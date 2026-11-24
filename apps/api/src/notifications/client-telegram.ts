@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
 
 // A client links Telegram from their booking: `t.me/<bot>?start=<param>`. The parameter is the
-// booking id signed with AUTH_SECRET — no table of codes, and it only reveals a booking id.
+// booking id signed with AUTH_SECRET - no table of codes, and it only reveals a booking id.
 // Telegram allows 64 characters of [A-Za-z0-9_-]: «v» + 32 hex + 16 signature = 49.
 const PREFIX = 'v'
 const SIGNATURE_LENGTH = 16

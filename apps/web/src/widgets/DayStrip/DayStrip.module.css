@@ -130,7 +130,7 @@
   white-space: nowrap;
 }
 
-/* Compact: one thin line — «чт 19» in a capsule per day, the chosen one filled; the dot of a day
+/* Compact: one thin line - «чт 19» in a capsule per day, the chosen one filled; the dot of a day
    with unmarked visits sits beside the number. */
 .strip[data-variant="compact"] {
   padding-block: 6px;
@@ -284,7 +284,7 @@
   }
 }
 
-/* How full the day is: a thin track along the chip's foot, filled from the left — a glance down
+/* How full the day is: a thin track along the chip's foot, filled from the left - a glance down
    the row shows the busy days. */
 .load {
   position: absolute;

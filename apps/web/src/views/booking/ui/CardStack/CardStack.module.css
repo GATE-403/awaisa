@@ -238,7 +238,7 @@
   outline-offset: 2px;
 }
 
-/* Under the open stack: «Начать заново» on the left, «Свернуть» on the right — the stack's own
+/* Under the open stack: «Начать заново» on the left, «Свернуть» on the right - the stack's own
    controls, not a stray link at the foot of the sheet. */
 .foot {
   position: absolute;
@@ -332,7 +332,7 @@
   }
 }
 
-/* Folded, the cards behind show one line in the strip that peeks out — their name and price —
+/* Folded, the cards behind show one line in the strip that peeks out - their name and price -
    instead of the top half of a face and a cut title. */
 .content {
   display: flex;
@@ -386,7 +386,7 @@
 }
 
 /* Folded: the cards behind show their strip; pulling the stack open trades it for the whole card
-   in turn — the strip is gone at the first tenth, the card shows from there — with no change of layout. */
+   in turn - the strip is gone at the first tenth, the card shows from there - with no change of layout. */
 .stack:not([data-fanned]) .card[data-back] .peek {
   opacity: calc(1 - min(1, var(--pull, 0) * 8));
 }

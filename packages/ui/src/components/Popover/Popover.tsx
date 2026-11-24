@@ -8,7 +8,7 @@ import styles from './Popover.module.css'
 interface PopoverProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** What it points at — a card on a board, a button. */
+  /** What it points at - a card on a board, a button. */
   anchor: Element | null
   /** Its name for screen readers (the popup is a dialog). */
   label: string
@@ -18,7 +18,7 @@ interface PopoverProps {
 }
 
 // A macOS inspector: a small surface beside what it is about, with an arrow to it and no dimmed
-// page behind — Escape or a click elsewhere closes it. Controlled and anchored to any element, so
+// page behind - Escape or a click elsewhere closes it. Controlled and anchored to any element, so
 // a board can open it from its own cards without a trigger of its own.
 const Popover = ({
   open,

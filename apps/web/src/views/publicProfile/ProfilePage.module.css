@@ -173,7 +173,7 @@
   margin: calc(-1 * var(--space-4)) 0 calc(-1 * var(--space-4));
 }
 
-/* «Следующая цель»: one row over the medals — the closest medal in a ring that fills to its
+/* «Следующая цель»: one row over the medals - the closest medal in a ring that fills to its
    progress, what is left, and the one tap that brings it nearer. No card: it lies on the page. */
 .goal {
   display: flex;

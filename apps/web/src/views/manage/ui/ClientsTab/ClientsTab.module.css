@@ -33,7 +33,7 @@
 }
 
 /* With a mouse the row stays pinned under the cabinet bar (its bottom edge is `--toast-top`) while
-   the list scrolls, so «Наверх» and the search are always in reach — the same pin as the reviews'
+   the list scrolls, so «Наверх» and the search are always in reach - the same pin as the reviews'
    toolbar: the page colour, and once pinned a hairline across the whole window. */
 @media (min-width: 640px) {
   .searchPin {

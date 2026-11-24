@@ -20,7 +20,7 @@ const describeHours = (from: number | null, to: number | null) => {
   return ''
 }
 
-// «−20% по будням до 12:00», «−10% на первый визит» — one short line per promotion.
+// «−20% по будням до 12:00», «−10% на первый визит» - one short line per promotion.
 const describePromotion = (promotion: PublicPromotion) => {
   const percent = `−${promotion.percent}%`
   if (promotion.kind === 'first_visit') return `${percent} на первый визит`

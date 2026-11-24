@@ -32,7 +32,7 @@ const FLICK_MIN = 10
 /** The flick's speed is read over the finger's last moments, not the whole gesture. */
 const FLICK_WINDOW_MS = 90
 
-// «Образы»: finished work as a hand of cards — one large in the middle, one tilted at each side.
+// «Образы»: finished work as a hand of cards - one large in the middle, one tilted at each side.
 // A swipe brings the next card in; each is a service with its price, the first free time and
 // «Записаться».
 export const FeedPage = ({ kind, business, start, initialPage, isPending }: FeedPageProps) => {
@@ -134,7 +134,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
   }
 
   // No filters on the deck: the work nearest to where the person is comes first, when that is
-  // already known (a granted location or a picked district) — never a permission prompt.
+  // already known (a granted location or a picked district) - never a permission prompt.
   // biome-ignore lint/correctness/useExhaustiveDependencies: once, for the deck the page opened with
   useEffect(() => {
     if (start || business) return
@@ -200,7 +200,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
 
   // The finger's path is written straight to CSS variables once a frame, never through React state:
   // re-rendering the deck on every move dropped frames on phones. They go on the card in play
-  // itself — set on the stage, every card and every line of text in it was restyled each frame.
+  // itself - set on the stage, every card and every line of text in it was restyled each frame.
   const paint = () => {
     frame.current = 0
     const stage = stageRef.current
@@ -284,7 +284,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
         {!isPending && shown.length === 0 && (
           <EmptyState
             title={t('Образов пока нет')}
-            text={t('Здесь появятся фото работ мастеров — с ценой и записью в один тап.')}
+            text={t('Здесь появятся фото работ мастеров - с ценой и записью в один тап.')}
             action={
               <NextLink href='/' className={styles.emptyLink}>
                 {t('Открыть каталог ›')}
@@ -359,7 +359,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
 
       {active > 0 && (
         <p className={styles.hint} aria-hidden>
-          {t('Потяните вверх — вернуть прошлую')}
+          {t('Потяните вверх - вернуть прошлую')}
         </p>
       )}
     </main>

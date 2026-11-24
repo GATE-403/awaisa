@@ -26,7 +26,7 @@ interface WaitlistJoinProps {
   specialistId: string
   branchId?: string
   date: string
-  /** «Среда, 12 ноября» — shown in the sheet and the toast. */
+  /** «Среда, 12 ноября» - shown in the sheet and the toast. */
   dayLabel: string
 }
 
@@ -86,7 +86,7 @@ export const WaitlistJoin = ({
       return
     }
     if (!accountPhone && phone.replace(/\D/g, '').length < 9) {
-      setFieldError({ field: 'phone', message: 'Укажите номер — на него придёт SMS' })
+      setFieldError({ field: 'phone', message: 'Укажите номер - на него придёт SMS' })
       trackFormError('waitlist_phone')
       return
     }
@@ -123,7 +123,7 @@ export const WaitlistJoin = ({
     return (
       <p className={styles.joined} aria-live='polite'>
         <CheckCircle weight='fill' aria-hidden />
-        Ждём окна на этот день — пришлём SMS
+        Ждём окна на этот день - пришлём SMS
       </p>
     )
   }

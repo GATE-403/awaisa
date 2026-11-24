@@ -15,7 +15,7 @@ interface PlacePickerSheetProps {
   onPicked?: (place: MyPlace) => void
 }
 
-// «Где вы?» — the browser's location in one tap, or a district by name for those who do not
+// «Где вы?» - the browser's location in one tap, or a district by name for those who do not
 // share it (or do not know how). The choice stays on the device for the map, branches and picks.
 export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) => {
   const t = useT()
@@ -58,8 +58,8 @@ export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) =
         </div>
         <p className={sheet.groupFooter}>
           {state === 'denied'
-            ? t('Телефон не дал узнать место — выберите район ниже.')
-            : t('Телефон спросит разрешение. Можно и без него — выберите район.')}
+            ? t('Телефон не дал узнать место - выберите район ниже.')
+            : t('Телефон спросит разрешение. Можно и без него - выберите район.')}
         </p>
       </div>
 

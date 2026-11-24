@@ -76,7 +76,7 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
     <section className={styles.section} aria-label={t('Сотрудники')}>
       <SectionHeader
         title={t('Сотрудники')}
-        description={t('Администратор видит расписание, клиентов и отзывы — без денег и настроек.')}
+        description={t('Администратор видит расписание, клиентов и отзывы - без денег и настроек.')}
       />
       {team && (
         <ul className={styles.list}>

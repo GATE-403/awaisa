@@ -22,7 +22,7 @@ const report = (imported: number, skipped: Skipped[]) => ({
 /**
  * Moving from Altegio or YCLIENTS: the client base (name, phone, birthday, note) and the
  * bookings still ahead. The other system already placed those visits, so they go in as they are
- * — no slot step, hours or lead time — and only a master's overlapping visit refuses one. Nobody
+ * - no slot step, hours or lead time - and only a master's overlapping visit refuses one. Nobody
  * gets a confirmation SMS; reminders go out as usual when the owner keeps them on.
  */
 @Injectable()
@@ -94,9 +94,9 @@ export class ImportService {
           : !phone
             ? 'нет телефона'
             : !service
-              ? `нет услуги «${booking.service || '—'}»`
+              ? `нет услуги «${booking.service || '-'}»`
               : !master
-                ? `нет мастера «${booking.master || '—'}»`
+                ? `нет мастера «${booking.master || '-'}»`
                 : null
       if (reason || !date || !time || !phone || !service || !master) {
         skipped.push({ row, reason: reason ?? 'не прочитана строка' })

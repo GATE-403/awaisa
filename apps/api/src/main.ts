@@ -12,7 +12,7 @@ import { parseProcessRole, servesHttp } from './runtime/process-role.js'
 import { requestLog } from './runtime/request-log.js'
 import { initSentry } from './runtime/sentry.js'
 
-// HTTP server: PROCESS_ROLE `all` (default — also runs the jobs) or `api` (HTTP only).
+// HTTP server: PROCESS_ROLE `all` (default - also runs the jobs) or `api` (HTTP only).
 const bootstrap = async () => {
   loadRootEnv()
   const role = parseProcessRole(process.env.PROCESS_ROLE)

@@ -21,7 +21,7 @@ interface TicketProps {
   onOpen?: () => void
   /** A control in the top-right corner instead of the «Электронный талон» label. */
   headerAction?: ReactNode
-  /** Not booked yet (the form's «Ваша запись»): no number or barcode, «—» for what is still to
+  /** Not booked yet (the form's «Ваша запись»): no number or barcode, «-» for what is still to
       choose. */
   isDraft?: boolean
 }
@@ -44,8 +44,8 @@ export const Ticket = ({
         month: t.monthShort(booking.date),
         weekday: weekdayName.charAt(0).toUpperCase() + weekdayName.slice(1),
       }
-    : { day: '—', month: '', weekday: t('Дата не выбрана') }
-  const code = isDraft ? '—' : getBookingCode(booking.id)
+    : { day: '-', month: '', weekday: t('Дата не выбрана') }
+  const code = isDraft ? '-' : getBookingCode(booking.id)
   const isCancelled = booking.status === 'cancelled'
   const price = booking.price - (booking.discount?.amount ?? 0)
   const isDepositPaid = booking.payment?.status === 'paid'
@@ -96,7 +96,7 @@ export const Ticket = ({
             </div>
             <div className={styles.details}>
               <p className={styles.weekday}>{weekday}</p>
-              <p className={styles.time}>{booking.time || '—'}</p>
+              <p className={styles.time}>{booking.time || '-'}</p>
               <p className={styles.service}>{booking.serviceName}</p>
               <p className={styles.meta}>
                 {[booking.specialistName, booking.business.address].filter(Boolean).join(' · ')}

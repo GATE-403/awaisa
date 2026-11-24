@@ -10,7 +10,7 @@ import { RateVisitSheet } from '../RateVisitSheet/RateVisitSheet'
 import styles from './RateRecent.module.css'
 
 interface RateRecentProps {
-  /** Past visits, newest first or not — the latest unrated one is picked. */
+  /** Past visits, newest first or not - the latest unrated one is picked. */
   history: Booking[]
   today: { dayKey: string } | null
   onRated: (booking: Booking) => void
@@ -35,7 +35,7 @@ const whenLabel = (date: string, today: { dayKey: string }) => {
 const tokenOf = (id: string) =>
   parseBookings(readRaw()).find((item) => item.id === id)?.token ?? null
 
-/** «Как прошло?» — the latest visit without a review, rated with one tap on a star. */
+/** «Как прошло?» - the latest visit without a review, rated with one tap on a star. */
 export const RateRecent = ({ history, today, onRated }: RateRecentProps) => {
   const t = useT()
   const [dismissed, setDismissed] = useState<string[] | null>(null)

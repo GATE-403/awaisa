@@ -110,7 +110,7 @@ export class AuthService {
       where: { phone, consumedAt: IsNull(), expiresAt: MoreThan(new Date()) },
       order: { createdAt: 'DESC' },
     })
-    if (!otp) throw new BadRequestException('Код устарел — запросите новый')
+    if (!otp) throw new BadRequestException('Код устарел - запросите новый')
     // The attempt is taken before the code is compared, in one statement: parallel guesses
     // cannot all read «0 attempts» and try far more than five codes.
     const taken = await this.codes
@@ -121,14 +121,14 @@ export class AuthService {
       .returning(['attempts'])
       .execute()
     const attempts = (taken.raw as { attempts: number }[])[0]?.attempts
-    if (attempts === undefined) throw new BadRequestException('Код устарел — запросите новый')
+    if (attempts === undefined) throw new BadRequestException('Код устарел - запросите новый')
 
     const expected = Buffer.from(otp.codeHash, 'hex')
     const actual = Buffer.from(this.hashCode(phone, code), 'hex')
     if (!timingSafeEqual(expected, actual)) {
       const left = OTP.maxAttempts - attempts
       throw new BadRequestException(
-        left > 0 ? `Неверный код, осталось попыток: ${left}` : 'Код устарел — запросите новый',
+        left > 0 ? `Неверный код, осталось попыток: ${left}` : 'Код устарел - запросите новый',
       )
     }
 

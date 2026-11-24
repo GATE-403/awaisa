@@ -125,7 +125,7 @@ export const useCreateBusinessForm = () => {
     setStep(STEPS[Math.max(0, index - 1)] ?? 'name')
   }
 
-  // The kind is one tap, like the first pick in booking: it moves on at once — to the starter
+  // The kind is one tap, like the first pick in booking: it moves on at once - to the starter
   // menu, or straight to contacts when the kind has none («Другое»).
   const pickKind = (value: BusinessKind) => {
     setKind(value)
@@ -168,8 +168,8 @@ export const useCreateBusinessForm = () => {
       title: t('Страница создана'),
       description: t(
         launched.hasServices
-          ? 'Осталось добавить мастеров — и можно принимать записи'
-          : 'Добавьте услуги и мастеров — и можно принимать записи',
+          ? 'Осталось добавить мастеров - и можно принимать записи'
+          : 'Добавьте услуги и мастеров - и можно принимать записи',
       ),
       type: 'success',
     })

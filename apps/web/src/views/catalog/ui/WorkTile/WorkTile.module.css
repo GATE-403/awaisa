@@ -1,5 +1,5 @@
 /* One cell of the services grid, shaped like the service cards around it (3:4, radius 12, the
-   same scrim); a feature spans two of them — on phones the grid's width at one card's height,
+   same scrim); a feature spans two of them - on phones the grid's width at one card's height,
    from 768px two cards by two. */
 .tile {
   position: relative;

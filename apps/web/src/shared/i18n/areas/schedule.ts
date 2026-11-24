@@ -18,7 +18,7 @@ const SCHEDULE: Record<string, Entry> = {
   ],
   'Запись на прежнем месте': ['Жазылуу мурунку ордунда', 'The booking is back in place'],
   'Время закрыто': ['Убакыт жабылды', 'Time blocked'],
-  'Время закрыто. В нём {count} — отмените или перенесите': [
+  'Время закрыто. В нём {count} - отмените или перенесите': [
     'Убакыт жабылды. Анда {count} бар: жокко чыгарыңыз же жылдырыңыз',
     'Time blocked. It has {count}: cancel or move them',
   ],
@@ -29,7 +29,7 @@ const SCHEDULE: Record<string, Entry> = {
   'Записей нет': ['Жазылуулар жок', 'No bookings'],
   '{name} больше не ждёт': ['{name} мындан ары күтпөйт', '{name} is no longer waiting'],
   'Отмечено: {count}': ['Белгиленди: {count}', 'Marked: {count}'],
-  'Все пришли, оплата по прайсу наличными — поправьте, где было иначе': [
+  'Все пришли, оплата по прайсу наличными - поправьте, где было иначе': [
     'Баары келди, прайс боюнча накталай төлөндү: башкача болгон жерин оңдоңуз',
     'Everyone arrived, paid the list price in cash: fix any that differ',
   ],
@@ -46,7 +46,7 @@ const SCHEDULE: Record<string, Entry> = {
   'Поделиться свободными окнами': ['Бош убакыттар менен бөлүшүү', 'Share free slots'],
   'Найти место под услугу': ['Кызматка орун табуу', 'Find room for a service'],
   'Места для «{service}»': ['«{service}» үчүн орундар', 'Room for «{service}»'],
-  'Откройте раздел «Мастера» и добавьте хотя бы себя — здесь появится расписание.': [
+  'Откройте раздел «Мастера» и добавьте хотя бы себя - здесь появится расписание.': [
     '«Усталар» бөлүмүн ачып, жок дегенде өзүңүздү кошуңуз: бул жерде жадыбал пайда болот.',
     'Open «Specialists» and add at least yourself: the schedule will appear here.',
   ],
@@ -102,7 +102,7 @@ const SCHEDULE: Record<string, Entry> = {
 
   // Time off and waitlist
   'Закрыть время': ['Убакытты жабуу', 'Block time'],
-  'Перерыв, обучение или выходной — клиенты не смогут записаться на это время.': [
+  'Перерыв, обучение или выходной - клиенты не смогут записаться на это время.': [
     'Тыныгуу, окуу же дем алыш: кардарлар бул убакытка жазыла алышпайт.',
     'A break, training or a day off: clients cannot book this time.',
   ],
@@ -110,9 +110,9 @@ const SCHEDULE: Record<string, Entry> = {
     'Аягы башталышынан кеч болушу керек.',
     'The end must be after the start.',
   ],
-  'Причина — необязательно': ['Себеби (милдеттүү эмес)', 'Reason (optional)'],
+  'Причина - необязательно': ['Себеби (милдеттүү эмес)', 'Reason (optional)'],
   'Ждут окна': ['Бош убакыт күтүшөт', 'Waiting for a slot'],
-  '{day}. Освободится время — клиенты получат SMS сами; можно и записать их сразу.': [
+  '{day}. Освободится время - клиенты получат SMS сами; можно и записать их сразу.': [
     '{day}. Убакыт бошосо, кардарлар өздөрү SMS алышат; аларды азыр эле жазып койсо да болот.',
     '{day}. When time frees up, clients get an SMS on their own; you can also book them now.',
   ],
@@ -137,7 +137,7 @@ const SCHEDULE: Record<string, Entry> = {
   'прошёл без отметки': ['белгисиз өттү', 'passed unmarked'],
   'прошли без отметки': ['белгисиз өттү', 'passed unmarked'],
   'Неотмеченные визиты': ['Белгиленбеген визиттер', 'Unmarked visits'],
-  '{visits} {passed} — показать кто': [
+  '{visits} {passed} - показать кто': [
     '{visits} {passed}: кимдер экенин көрсөтүү',
     '{visits} {passed}: show who',
   ],
@@ -153,7 +153,7 @@ const SCHEDULE: Record<string, Entry> = {
   ],
   'Свободное время · {day}': ['Бош убакыт · {day}', 'Free time · {day}'],
   'Запись онлайн: {link}': ['Онлайн жазылуу: {link}', 'Book online: {link}'],
-  'Скопировано — вставьте в чат или сторис': [
+  'Скопировано - вставьте в чат или сторис': [
     'Көчүрүлдү: чатка же сторис’ке кыстарыңыз',
     'Copied: paste it into a chat or a story',
   ],

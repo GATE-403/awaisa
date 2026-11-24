@@ -16,8 +16,8 @@ interface GlyphButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>,
 }
 
 // One fill capsule of thin glyph buttons, like the cabinet toolbar's (a macOS 26 toolbar group):
-// for a few secondary actions beside one primary button. Any button inside — a menu's trigger
-// too — takes the glyph look.
+// for a few secondary actions beside one primary button. Any button inside - a menu's trigger
+// too - takes the glyph look.
 export const GlyphGroup = ({ children, label }: GlyphGroupProps) => (
   // biome-ignore lint/a11y/useSemanticElements: a fieldset would add a legend for three buttons.
   <span className={styles.group} role='group' aria-label={label}>

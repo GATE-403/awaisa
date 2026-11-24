@@ -183,7 +183,7 @@
   gap: 3px;
   margin-top: 1px;
   padding: 6px 8px;
-  /* A task card on the day: a quiet chip row, the client, the service, then the time — white,
+  /* A task card on the day: a quiet chip row, the client, the service, then the time - white,
      breathed on by the master's colour (a pastel, not a fill: the state chip still leads). */
   border-radius: 12px;
   background: color-mix(in srgb, var(--tint) 6%, var(--color-elevated));
@@ -405,7 +405,7 @@
 }
 
 /* «Лента»: masters as rows on the left, the hours across the top, visits as bars along their row
-   — the same blocks as the columns, only the axis turned. Names stay pinned on the left and the
+   - the same blocks as the columns, only the axis turned. Names stay pinned on the left and the
    hours on top while the day scrolls sideways. */
 .grid[data-layout="timeline"] {
   /* No row of its own for the hours: they are written on the hour lines, in the room the first
@@ -511,7 +511,7 @@
   font-size: 11px;
 }
 
-/* Zoomed in: halves or quarters between the hours — a fainter dashed line and a smaller,
+/* Zoomed in: halves or quarters between the hours - a fainter dashed line and a smaller,
    lighter time beside its top, so the whole hours still lead. */
 .minorLine {
   position: absolute;
@@ -545,7 +545,7 @@
   max-width: 100%;
 }
 
-/* «Лента» without a names column: no table — the masters are on their cards (a small face), in
+/* «Лента» without a names column: no table - the masters are on their cards (a small face), in
    the corner stack and on an empty lane; lanes part by a little space, not by lines. */
 .grid[data-layout="timeline"] :is(.corner, .columnHead) {
   display: none;
@@ -574,13 +574,13 @@
   gap: var(--space-1);
 }
 
-/* A short visit on the timeline: its place on the hours already says when — the room goes to the
+/* A short visit on the timeline: its place on the hours already says when - the room goes to the
    client's name. */
 .grid[data-layout="timeline"] .blockLine .blockTime {
   display: none;
 }
 
-/* «Now», one red line with its time in a capsule — on the hours for the columns, on top of the
+/* «Now», one red line with its time in a capsule - on the hours for the columns, on top of the
    timeline's single line through every lane. No dots: the capsule says what the line is. */
 .nowLabel {
   position: absolute;
@@ -890,8 +890,8 @@
   font-size: var(--text-body);
 }
 
-/* The masters' track (variant «В»): the kit's segmented look — a capsule of fill, a raised white
-   pill under the chosen one — with each face ringed by how full its day is. */
+/* The masters' track (variant «В»): the kit's segmented look - a capsule of fill, a raised white
+   pill under the chosen one - with each face ringed by how full its day is. */
 .track {
   display: inline-flex;
   min-width: 0;
@@ -1047,8 +1047,8 @@
 }
 
 /* Cards with body (the owner's choice: «сочно и тактильно»): each state is a soft, saturated
-   button — its colour from the top a shade lighter to the foot, a lit top edge and a shadow in
-   its own colour — the visit under way solid blue with white text. «Ждём» stays a white card. */
+   button - its colour from the top a shade lighter to the foot, a lit top edge and a shadow in
+   its own colour - the visit under way solid blue with white text. «Ждём» stays a white card. */
 .booking {
   --card-base: #fff;
   --lit: rgb(255 255 255 / 0.7);
@@ -1249,7 +1249,7 @@
 }
 
 /* The slot preview on the timeline is a card to come, the same shape as the visits: a light card
-   ringed in the master's colour, its time, «+ Новая запись» and whose — wide enough to read. */
+   ringed in the master's colour, its time, «+ Новая запись» and whose - wide enough to read. */
 .grid[data-layout="timeline"] .ghost {
   display: flex;
   flex-direction: column;
@@ -1273,8 +1273,8 @@
   font-size: 8px;
 }
 
-/* ——— macOS Calendar (the owner's direction): a white day with hairline hours, events as soft
-   fills in their calendar's — here the master's — colour with text in a deeper shade of it, small
+/* --- macOS Calendar (the owner's direction): a white day with hairline hours, events as soft
+   fills in their calendar's - here the master's - colour with text in a deeper shade of it, small
    corners, no shadow and no bar; the visit under way is the selected event (solid colour, white
    text); visits that have ended step back. These rules come last and win over the ones above. */
 .grid .column,
@@ -1306,7 +1306,7 @@
   background: color-mix(in srgb, var(--tint) 28%, var(--color-surface));
 }
 
-/* The visit under way: the selected event — solid colour, white text. */
+/* The visit under way: the selected event - solid colour, white text. */
 .grid .booking[data-tone="accent"] {
   --ink: var(--color-primary-foreground);
 
@@ -1391,7 +1391,7 @@
 
 /* Readable events (the owner: «не читаемый текст»): the ink is a deep shade of the master's
    colour, secondary lines the same ink a step lighter (no transparency), and an ended visit fades
-   only its fill — its words stay readable. Contrast ≥ 4.5:1 on the 20% fill. */
+   only its fill - its words stay readable. Contrast ≥ 4.5:1 on the 20% fill. */
 :root .grid .booking:not([data-tone="accent"]) {
   --ink: color-mix(in srgb, var(--tint) 42%, black);
 
@@ -1425,7 +1425,7 @@
 }
 
 /* Lanes no taller than they need (the owner: «слишком большие блоки и маленькие карточки»), and a
-   card fills its lane under the master's line — the phone or comment at its foot. */
+   card fills its lane under the master's line - the phone or comment at its foot. */
 .grid[data-layout="timeline"] {
   grid-template-rows: 0 minmax(142px, 192px);
   grid-auto-rows: minmax(124px, 174px);
@@ -1459,7 +1459,7 @@
   display: none;
 }
 
-/* A card answers the pointer with a deeper fill only — no glow around it. */
+/* A card answers the pointer with a deeper fill only - no glow around it. */
 :root .grid .booking:not([data-cancelled]):hover {
   background: color-mix(in srgb, var(--tint) 36%, var(--color-surface));
   box-shadow: none;
@@ -1640,7 +1640,7 @@
   }
 }
 
-/* ——— Edges of the timeline ——— */
+/* --- Edges of the timeline --- */
 
 /* Cards leaving the view recede: over their last 56px before an edge they fade toward the day,
    instead of being cut by it. Driven by the scroll itself (a view timeline), so it costs no
@@ -1796,7 +1796,7 @@
   z-index: 6;
 }
 
-/* ——— The day a shade grey, the masters' heads and hours on the panel's white ——— */
+/* --- The day a shade grey, the masters' heads and hours on the panel's white --- */
 .grid {
   --day-bg: color-mix(in srgb, var(--color-background) 60%, var(--color-surface));
 }
@@ -1810,7 +1810,7 @@
   background: transparent;
 }
 
-/* ——— Edge tabs: filled in the accent so they read as a way to go, not a note ——— */
+/* --- Edge tabs: filled in the accent so they read as a way to go, not a note --- */
 .grid .edgeTab .edgeHint {
   background: var(--color-primary);
   box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 30%, transparent);
@@ -1895,7 +1895,7 @@
   white-space: nowrap;
 }
 
-/* ——— Phones ——— */
+/* --- Phones --- */
 
 /* The lane's first line never reaches under the right tab. */
 .grid[data-layout="timeline"] .laneTag {
@@ -1934,7 +1934,7 @@
   }
 
   /* No zoom capsule (two fingers zoom), so the masters' track has the whole foot; the chosen face
-     stays a face — its name and note would not fit. */
+     stays a face - its name and note would not fit. */
   .zoomPill {
     display: none;
   }
@@ -1949,7 +1949,7 @@
   }
 }
 
-/* ——— Cards stand apart ———
+/* --- Cards stand apart ---
    Back-to-back visits used to touch, and a soft fill on a soft fill hid where one ended. A clear
    3px edge (the day shows through it) parts neighbours and keeps cards off the board's sides, and
    a hairline of the master's colour draws each card's outline. */
@@ -1988,7 +1988,7 @@
   }
 }
 
-/* ——— One ink per card ———
+/* --- One ink per card ---
    Orange and red words on a blue or violet card clashed: the state word takes the card's own
    ink, and its colour lives only in its glyph (see «State glyphs» below). */
 :root .grid .booking:is([data-tone="warning"], [data-tone="danger"]) .blockState {
@@ -2011,7 +2011,7 @@
   padding-bottom: calc(64px + var(--foot-lift, 0px));
 }
 
-/* Phones: the track keeps to faces, so every master stays one tap away — a chosen face opening
+/* Phones: the track keeps to faces, so every master stays one tap away - a chosen face opening
    into its name pushed the others out of reach. The chosen one rides the raised knob; its name and
    «свободен с …» already lead its lane. */
 @media (max-width: 639px) {
@@ -2037,9 +2037,9 @@
   margin-left: var(--space-3);
 }
 
-/* ——— Motion ———
+/* --- Motion ---
    The day lays itself out: lane after lane (40ms apart), sliding in from the side the day moved
-   to — later days from the right, earlier ones from the left — or rising a little on first open.
+   to - later days from the right, earlier ones from the left - or rising a little on first open.
    Only opacity and translate, once, and nothing under reduced motion. */
 @media (prefers-reduced-motion: no-preference) {
   .grid section.column {
@@ -2067,7 +2067,7 @@
   }
 }
 
-/* «Пришёл» lands: the card's fill eases into its new tone and the check pops in — one after
+/* «Пришёл» lands: the card's fill eases into its new tone and the check pops in - one after
    another down the day when «Все пришли» marked many (45ms apart, eight at most waiting). */
 @media (prefers-reduced-motion: no-preference) {
   .grid .booking[data-just-marked] {
@@ -2127,7 +2127,7 @@
   }
 }
 
-/* ——— «Найти место» ———
+/* --- «Найти место» ---
    Where the chosen service fits: dashed accent blocks over the free stretches, the visits stepping
    back while the search is on. A tap books that master from the gap's start. */
 .fitSlot {
@@ -2205,7 +2205,7 @@
   }
 }
 
-/* ——— The slot preview as a time cursor ———
+/* --- The slot preview as a time cursor ---
    A whole card for a visit that does not exist yet read as a real booking. Now: a 2px line in the
    master's colour where it would start and one small raised capsule on it. */
 :root .grid .ghost,
@@ -2286,13 +2286,13 @@
   font-size: 8px;
 }
 
-/* ——— No outline on the cards: the clear 3px edge alone parts them ——— */
+/* --- No outline on the cards: the clear 3px edge alone parts them --- */
 :root .grid[data-layout] .booking,
 :root .grid[data-layout] .booking[data-ended] {
   outline: none;
 }
 
-/* ——— The timeline's grid ———
+/* --- The timeline's grid ---
    The hours ride a row of their own pinned to the top; each master is a rounded lane of the day's
    grey on the page's darker grey, parted by a 6px gap instead of a line; hour lines run inside the
    lanes, with a short tick at each half hour along the lane's foot, like a ruler. */
@@ -2377,7 +2377,7 @@
   z-index: 7;
 }
 
-/* ——— Lines run the whole day ———
+/* --- Lines run the whole day ---
    The hour lines are drawn on the grid itself too, so they carry on through the gaps between
    lanes and the room under the last one (no breaks, no blank foot); a fainter line marks every
    half hour, in the lanes and around them alike. */
@@ -2418,7 +2418,7 @@
 }
 
 /* A visit just gone to (an edge tab, the unmarked list) is the active card for a moment: a ring
-   of its master's colour hugging the fill, a deeper fill and its own shadow — then it settles.
+   of its master's colour hugging the fill, a deeper fill and its own shadow - then it settles.
    Drawn with outline and colour, not an animation, so the edge fade's animations never cancel it. */
 :root .grid .booking {
   transition:
@@ -2441,8 +2441,8 @@
   background: color-mix(in srgb, var(--tint) 92%, black);
 }
 
-/* ——— One layer of lines ———
-   The lines were drawn twice — on each lane and on the gaps — and one translucent line over two
+/* --- One layer of lines ---
+   The lines were drawn twice - on each lane and on the gaps - and one translucent line over two
    greys read as two shades, broken at every gap. Now one layer over the whole day draws them once:
    above the lanes' fill, under the cards (later in the tree) and the lanes' own labels. */
 :root .grid[data-layout="timeline"],
@@ -2476,13 +2476,13 @@
   z-index: 2;
 }
 
-/* The lanes' own hour lines would draw a second, darker line over the layer's — off on the
+/* The lanes' own hour lines would draw a second, darker line over the layer's - off on the
    timeline (the dashed quarter lines from 3× stay). */
 .grid[data-layout="timeline"] .line {
   display: none;
 }
 
-/* ——— State glyphs instead of dots ———
+/* --- State glyphs instead of dots ---
    The colour of a state now lives in its glyph (12pt, beside the word in the card's ink); a narrow
    card keeps the glyph alone. */
 :root .grid .booking .blockState::before,
@@ -2527,7 +2527,7 @@
   color: var(--color-success-text, var(--system-green));
 }
 
-/* Cards always above the line layer (z 1): live ones at 2, a cancelled one at 1 — under the live
+/* Cards always above the line layer (z 1): live ones at 2, a cancelled one at 1 - under the live
    visit that took its time, still over the lines (at 0 the lines crossed it). */
 :root .grid[data-layout] .booking {
   z-index: 2;
@@ -2538,7 +2538,7 @@
 }
 
 /* The visit under way shows its progress in its own fill, not a bar: the part already done a
-   shade deeper, from the start edge to now — left to right on the timeline, top down in the
+   shade deeper, from the start edge to now - left to right on the timeline, top down in the
    columns. Both shades keep the white words AA. */
 :root .grid .booking[data-tone="accent"] {
   background: linear-gradient(
@@ -2556,7 +2556,7 @@
   display: none;
 }
 
-/* ——— The visit under way, settled ———
+/* --- The visit under way, settled ---
    The progress fill is drawn inside the card's clear edge only and never repeats (it spilled
    into the edge as a dark strip), hovering deepens both shades instead of swapping the gradient
    for a flat colour (the card blinked), and every line on it is white (the phone faded out). */
@@ -2596,9 +2596,9 @@
   border-top-color: color-mix(in srgb, var(--color-primary-foreground) 30%, transparent);
 }
 
-/* ——— An ended visit nobody marked asks its question ———
+/* --- An ended visit nobody marked asks its question ---
    «Не отмечен» with a dashed circle, and both answers as capsules at the card's foot where the
-   phone was — always shown, so what happened is never a guess. */
+   phone was - always shown, so what happened is never a guess. */
 .markBar {
   position: absolute;
   z-index: 3;
@@ -2691,8 +2691,8 @@
   background: var(--color-danger-strong);
 }
 
-/* ——— Weak devices ———
-   The edge fade gives every card two scroll-driven animations — a compositor layer each, a
+/* --- Weak devices ---
+   The edge fade gives every card two scroll-driven animations - a compositor layer each, a
    hundred on a busy day. Phones and tablets skip that decoration (and the landing of a mark,
    which shares the animation list); with a mouse it stays. */
 @media (pointer: coarse) {
@@ -2702,7 +2702,7 @@
   }
 }
 
-/* ——— Small cards keep their answers ———
+/* --- Small cards keep their answers ---
    The answers take the card's width (less its padding) and measure it: where «Пришёл» and
    «Не пришёл» do not fit, they become two round glyphs (named in tooltips) instead of spilling
    past the card. The bar itself lets clicks through to the card, and it sits on its card's layer,
@@ -2749,7 +2749,7 @@
   }
 }
 
-/* «Сейчас ←/→» on the timeline rides the pinned hours row, at its side — in the middle of the
+/* «Сейчас ←/→» on the timeline rides the pinned hours row, at its side - in the middle of the
    lanes it sat over the lane tags and the edge tabs. */
 :root .toNow[data-layout="timeline"] {
   top: 2px;
@@ -2770,7 +2770,7 @@
   padding-bottom: var(--foot-lift, 0px);
 }
 
-/* ——— Compact columns on phones ———
+/* --- Compact columns on phones ---
    The hours take 40px instead of 56, the masters' heads a first name and the fact under a 26pt
    face in 44pt, and a column 140px, so two masters fit side by side on a phone. */
 @media (max-width: 639px) {

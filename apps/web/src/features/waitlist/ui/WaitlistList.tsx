@@ -44,7 +44,7 @@ export const WaitlistList = () => {
                 </span>
                 {isFree ? (
                   <NextLink href={`/${entry.business.slug}/book?${params}`} className={styles.free}>
-                    {t('Освободилось {time} — записаться ›', { time: entry.notifiedTime ?? '' })}
+                    {t('Освободилось {time} - записаться ›', { time: entry.notifiedTime ?? '' })}
                   </NextLink>
                 ) : (
                   <span className={styles.waiting}>{t('Сообщим по SMS, если освободится')}</span>

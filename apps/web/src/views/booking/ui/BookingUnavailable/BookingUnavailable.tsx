@@ -6,7 +6,7 @@ import { useT } from '@/shared/i18n'
 import styles from './BookingUnavailable.module.css'
 
 // Booking tapped on a page, but the place could not be read: say so over the page and let the
-// client go back or try again — the page under it stays as it was.
+// client go back or try again - the page under it stays as it was.
 export const BookingUnavailable = () => {
   const router = useRouter()
   const t = useT()

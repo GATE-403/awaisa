@@ -210,7 +210,7 @@ const startLightWave = (
   return () => {
     cancelAnimationFrame(frame)
     observer.disconnect()
-    // Give the GPU memory back at once instead of waiting for garbage collection — on phones
+    // Give the GPU memory back at once instead of waiting for garbage collection - on phones
     // the browser keeps only a few contexts alive.
     gl.getExtension('WEBGL_lose_context')?.loseContext()
   }

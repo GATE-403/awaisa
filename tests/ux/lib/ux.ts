@@ -329,7 +329,7 @@ class UxContext {
         rule: isFail ? 'ux-target-size-24' : 'ux-target-size-44',
         title: isFail
           ? 'Цель меньше 24×24: в неё трудно попасть (WCAG 2.5.8)'
-          : 'Цель меньше 44×44 — правило проекта и Apple HIG',
+          : 'Цель меньше 44×44 - правило проекта и Apple HIG',
         detail: `«${target.name || target.selector}» ${Math.round(target.width)}×${Math.round(target.height)}`,
         wcag: isFail ? '2.5.8' : '2.5.5',
         target: target.selector,
@@ -393,7 +393,7 @@ class UxContext {
         severity: 'moderate',
         rule: 'ux-row-wobble',
         title: `Лента прокручивается и вбок, и вверх-вниз${context}`,
-        detail: `${row.selector}: лишние ${row.extra}px по вертикали — лента «ёрзает» под пальцем`,
+        detail: `${row.selector}: лишние ${row.extra}px по вертикали - лента «ёрзает» под пальцем`,
         target: row.selector,
         classes: row.classes,
         shoot: `[data-ux-id="${row.id}"]`,
@@ -598,7 +598,7 @@ class UxContext {
       .filter((finding) => finding.severity === 'critical' || finding.severity === 'serious')
       .map(
         (finding) =>
-          `${finding.severity}: ${finding.title} — ${finding.detail ?? finding.target ?? ''}`,
+          `${finding.severity}: ${finding.title} - ${finding.detail ?? finding.target ?? ''}`,
       )
   }
 
@@ -696,7 +696,7 @@ class UxContext {
           toast.hasAction
             ? 'Сообщение с действием исчезает само'
             : 'Сообщение исчезает раньше, чем его успеют прочитать',
-          `«${toast.text}» — ${seconds} с${toast.hasAction ? ': кнопку можно не успеть нажать' : ''}`,
+          `«${toast.text}» - ${seconds} с${toast.hasAction ? ': кнопку можно не успеть нажать' : ''}`,
         ),
         wcag: '2.2.1',
         files: ['packages/ui/src/components/Toast/Toast.tsx'],

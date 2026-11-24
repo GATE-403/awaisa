@@ -16,16 +16,16 @@ const FOR_BUSINESS: Record<string, Entry> = {
       'A page with services and prices, specialists’ schedules, client reminders and Wallet passes. Free, with no subscription fee or commission.',
     ],
   'Всё для записи': ['Жазылуу үчүн баары', 'Everything for bookings'],
-  ' — из коробки': [' даяр турат', ', out of the box'],
+  ' - из коробки': [' даяр турат', ', out of the box'],
   'Только свободные окна с учётом графика и длительности. Двойная запись невозможна.': [
     'Графикти жана узактыкты эске алган бош убакыттар гана. Эки жолу жазылуу мүмкүн эмес.',
     'Only free slots that respect schedules and durations. Double bookings can’t happen.',
   ],
-  'Подтверждение сразу и напоминание за два часа — меньше пустых кресел.': [
+  'Подтверждение сразу и напоминание за два часа - меньше пустых кресел.': [
     'Дароо ырастоо жана эки саат мурун эскертме: бош отургучтар азыраак.',
     'Instant confirmation and a reminder two hours ahead: fewer empty chairs.',
   ],
-  'Колонка на мастера. Перенос перетаскиванием, запись с улицы — нажатием на время.': [
+  'Колонка на мастера. Перенос перетаскиванием, запись с улицы - нажатием на время.': [
     'Ар бир устага бир тилке. Сүйрөп которуу, көчөдөн келгенди убакытты басып жазуу.',
     'A column per specialist. Drag to reschedule, tap a time to book a walk-in.',
   ],
@@ -56,11 +56,11 @@ const FOR_BUSINESS: Record<string, Entry> = {
     'The code comes by Telegram or SMS. No passwords.',
   ],
   'Создайте страницу': ['Баракча түзүңүз', 'Create your page'],
-  'Название и вид бизнеса — мы подставим типичные услуги и цены.': [
+  'Название и вид бизнеса - мы подставим типичные услуги и цены.': [
     'Бизнестин аталышы жана түрү: биз кадимки кызматтарды жана бааларды кошуп беребиз.',
     'Your business name and type: we’ll fill in typical services and prices.',
   ],
-  'Укажите график — и делитесь ссылкой в Instagram и 2ГИС.': [
+  'Укажите график - и делитесь ссылкой в Instagram и 2ГИС.': [
     'Графикти көрсөтүңүз да, шилтемени Instagram жана 2ГИСте бөлүшүңүз.',
     'Set the schedule and share your link on Instagram and 2GIS.',
   ],
@@ -71,7 +71,7 @@ const FOR_BUSINESS: Record<string, Entry> = {
     'The page, booking and schedule are free. SMS reminders to clients are included too.',
   ],
   'Нужен ли сайт или приложение?': ['Сайт же тиркеме керекпи?', 'Do I need a website or an app?'],
-  'Нет. У вас будет страница awaisa.kg/ваше-название — её можно поставить в Instagram, WhatsApp и 2ГИС.':
+  'Нет. У вас будет страница awaisa.kg/ваше-название - её можно поставить в Instagram, WhatsApp и 2ГИС.':
     [
       'Жок. Сизде awaisa.kg/сиздин-аталыш баракчасы болот: аны Instagram, WhatsApp жана 2ГИСке коюуга болот.',
       'No. You get a page at awaisa.kg/your-name, which you can add to Instagram, WhatsApp and 2GIS.',
@@ -80,13 +80,13 @@ const FOR_BUSINESS: Record<string, Entry> = {
     'Кардар чалса же жазылбай келсечи?',
     'What if a client calls or walks in?',
   ],
-  'Нажмите на свободное время в расписании — запись появится сразу, клиенту придёт SMS с подтверждением.':
+  'Нажмите на свободное время в расписании - запись появится сразу, клиенту придёт SMS с подтверждением.':
     [
       'Жадыбалдагы бош убакытты басыңыз: жазылуу дароо пайда болот, кардарга ырастоо SMS келет.',
       'Tap a free time in the schedule: the booking appears at once and the client gets a confirmation SMS.',
     ],
   'У нас несколько филиалов.': ['Бизде бир нече филиал бар.', 'We have several branches.'],
-  'Добавьте филиалы с адресами и метками на карте, привяжите мастеров — клиент выберет ближайший.':
+  'Добавьте филиалы с адресами и метками на карте, привяжите мастеров - клиент выберет ближайший.':
     [
       'Филиалдарды дареги жана картадагы белгиси менен кошуп, усталарды байлаңыз: кардар жакынын тандайт.',
       'Add branches with addresses and map pins, assign specialists, and clients pick the nearest.',
@@ -100,18 +100,18 @@ const FOR_BUSINESS: Record<string, Entry> = {
     'Yes: the owner and staff sign in to one dashboard with their own phone numbers.',
   ],
   Начать: ['Баштоо', 'Get started'],
-  'Первая запись — уже сегодня.': ['Биринчи жазылуу бүгүн эле.', 'Your first booking, today.'],
+  'Первая запись - уже сегодня.': ['Биринчи жазылуу бүгүн эле.', 'Your first booking, today.'],
   'Начать бесплатно': ['Акысыз баштоо', 'Start for free'],
 
   // Landing: the product's pieces
   'Чт, 20 ноября · свободно': ['Бей, 20-ноябрь · бош', 'Thu, 20 November · free'],
   'Сообщения · сегодня 12:30': ['Билдирүүлөр · бүгүн 12:30', 'Messages · today 12:30'],
-  'Barber Pro: напоминаем — сегодня в 14:30 мужская стрижка, мастер Тимур. Ждём вас!': [
+  'Barber Pro: напоминаем - сегодня в 14:30 мужская стрижка, мастер Тимур. Ждём вас!': [
     'Barber Pro: эскертебиз, бүгүн саат 14:30да эркектердин чачын кырктыруу, уста Тимур. Сизди күтөбүз!',
     'Barber Pro: a reminder, men’s haircut today at 14:30 with Timur. See you soon!',
   ],
   Доставлено: ['Жеткирилди', 'Delivered'],
-  'Перетащите — клиент получит SMS': [
+  'Перетащите - клиент получит SMS': [
     'Сүйрөңүз: кардар SMS алат',
     'Drag it: the client gets an SMS',
   ],
@@ -148,7 +148,7 @@ const FOR_BUSINESS: Record<string, Entry> = {
     ' This is how people find you in the catalogue.',
   ],
   'Чем занимаетесь?': ['Эмне менен алектенесиз?', 'What do you do?'],
-  ' Подставим услуги — уберите лишнее.': [
+  ' Подставим услуги - уберите лишнее.': [
     ' Кызматтарды кошобуз, ашыгын алып салыңыз.',
     ' We’ll add services: remove what you don’t need.',
   ],
@@ -158,7 +158,7 @@ const FOR_BUSINESS: Record<string, Entry> = {
     ' Set up the rest in the dashboard.',
   ],
   'Например, Barber Pro': ['Мисалы, Barber Pro', 'For example, Barber Pro'],
-  'Свободна: awaisa.kg/{slug} — её получат клиенты': [
+  'Свободна: awaisa.kg/{slug} - её получат клиенты': [
     'Бош: awaisa.kg/{slug}, бул шилтемени кардарлар алат',
     'Available: awaisa.kg/{slug}, the link clients get',
   ],
@@ -172,7 +172,7 @@ const FOR_BUSINESS: Record<string, Entry> = {
     'Бааларды жана узактыкты кабинетте каалаган убакта өзгөртсөңүз болот.',
     'You can change prices and durations in the dashboard any time.',
   ],
-  'Услуги добавите в кабинете — название, длительность и цену.': [
+  'Услуги добавите в кабинете - название, длительность и цену.': [
     'Кызматтарды кабинетте кошосуз: аталышы, узактыгы жана баасы.',
     'Add services in the dashboard: name, duration and price.',
   ],
@@ -199,11 +199,11 @@ const FOR_BUSINESS: Record<string, Entry> = {
   'Создаём…': ['Түзүп жатабыз…', 'Creating…'],
   'Укажите название': ['Аталышын жазыңыз', 'Enter a name'],
   'Страница создана': ['Баракча түзүлдү', 'Page created'],
-  'Осталось добавить мастеров — и можно принимать записи': [
+  'Осталось добавить мастеров - и можно принимать записи': [
     'Усталарды кошуу гана калды, анан жазылууларды кабыл алсаңыз болот',
     'Add specialists and you can start taking bookings',
   ],
-  'Добавьте услуги и мастеров — и можно принимать записи': [
+  'Добавьте услуги и мастеров - и можно принимать записи': [
     'Кызматтарды жана усталарды кошуңуз, анан жазылууларды кабыл алсаңыз болот',
     'Add services and specialists and you can start taking bookings',
   ],
@@ -212,7 +212,7 @@ const FOR_BUSINESS: Record<string, Entry> = {
   Сценарий: ['Сценарий', 'Scenario'],
   '3 месяца': ['3 ай', '3 months'],
   Шаги: ['Кадамдар', 'Steps'],
-  'За этот период таких устройств здесь не было — выберите другой период или уберите отбор.': [
+  'За этот период таких устройств здесь не было - выберите другой период или уберите отбор.': [
     'Бул мезгилде мындай түзмөктөр болгон жок: башка мезгилди тандаңыз же чыпканы алып салыңыз.',
     'No such devices in this period: pick another period or clear the filter.',
   ],

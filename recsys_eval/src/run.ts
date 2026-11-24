@@ -11,7 +11,7 @@ import { makePrototypes } from './recommenders/prototypes.ts'
 import { type Section, toHtml, toMarkdown } from './report.ts'
 import type { Dataset, Recommender } from './types.ts'
 
-// `pnpm rec:eval` — export the local database (read-only, anonymised), simulate behaviour on
+// `pnpm rec:eval` - export the local database (read-only, anonymised), simulate behaviour on
 // its catalog, split both by time, run every recommender, write reports/latest.{md,html}.
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), '..', '..')

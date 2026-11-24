@@ -24,7 +24,7 @@ export class TelegramGatewayService {
   }
 
   // Returns the request id, or null when the number can't get the code in Telegram (no account,
-  // gateway error) — the caller then falls back to SMS.
+  // gateway error) - the caller then falls back to SMS.
   async sendCode(phone: string, code: string, ttlSeconds: number): Promise<string | null> {
     if (!this.isEnabled) return null
 

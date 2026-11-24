@@ -130,7 +130,7 @@ export const BookingSummary = ({
   const sheetRows = ticket ? details.slice(4).filter((item) => item.label !== t('Итого')) : details
   const buttonLabel =
     (!isSubmitting && submitLabel) || getButtonLabel(firstIncompleteStep, isSubmitting, t)
-  // Ready to book: when and where in one line — a place with two addresses must not be a surprise.
+  // Ready to book: when and where in one line - a place with two addresses must not be a surprise.
   const shortWhen = dayKey && time ? `${t.dayShort(dayKey)}, ${time}` : null
   // While steps remain the line says what is chosen so far, not «Шаг 2 из 4»: the step's own
   // caption above its question already counts, and two counters read as clutter.
@@ -225,7 +225,7 @@ export const BookingSummary = ({
                 {sheetRows.map((item) => (
                   <div key={item.label} className={sheet.row}>
                     <dt className={sheet.rowLabel}>{item.label}</dt>
-                    <dd className={styles.detailValue}>{item.value || '—'}</dd>
+                    <dd className={styles.detailValue}>{item.value || '-'}</dd>
                   </div>
                 ))}
               </dl>
@@ -275,7 +275,7 @@ export const BookingSummary = ({
                 {sheetRows.map((item) => (
                   <div key={item.label} className={sheet.row}>
                     <dt className={sheet.rowLabel}>{item.label}</dt>
-                    <dd className={styles.detailValue}>{item.value || '—'}</dd>
+                    <dd className={styles.detailValue}>{item.value || '-'}</dd>
                   </div>
                 ))}
               </dl>
@@ -338,7 +338,7 @@ export const BookingSummary = ({
                   ) : isNext ? (
                     <span className={styles.rowAction}>{t(NEXT_STEP_HINTS[row.step])}</span>
                   ) : (
-                    <span className={styles.rowEmpty}>—</span>
+                    <span className={styles.rowEmpty}>-</span>
                   )}
                 </span>
                 <CaretRight className={styles.rowChevron} aria-hidden />
@@ -359,7 +359,7 @@ export const BookingSummary = ({
         <span>{t('Итого')}</span>
         <span>
           {discount && service && <s className={styles.oldPrice}>{formatPrice(service.price)}</s>}
-          {total !== null ? formatPrice(total) : (paidWith?.label ?? '—')}
+          {total !== null ? formatPrice(total) : (paidWith?.label ?? '-')}
         </span>
       </div>
       {paidWith && <p className={styles.deposit}>{paidWith.label}</p>}
@@ -367,7 +367,7 @@ export const BookingSummary = ({
       {deposit ? (
         <p className={styles.deposit}>
           {t(
-            'Предоплата {amount} — картой сразу после записи, остальное в салоне. Вернём при отмене за сутки.',
+            'Предоплата {amount} - картой сразу после записи, остальное в салоне. Вернём при отмене за сутки.',
             { amount: formatPrice(deposit) },
           )}
         </p>

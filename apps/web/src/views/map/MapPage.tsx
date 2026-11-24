@@ -56,7 +56,7 @@ interface MapPageProps {
 export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPageProps) => {
   const t = useT()
   const myPlace = useMyPlace()
-  // The place picked by hand or the browser's location — kept on the device for next time.
+  // The place picked by hand or the browser's location - kept on the device for next time.
   const location: Point | null = myPlace ? { latitude: myPlace.lat, longitude: myPlace.lng } : null
   const [isPicking, setIsPicking] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -83,7 +83,7 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
   detentRef.current = detent
 
   // Pulling the list down from its very top carries on as a drag of the sheet itself, which then
-  // settles lower or collapses — like Apple Maps; before, the list just stopped at its first row.
+  // settles lower or collapses - like Apple Maps; before, the list just stopped at its first row.
   // Touch events, not pointer ones: a scroll container cancels the pointer once it scrolls.
   // biome-ignore lint/correctness/useExhaustiveDependencies: handlers read refs; bound once
   useEffect(() => {
@@ -163,7 +163,7 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
   }
 
   // Moves the sheet under the finger: a transform only, no layout. The map is resized once, when
-  // the sheet settles — resizing Leaflet every frame is what made it stutter on phones.
+  // the sheet settles - resizing Leaflet every frame is what made it stutter on phones.
   const follow = (clientY: number, timeStamp: number) => {
     const state = drag.current
     if (!state) return
@@ -303,7 +303,7 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
                       })
                     : t.count(places.length, ['место', 'места', 'мест'])}
               </p>
-              {/* Where the visitor is: the browser's location or a district by name — the list
+              {/* Where the visitor is: the browser's location or a district by name - the list
                   is sorted from there and the map shows the spot. */}
               <Button
                 variant={location ? 'secondary' : 'outline'}
@@ -316,7 +316,7 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
             </div>
             {!location && (
               <p className={styles.hint}>
-                {t('Укажите, где вы, — покажем ближайшие места и точку на карте.')}
+                {t('Укажите, где вы, - покажем ближайшие места и точку на карте.')}
               </p>
             )}
             {error && (
@@ -357,7 +357,7 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
         {isPicking && <PlacePickerSheet onClose={() => setIsPicking(false)} />}
         {detent === 'full' && (
           // The list over the whole screen hides the map: one floating button brings it back,
-          // like «Карта» in a listings app — the grabber alone was not found.
+          // like «Карта» in a listings app - the grabber alone was not found.
           <button
             type='button'
             className={styles.showMap}

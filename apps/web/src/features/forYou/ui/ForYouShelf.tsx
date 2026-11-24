@@ -75,7 +75,7 @@ const pickOf = (item: Recommendation) => ({
   algorithm: item.algorithm,
 })
 
-// «Для вас»: services picked for this client — their answers, their visits («Пора снова»), where
+// «Для вас»: services picked for this client - their answers, their visits («Пора снова»), where
 // they are and who is free soon. Each card says why it is here.
 // The reason the score gives a service due again (`recommend-score.ts`).
 const DUE_REASON = 'Пора снова'
@@ -85,7 +85,7 @@ interface ForYouShelfProps {
   title?: string
   /** A visit just booked (`serviceId~YYYY-MM-DD`): picks lean on it even before it is stored. */
   seedVisit?: string
-  /** A service to leave out — the one just booked. */
+  /** A service to leave out - the one just booked. */
   excludeServiceId?: string
   /** The service being chosen (the booking form): picks of the same kind come first. */
   likeServiceId?: string
@@ -93,7 +93,7 @@ interface ForYouShelfProps {
   isForEveryone?: boolean
   /** Inside a column (the success screen): the track keeps to it instead of bleeding to the edge. */
   isInline?: boolean
-  /** «Настроить» beside the title — only in the profile, where the answers live. */
+  /** «Настроить» beside the title - only in the profile, where the answers live. */
   isTunable?: boolean
   /** Where the shelf stands, for what it learns from taps (`catalog`, `booking`, …). */
   surface?: Surface
@@ -218,7 +218,7 @@ export const ForYouShelf = ({
           <Sparkle aria-hidden className={styles.promptIcon} />
           <span className={styles.promptText}>
             <span className={styles.promptTitle}>{t('Подберём для вас')}</span>
-            <span className={styles.promptMeta}>{t('3 вопроса — и подборка услуг рядом')}</span>
+            <span className={styles.promptMeta}>{t('3 вопроса - и подборка услуг рядом')}</span>
           </span>
         </button>
         {sheet}

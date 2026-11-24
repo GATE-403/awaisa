@@ -336,7 +336,7 @@
   font-size: var(--text-footnote);
 }
 
-/* A 44pt tap target around the smaller control, invisible — it looks the same (WCAG 2.5.8 and
+/* A 44pt tap target around the smaller control, invisible - it looks the same (WCAG 2.5.8 and
    our 44pt rule). `:where` keeps the control's own position if it has one. */
 :where(.groupLink) {
   position: relative;
@@ -350,7 +350,7 @@
 }
 
 /* A plain Select in a sheet row opens from anywhere on the row, like iOS: its trigger stretches
-   an invisible ::before over the row. Only here — in the kit itself the same rule covered whatever
+   an invisible ::before over the row. Only here - in the kit itself the same rule covered whatever
    held the trigger (the catalog's tabs, under its sort menu). */
 .row:has(button[data-variant="plain"]) {
   position: relative;

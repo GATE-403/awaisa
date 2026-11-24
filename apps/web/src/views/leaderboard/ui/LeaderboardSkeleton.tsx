@@ -7,7 +7,7 @@ import skeleton from './LeaderboardSkeleton.module.css'
 const ROWS = 8
 
 // The board while it streams in, on the page's own classes: the gold wash, the trail, the title
-// still to come over «По отзывам клиентов», the switch and kind tabs, then rows of one height —
+// still to come over «По отзывам клиентов», the switch and kind tabs, then rows of one height -
 // the place, a face, a name over a place, the rating on the right.
 export const LeaderboardSkeleton = () => (
   <main

@@ -40,7 +40,7 @@ interface CatalogResultsProps {
   query?: string
 }
 
-// What first (services), then where (places) — one switch instead of two long sections.
+// What first (services), then where (places) - one switch instead of two long sections.
 export const CatalogResults = ({
   title,
   searchedFor,
@@ -147,7 +147,7 @@ export const CatalogResults = ({
         (businesses.length === 0 ? (
           <EmptyState
             variant='inline'
-            text={t('Мест не нашли — попробуйте другую категорию или услугу.')}
+            text={t('Мест не нашли - попробуйте другую категорию или услугу.')}
           />
         ) : (
           <ul
@@ -167,7 +167,7 @@ export const CatalogResults = ({
 
       {view === 'services' &&
         (feed.offers.length === 0 ? (
-          <EmptyState variant='inline' text={t('Услуг не нашли — попробуйте другое слово.')} />
+          <EmptyState variant='inline' text={t('Услуг не нашли - попробуйте другое слово.')} />
         ) : (
           <OffersFeed
             offers={feed.offers}

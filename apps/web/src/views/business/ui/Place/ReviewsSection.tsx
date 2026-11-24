@@ -56,7 +56,7 @@ export const ReviewsSection = ({ business, reviews }: ReviewsSectionProps) => {
                   <span className={styles.reviewBarFill} style={{ width: `${share}%` }} />
                 </span>
                 <span className={styles.reviewBarCount}>
-                  {Math.round(share)}%<span className={styles.srOnly}> — {count}</span>
+                  {Math.round(share)}%<span className={styles.srOnly}> - {count}</span>
                 </span>
               </li>
             )

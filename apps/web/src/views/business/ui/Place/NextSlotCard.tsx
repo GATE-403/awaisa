@@ -68,7 +68,7 @@ export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
   // Rendered into <body>: a fixed pill inside a section with `content-visibility` (which contains
   // paint) would be fixed to that section and slide under the next one.
   return createPortal(
-    // One slim pill in the place's colour, the whole of it a link — the same shape and place as
+    // One slim pill in the place's colour, the whole of it a link - the same shape and place as
     // «Продолжить запись», tucking away while the page scrolls down.
     <aside
       className={styles.slotCard}

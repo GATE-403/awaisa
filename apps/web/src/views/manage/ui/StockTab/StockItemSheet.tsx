@@ -274,7 +274,7 @@ export const StockItemSheet = ({
                       variant='plain'
                       aria-label={t('Расход: {name}', { name: service.name })}
                       inputMode='decimal'
-                      placeholder='—'
+                      placeholder='-'
                       value={amounts[service.id] ?? ''}
                       onValueChange={(value) =>
                         setAmounts((current) => ({ ...current, [service.id]: maskDecimal(value) }))
@@ -287,11 +287,11 @@ export const StockItemSheet = ({
             </div>
             <p className={sheet.groupFooter}>
               {example && exampleCost > 0
-                ? t('«{name}» — {amount} сом материалов за визит.', {
+                ? t('«{name}» - {amount} сом материалов за визит.', {
                     name: example.name,
                     amount: maskAmountInput(String(exampleCost)),
                   })
-                : t('Сколько уходит на один визит — спишется, когда визит отмечен «Пришёл».')}
+                : t('Сколько уходит на один визит - спишется, когда визит отмечен «Пришёл».')}
             </p>
           </section>
         )}

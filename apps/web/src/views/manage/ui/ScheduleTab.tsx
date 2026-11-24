@@ -378,7 +378,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         title: t('Отмечено: {count}', {
           count: t.count(ids.length, ['визит', 'визита', 'визитов']),
         }),
-        description: t('Все пришли, оплата по прайсу наличными — поправьте, где было иначе'),
+        description: t('Все пришли, оплата по прайсу наличными - поправьте, где было иначе'),
         type: 'success',
         action: {
           label: t('Вернуть'),
@@ -568,7 +568,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
           <EmptyState
             title={t('Добавьте мастеров')}
             text={t(
-              'Откройте раздел «Мастера» и добавьте хотя бы себя — здесь появится расписание.',
+              'Откройте раздел «Мастера» и добавьте хотя бы себя - здесь появится расписание.',
             )}
           />
         )}

@@ -1,4 +1,4 @@
-/* Phones: the map stays on screen and the list scrolls inside its own sheet below it —
+/* Phones: the map stays on screen and the list scrolls inside its own sheet below it -
    the page itself does not scroll, so the map is never pushed away. */
 .layout {
   display: flex;

@@ -9,7 +9,7 @@ interface SectionCaptionProps extends Omit<ComponentProps<'h3'>, 'ref'> {
   isInset?: boolean
 }
 
-// The small uppercase caption over a group — iOS Settings' section header. One look for sheets,
+// The small uppercase caption over a group - iOS Settings' section header. One look for sheets,
 // the cabinet, the profile and the business page; a count or a link may sit inside it.
 export const SectionCaption = ({
   as: Tag = 'h3',

@@ -5,7 +5,7 @@ import type { CountedEntry, Entry } from './types'
 const PROFILE: Record<string, Entry> = {
   // Profile page and its tabs
   'Предоплата внесена': ['Алдын ала төлөм кабыл алынды', 'Deposit paid'],
-  'Вы записаны — ждём вас': ['Сиз жазылдыңыз, күтөбүз', 'You are booked, see you soon'],
+  'Вы записаны - ждём вас': ['Сиз жазылдыңыз, күтөбүз', 'You are booked, see you soon'],
   Предстоящие: ['Алдыдагылар', 'Upcoming'],
   Дальше: ['Андан ары', 'Later'],
   Прошлые: ['Өткөндөр', 'Past'],
@@ -62,7 +62,7 @@ const PROFILE: Record<string, Entry> = {
   История: ['Тарых', 'History'],
   Настройки: ['Жөндөөлөр', 'Settings'],
   'Запишитесь к мастеру': ['Устага жазылыңыз', 'Book a specialist'],
-  'Найдите салон и выберите время — запись появится здесь': [
+  'Найдите салон и выберите время - запись появится здесь': [
     'Салонду таап, убакытты тандаңыз: жазылуу ушул жерде чыгат',
     'Find a salon and pick a time: the booking will show up here',
   ],
@@ -84,7 +84,7 @@ const PROFILE: Record<string, Entry> = {
 
   // Account card and name
   'Ваши записи': ['Сиздин жазылууларыңыз', 'Your bookings'],
-  'Только на этом телефоне — войдите, будут везде': [
+  'Только на этом телефоне - войдите, будут везде': [
     'Ушул телефондо гана. Кирсеңиз, бардык жерде болот',
     'On this phone only: sign in to have them everywhere',
   ],
@@ -203,7 +203,7 @@ const PROFILE: Record<string, Entry> = {
   удержана: ['кармалды', 'kept'],
   'не оплачена': ['төлөнгөн жок', 'not paid'],
   ', остальное в салоне': [', калганы салондо', ', the rest at the salon'],
-  'оплата в салоне — наличными или картой': [
+  'оплата в салоне - наличными или картой': [
     'төлөм салондо: накталай же карта менен',
     'pay at the salon: cash or card',
   ],
@@ -229,7 +229,7 @@ const PROFILE: Record<string, Entry> = {
   // Waitlist
   'Жду окна': ['Бош убакыт күтөм', 'Waiting for a slot'],
   'Жду окна: {service}': ['Бош убакыт күтөм: {service}', 'Waiting for a slot: {service}'],
-  'Освободилось {time} — записаться ›': ['{time} бошоду: жазылуу ›', '{time} is free: book ›'],
+  'Освободилось {time} - записаться ›': ['{time} бошоду: жазылуу ›', '{time} is free: book ›'],
   'Сообщим по SMS, если освободится': [
     'Бошосо, SMS аркылуу кабарлайбыз',
     'We will text you if a slot opens',
@@ -237,7 +237,7 @@ const PROFILE: Record<string, Entry> = {
   'Больше не ждать': ['Мындан ары күтпөө', 'Stop waiting'],
 
   // Rating a visit
-  'Поставьте оценку — от одной до пяти звёзд': [
+  'Поставьте оценку - от одной до пяти звёзд': [
     'Баа коюңуз: бирден беш жылдызга чейин',
     'Give a rating: one to five stars',
   ],
@@ -247,7 +247,7 @@ const PROFILE: Record<string, Entry> = {
   'Другой мастер': ['Башка уста', 'Another specialist'],
   'Как вам у мастера {name}?': ['{name} уста сизге жактыбы?', 'How was it with {name}?'],
   'Расскажите подробнее': ['Кененирээк айтып бериңиз', 'Tell us more'],
-  '— по желанию': ['(каалоо боюнча)', '(optional)'],
+  '- по желанию': ['(каалоо боюнча)', '(optional)'],
   'Что понравилось, что можно лучше': [
     'Эмне жакты, эмнени жакшыртса болот',
     'What you liked, what could be better',
@@ -264,7 +264,7 @@ const PROFILE: Record<string, Entry> = {
   'Фото к отзыву': ['Пикирге сүрөт', 'Review photo'],
   'Отправить отзыв': ['Пикир жөнөтүү', 'Send review'],
   Оценка: ['Баа', 'Rating'],
-  '{stars} из 5 — {label}': ['{stars} / 5: {label}', '{stars} of 5: {label}'],
+  '{stars} из 5 - {label}': ['{stars} / 5: {label}', '{stars} of 5: {label}'],
   Плохо: ['Начар', 'Bad'],
   'Так себе': ['Анча эмес', 'So-so'],
   Нормально: ['Жаман эмес', 'OK'],
@@ -294,7 +294,7 @@ const PROFILE: Record<string, Entry> = {
   ],
   'Адрес профиля': ['Профилдин дареги', 'Profile address'],
   'ваш-ник': ['сиздин-ник', 'your-handle'],
-  'Латиница, цифры, «_» и «.», от 3 символов — короткая ссылка для био и сторис.': [
+  'Латиница, цифры, «_» и «.», от 3 символов - короткая ссылка для био и сторис.': [
     'Латын тамгалары, сандар, «_» жана «.», 3 белгиден баштап: био жана сторис үчүн кыска шилтеме.',
     'Latin letters, digits, «_» and «.», 3 or more: a short link for your bio and stories.',
   ],
@@ -306,12 +306,12 @@ const PROFILE: Record<string, Entry> = {
   Ссылки: ['Шилтемелер', 'Links'],
   Сайт: ['Сайт', 'Website'],
   '@ник': ['@ник', '@handle'],
-  'Ник или ссылка — покажем значками на вашей странице.': [
+  'Ник или ссылка - покажем значками на вашей странице.': [
     'Ник же шилтеме: барагыңызда белгилер менен көрсөтөбүз.',
     'A handle or a link: shown as icons on your page.',
   ],
   Витрина: ['Витрина', 'Showcase'],
-  'До трёх достижений — рядом с вашим уровнем.': [
+  'До трёх достижений - рядом с вашим уровнем.': [
     'Үч жетишкендикке чейин: деңгээлиңиздин жанында.',
     'Up to three achievements, next to your level.',
   ],
@@ -320,7 +320,7 @@ const PROFILE: Record<string, Entry> = {
   Никто: ['Эч ким', 'No one'],
   'Открытый профиль': ['Ачык профиль', 'Public profile'],
   'Мастера и места': ['Усталар жана жайлар', 'Specialists and places'],
-  'Открытый профиль видят по ссылке и из ваших отзывов. Уровень и достижения — за визиты и отзывы.':
+  'Открытый профиль видят по ссылке и из ваших отзывов. Уровень и достижения - за визиты и отзывы.':
     [
       'Ачык профилди шилтеме жана пикирлериңиз аркылуу көрүшөт. Деңгээл жана жетишкендиктер визиттер менен пикирлер үчүн берилет.',
       'A public profile is seen by its link and from your reviews. Level and achievements come from visits and reviews.',
@@ -363,8 +363,8 @@ const PROFILE: Record<string, Entry> = {
   'с {date}': ['{date} бери', 'since {date}'],
   '{points} очков до следующего': ['кийинкисине {points} упай', '{points} points to the next'],
   максимальный: ['эң жогорку', 'top level'],
-  'Мой мастер —': ['Менин устам:', 'My specialist:'],
-  'Профиль скрыт — его видите только вы': [
+  'Мой мастер -': ['Менин устам:', 'My specialist:'],
+  'Профиль скрыт - его видите только вы': [
     'Профиль жашырылган: аны сиз гана көрөсүз',
     'Profile hidden: only you can see it',
   ],
@@ -372,7 +372,7 @@ const PROFILE: Record<string, Entry> = {
   'Чаще всего': ['Көбүнчө', 'Most often'],
   'Ждут оценки: {visits} ›': ['Баа күтүүдө: {visits} ›', 'Awaiting rating: {visits} ›'],
   Пригласить: ['Чакыруу', 'Invite'],
-  'Записывайся к мастерам через Awaisa — вот мой профиль': [
+  'Записывайся к мастерам через Awaisa - вот мой профиль': [
     'Awaisa аркылуу усталарга жазыл, бул менин профилим',
     'Book specialists through Awaisa, here is my profile',
   ],
@@ -413,7 +413,7 @@ const PROFILE: Record<string, Entry> = {
     'Too few reviews for a rating yet. It will appear once there are more.',
   ],
   '{place}-е место': ['{place}-орун', 'place {place}'],
-  'Место зависит от оценок после визитов: средняя подтягивается к 4,3, пока отзывов мало; мастеру нужно хотя бы три отзыва, месту — пять. Обновляется каждые несколько минут.':
+  'Место зависит от оценок после визитов: средняя подтягивается к 4,3, пока отзывов мало; мастеру нужно хотя бы три отзыва, месту - пять. Обновляется каждые несколько минут.':
     [
       'Орун визиттен кийинки баалардан көз каранды: пикирлер аз болгондо орточо баа 4,3кө тартылат; устага жок дегенде үч пикир, жайга беш пикир керек. Бир нече мүнөт сайын жаңыланат.',
       'The place depends on ratings after visits: the average leans toward 4.3 while there are few reviews; a specialist needs at least three reviews, a place five. Updated every few minutes.',

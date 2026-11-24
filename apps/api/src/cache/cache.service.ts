@@ -13,7 +13,7 @@ const COMMAND_TIMEOUT_MS = 1000
 // Read-through cache for public answers. With REDIS_URL it lives in Redis (shared by every API
 // instance); without it, in this process's memory. Invalidation is by tag versions: a key
 // carries the versions of its tags, and bumping a tag makes every older key unreachable at once
-// (old entries simply expire). Any cache failure falls back to the database — never an error.
+// (old entries simply expire). Any cache failure falls back to the database - never an error.
 @Injectable()
 export class CacheService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(CacheService.name)

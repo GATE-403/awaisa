@@ -1,5 +1,5 @@
 /* The picture is the card: what, where, price and the next free time on a dark scrim at its
-   foot — the same shape as the place cards. */
+   foot - the same shape as the place cards. */
 .card {
   position: relative;
   display: flex;
@@ -257,7 +257,7 @@
   left: calc(var(--space-2) + 60px);
 }
 
-/* Phones: the rating would crowd the line; the place's name stays — it tells a service from a place. */
+/* Phones: the rating would crowd the line; the place's name stays - it tells a service from a place. */
 @media (max-width: 639px) {
   .rating {
     display: none;

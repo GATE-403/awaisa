@@ -24,7 +24,7 @@ const WEB_BURST = 10
 /**
  * The platform's own alarms, in the jobs process: new server errors, a burst of browser errors,
  * failed cron jobs and an unreachable Redis go to ALERT_TELEGRAM_CHAT_ID. It cannot tell that
- * the whole server is down — the GitHub uptime check (.github/workflows/uptime.yml) does that.
+ * the whole server is down - the GitHub uptime check (.github/workflows/uptime.yml) does that.
  */
 @Injectable()
 export class AlertsService implements OnApplicationBootstrap, OnApplicationShutdown {

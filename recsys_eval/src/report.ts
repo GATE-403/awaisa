@@ -58,7 +58,7 @@ const segmentRows = (results: Result[]) => {
       result.recommender,
       ...names.map((name) => {
         const s: Summary | undefined = result.segments[name]
-        return s ? `${fixed(s.ndcg)} / ${percent(s.hit)}` : '—'
+        return s ? `${fixed(s.ndcg)} / ${percent(s.hit)}` : '-'
       }),
     ]),
   }
@@ -72,16 +72,16 @@ const markdownTable = (head: string[], rows: string[][]) =>
   ].join('\n')
 
 const splitLine = ({ dataset, split }: Section) =>
-  `Срез ${day(split.cutoff)}: обучение — ${split.train.length} визитов до него, проверка — ` +
+  `Срез ${day(split.cutoff)}: обучение - ${split.train.length} визитов до него, проверка - ` +
   `${split.cases.length} клиентов, записавшихся за ${split.testDays} дн. после. ` +
   `Каталог: ${dataset.items.length} услуг.`
 
 const CAVEATS = [
   'Расстояние, «свободно сегодня» и акции в прошлом неизвестны: эти части формулы одинаковы для всех кандидатов и порядок не меняют. Онлайн они работают, офлайн их не оценить.',
-  'Рейтинг места — среднее отзывов до среза (в проде — средний рейтинг мастеров).',
+  'Рейтинг места - среднее отзывов до среза (в проде - средний рейтинг мастеров).',
   'Нет «уже показано» (seen): истории показов по клиентам в прошлом нет.',
-  'Релевантно всё, что клиент записал после среза, включая повторы: для записи к мастеру повтор — нормальный исход, поэтому есть колонка «Уже покупал».',
-  'Разнообразие — доля пар карточек разного типа услуг (стрижка, ногти…); новизна — средняя −log2 доли записей услуги до среза.',
+  'Релевантно всё, что клиент записал после среза, включая повторы: для записи к мастеру повтор - нормальный исход, поэтому есть колонка «Уже покупал».',
+  'Разнообразие - доля пар карточек разного типа услуг (стрижка, ногти…); новизна - средняя −log2 доли записей услуги до среза.',
 ]
 
 const toMarkdown = (sections: Section[], generatedAt: Date) =>
@@ -105,7 +105,7 @@ const toMarkdown = (sections: Section[], generatedAt: Date) =>
         '',
         markdownTable(segments.head, segments.rows),
         '',
-        ...section.results.map((result) => `- **${result.recommender}** — ${result.description}`),
+        ...section.results.map((result) => `- **${result.recommender}** - ${result.description}`),
         '',
       ]
     }),
@@ -161,7 +161,7 @@ ${bars(section.results, section.k)}
 ${htmlTable(MAIN_HEAD(section.k), mainRows(section.results))}
 <h3>По сегментам (NDCG@${section.k} / HitRate@${section.k})</h3>
 ${htmlTable(segments.head, segments.rows)}
-<ul>${section.results.map((result) => `<li><b>${escapeHtml(result.recommender)}</b> — ${escapeHtml(result.description)}</li>`).join('')}</ul></section>`
+<ul>${section.results.map((result) => `<li><b>${escapeHtml(result.recommender)}</b> - ${escapeHtml(result.description)}</li>`).join('')}</ul></section>`
   })
   .join('\n')}
 <section><h2>Оговорки</h2><ul>${CAVEATS.map((line) => `<li>${escapeHtml(line)}</li>`).join('')}</ul></section>

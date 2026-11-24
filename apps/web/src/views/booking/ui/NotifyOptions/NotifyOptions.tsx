@@ -22,7 +22,7 @@ const REMINDERS: { value: string; label: string }[] = [
   { value: 'off', label: 'Не напоминать' },
 ]
 
-// The client decides what reaches their phone and when — asked once, as Settings rows.
+// The client decides what reaches their phone and when - asked once, as Settings rows.
 export const NotifyOptions = ({
   phone,
   smsConfirmation,

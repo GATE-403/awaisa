@@ -74,7 +74,7 @@ const LOYALTY: Record<string, Entry> = {
   '{days} дней': ['{days} күн', '{days} days'],
   Продаётся: ['Сатылат', 'On sale'],
   'Продавать онлайн': ['Онлайн сатуу', 'Sell online'],
-  'По отдельности {visits} визитов стоят {full} сом — клиент экономит {saving} сом.': [
+  'По отдельности {visits} визитов стоят {full} сом - клиент экономит {saving} сом.': [
     'Өзүнчө {visits} визит {full} сом турат: кардар {saving} сом үнөмдөйт.',
     'Separately, {visits} visits cost {full} som: the client saves {saving} som.',
   ],
@@ -106,7 +106,7 @@ const LOYALTY: Record<string, Entry> = {
   ],
 
   // Promotions
-  'Скидки не суммируются — клиент получает самую большую.': [
+  'Скидки не суммируются - клиент получает самую большую.': [
     'Арзандатуулар кошулбайт: кардар эң чоңун алат.',
     'Discounts don’t add up: the client gets the biggest one.',
   ],
@@ -127,7 +127,7 @@ const LOYALTY: Record<string, Entry> = {
     'Тынч сааттарды толтуруңуз: арзандатуу тандалган күндөрү визит башталган убакытка жарайт.',
     'Fill quiet hours: the discount applies on the chosen days by the visit’s start time.',
   ],
-  'Для тех, кто записывается к вам впервые — по номеру телефона.': [
+  'Для тех, кто записывается к вам впервые - по номеру телефона.': [
     'Сизге биринчи жолу жазылгандар үчүн, телефон номери боюнча.',
     'For people booking with you for the first time, by phone number.',
   ],
@@ -140,7 +140,7 @@ const LOYALTY: Record<string, Entry> = {
   Конец: ['Аягы', 'End'],
   'До даты': ['Датага чейин', 'Until date'],
   Включена: ['Күйгүзүлгөн', 'On'],
-  'Без даты — пока не выключите.': [
+  'Без даты - пока не выключите.': [
     'Датасыз: өчүрмөйүнчө иштейт.',
     'Without a date: until you turn it off.',
   ],

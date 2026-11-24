@@ -25,7 +25,7 @@ interface RescheduleSheetProps {
 
 const DAYS_SHOWN = 14
 
-// Same master, same service, another time — chosen with the very picker of the booking form
+// Same master, same service, another time - chosen with the very picker of the booking form
 // (day cards with «Сегодня / Завтра», «Выберите время · N свободных», free times only).
 export const RescheduleSheet = ({ booking, token, onMoved, onClose }: RescheduleSheetProps) => {
   const t = useT()
@@ -88,7 +88,7 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
           <ArrowRight aria-hidden className={styles.arrow} />
           <span className={styles.will} data-empty={!time || undefined}>
             <span className={styles.caption}>{t('Станет')}</span>
-            <span className={styles.willTime}>{time ?? '—:—'}</span>
+            <span className={styles.willTime}>{time ?? '-:-'}</span>
             <span className={styles.date}>{t.dayShort(date)}</span>
           </span>
         </div>

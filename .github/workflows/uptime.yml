@@ -6,7 +6,7 @@ name: Uptime
 # checks every minute if that is not enough.
 #
 # Repository settings → Secrets and variables → Actions:
-#   variables: UPTIME_URLS — space-separated, e.g. "https://awaisa.kg https://awaisa.kg/api/health"
+#   variables: UPTIME_URLS - space-separated, e.g. "https://awaisa.kg https://awaisa.kg/api/health"
 #   secrets:   ALERT_TELEGRAM_BOT_TOKEN, ALERT_TELEGRAM_CHAT_ID (the chat's id: send /chatid to the bot)
 on:
   schedule:

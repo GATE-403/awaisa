@@ -2,7 +2,7 @@ import type { BusinessKind } from '@/shared/api/types'
 
 const PLATFORM = {
   name: 'Awaisa',
-  tagline: 'Онлайн-запись в салоны и к мастерам Бишкека — без звонков.',
+  tagline: 'Онлайн-запись в салоны и к мастерам Бишкека - без звонков.',
   // Kyrgyzstan has a single time zone; every business on the platform books in UTC+6.
   utcOffsetMinutes: 6 * 60,
 }

@@ -34,7 +34,7 @@ const distanceKm = (from: Point, to: Point) => {
   return 6371 * 2 * Math.asin(Math.sqrt(a))
 }
 
-// «350 м», «1,2 км», «12 км» — precision drops with distance, as in Maps.
+// «350 м», «1,2 км», «12 км» - precision drops with distance, as in Maps.
 const formatDistance = (km: number) => {
   if (km < 1) return `${Math.max(50, Math.round((km * 1000) / 50) * 50)} м`
   if (km < 10) return `${km.toFixed(1).replace('.', ',')} км`

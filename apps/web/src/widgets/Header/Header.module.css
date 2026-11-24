@@ -45,7 +45,7 @@
   display: none;
 }
 
-/* Phones: one row — the mascot and the search field, like a store app. */
+/* Phones: one row - the mascot and the search field, like a store app. */
 .inner {
   display: grid;
   grid-template-areas: "home search actions";
@@ -154,7 +154,7 @@
   display: none;
 }
 
-/* Phones: quiet text chips, only the chosen one sits on a light fill — the search stays the focus. */
+/* Phones: quiet text chips, only the chosen one sits on a light fill - the search stays the focus. */
 .category {
   display: inline-flex;
   align-items: center;
@@ -212,7 +212,7 @@
   }
 }
 
-/* From tablets: one row like a marketplace — logo, «Каталог», search, labelled actions. */
+/* From tablets: one row like a marketplace - logo, «Каталог», search, labelled actions. */
 @media (min-width: 768px) {
   .header:not([data-slim]) .home svg + svg {
     display: block;
@@ -344,7 +344,7 @@
   box-shadow: 0 0 0 2px var(--color-link);
 }
 
-/* A 44pt tap target around the smaller control, invisible — it looks the same (WCAG 2.5.8 and
+/* A 44pt tap target around the smaller control, invisible - it looks the same (WCAG 2.5.8 and
    our 44pt rule). `:where` keeps the control's own position if it has one. */
 :where(.category),
 :where(.city) {
@@ -360,7 +360,7 @@
 }
 
 /* Tablets: the city link keeps to «Бишкек» and the categories drop their glyphs, so every
-   category fits beside it — on an iPad «Другое» used to hide under the city link. */
+   category fits beside it - on an iPad «Другое» used to hide under the city link. */
 @media (min-width: 768px) and (max-width: 1023px) {
   .cityMore {
     display: none;

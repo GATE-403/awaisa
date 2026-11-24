@@ -27,7 +27,7 @@ const groupByDay = () => {
   return [...days.entries()]
 }
 
-// «Что нового»: one quiet column like the profile — a caption per day, then each change as a
+// «Что нового»: one quiet column like the profile - a caption per day, then each change as a
 // title and a line or two, with a link to try it.
 export const UpdatesPage = () => (
   <main className={styles.page}>

@@ -37,7 +37,7 @@ export const WaitlistSheet = ({
       onClose={onClose}
     >
       <p className={styles.lead}>
-        {t('{day}. Освободится время — клиенты получат SMS сами; можно и записать их сразу.', {
+        {t('{day}. Освободится время - клиенты получат SMS сами; можно и записать их сразу.', {
           day: dayLabel,
         })}
       </p>

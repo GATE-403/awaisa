@@ -32,7 +32,7 @@ export const StarRating = ({ value, onChange }: StarRatingProps) => {
                 checked={value === stars}
                 onChange={() => onChange(stars)}
                 className={styles.input}
-                aria-label={t('{stars} из 5 — {label}', { stars, label: t(label) })}
+                aria-label={t('{stars} из 5 - {label}', { stars, label: t(label) })}
               />
               <Star weight={stars <= value ? 'fill' : 'regular'} aria-hidden />
             </label>

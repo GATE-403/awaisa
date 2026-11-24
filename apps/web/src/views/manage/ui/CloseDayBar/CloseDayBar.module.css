@@ -165,7 +165,7 @@
   }
 }
 
-/* The glyph of visits waiting to be marked — the same as on their cards. */
+/* The glyph of visits waiting to be marked - the same as on their cards. */
 .bar .dot {
   width: 16px;
   height: 16px;
@@ -174,7 +174,7 @@
   color: var(--system-orange);
 }
 
-/* Inside the board, one slim row over the day like «Сейчас» — no floating capsule over the
+/* Inside the board, one slim row over the day like «Сейчас» - no floating capsule over the
    window's foot, so the day keeps its whole height (the room kept for it was wasted). */
 .bar {
   position: static;
@@ -206,7 +206,7 @@
   }
 }
 
-/* In the status row it is one capsule in orange — what asks for action — «◌ 4 без отметки ⌄»,
+/* In the status row it is one capsule in orange - what asks for action - «◌ 4 без отметки ⌄»,
    then «✓ Все пришли» and a small ✕. */
 .bar {
   gap: 2px;
@@ -281,7 +281,7 @@
   }
 }
 
-/* Phones: «◌ 5 визитов ⌄ · ✓ Все пришли» — the orange glyph already says «без отметки». */
+/* Phones: «◌ 5 визитов ⌄ · ✓ Все пришли» - the orange glyph already says «без отметки». */
 @media (max-width: 479px) {
   .short {
     display: none;

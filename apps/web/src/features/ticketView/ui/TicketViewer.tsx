@@ -118,7 +118,7 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
                         amount: formatPrice(booking.payment.amount),
                         status: t(PAYMENT_STATUS_TEXT[booking.payment.status]),
                       })}${booking.payment.status === 'paid' ? t(', остальное в салоне') : ''}`
-                    : t('оплата в салоне — наличными или картой')}
+                    : t('оплата в салоне - наличными или картой')}
               </span>
             </dd>
           </div>

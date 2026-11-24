@@ -69,7 +69,7 @@ const AFFINITY_TTL_MS = 10 * 60_000
 const NEW_PLACE_REVIEWS = 5
 
 /**
- * «Для вас»: every active service of a published place scored for this client — what they said
+ * «Для вас»: every active service of a published place scored for this client - what they said
  * they like, what they booked and when, where they are, when the place is free, how good and
  * how booked it is. No accounts needed: guests send their answers and device visits.
  */
@@ -182,7 +182,7 @@ export class RecommendationsService implements OnApplicationBootstrap {
     )
   }
 
-  /** Per reason: how often shown, tapped and booked — what actually brings bookings. */
+  /** Per reason: how often shown, tapped and booked - what actually brings bookings. */
   async stats(days: number, by: 'reason' | 'surface' = 'reason') {
     // `by` is one of two column names checked by the schema, never free text.
     const column = by === 'surface' ? '"surface"' : '"reason"'
@@ -199,7 +199,7 @@ export class RecommendationsService implements OnApplicationBootstrap {
     return rows.map((row) => {
       const impressions = Number(row.impressions)
       return {
-        [by]: String(row.key) || '—',
+        [by]: String(row.key) || '-',
         impressions,
         clicks: Number(row.clicks),
         bookings: Number(row.bookings),
@@ -290,7 +290,7 @@ export class RecommendationsService implements OnApplicationBootstrap {
     }))
   }
 
-  /** The current scorer, or — for devices in an interleaving test — it and another drafted together. */
+  /** The current scorer, or - for devices in an interleaving test - it and another drafted together. */
   private rank<T extends Candidate>(
     candidates: T[],
     profile: Profile,
@@ -316,7 +316,7 @@ export class RecommendationsService implements OnApplicationBootstrap {
   }
 
   /**
-   * Every active service of a published place with what scores it — the same for everyone, so
+   * Every active service of a published place with what scores it - the same for everyone, so
    * one copy is shared by all API instances for a minute (owners' edits bump `catalog`). It was
    * 55% of the database's time under load (load/README.md). Distances are worked out per request
    * from the branches' pins, since they depend on where the person is.

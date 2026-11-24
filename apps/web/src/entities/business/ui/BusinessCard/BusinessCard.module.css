@@ -368,7 +368,7 @@
   white-space: nowrap;
 }
 
-/* Phones: the address would be cut anyway — name, free time and price are enough. */
+/* Phones: the address would be cut anyway - name, free time and price are enough. */
 @media (max-width: 639px) {
   .address {
     display: none;

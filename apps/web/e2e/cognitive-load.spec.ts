@@ -92,7 +92,7 @@ test.describe('Cognitive load: booking', () => {
     expect(words).toBeLessThanOrEqual(LIMITS.wordsBeforeFirstChoice)
   })
 
-  test(`only ${LIMITS.requiredTextFields} fields are required — the rest is optional and says so`, async ({
+  test(`only ${LIMITS.requiredTextFields} fields are required - the rest is optional and says so`, async ({
     page,
   }) => {
     await page.goto('/awaisa-studio/book?service=styling')
@@ -141,7 +141,7 @@ test.describe('Cognitive load: booking', () => {
     expect(actions).toBeLessThanOrEqual(LIMITS.happyPathActions)
   })
 
-  test('price and duration are visible before committing — no surprises', async ({ page }) => {
+  test('price and duration are visible before committing - no surprises', async ({ page }) => {
     await page.goto('/awaisa-studio/book')
     const steps = bookingSteps(page)
     const option = steps.service.getByRole('radio', { name: /Укладка/ })

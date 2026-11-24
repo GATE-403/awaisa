@@ -111,7 +111,7 @@
 
 /* «▰▰▱ Запуск 2 из 3 · Добавьте мастеров»: a link over the row's own. Every link in the row reads
    the same: the quiet footnote colour with a thin underline («иконки и текст одним цветом, если
-   кликабельны — добавь линии»); the link colour under a mouse. */
+   кликабельны - добавь линии»); the link colour under a mouse. */
 .statusLink,
 .attentionLink {
   position: relative;

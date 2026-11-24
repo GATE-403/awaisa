@@ -13,14 +13,14 @@ const AUTH: Record<string, Entry> = {
     'Код Telegram же SMS аркылуу келет',
     'The code comes in Telegram or by SMS',
   ],
-  'Ссылка для входа устарела — нажмите «Войти через Telegram» ещё раз': [
+  'Ссылка для входа устарела - нажмите «Войти через Telegram» ещё раз': [
     'Кирүү шилтемесинин мөөнөтү бүттү: «Telegram аркылуу кирүү» дегенди кайра басыңыз',
     'The sign-in link has expired: tap «Sign in with Telegram» again',
   ],
   Назад: ['Артка', 'Back'],
   'Изменить номер': ['Номерди өзгөртүү', 'Change the number'],
   'Подтвердите в Telegram': ['Telegram аркылуу ырастаңыз', 'Confirm in Telegram'],
-  'Нажмите «Поделиться номером» в чате с ботом — и вернитесь сюда': [
+  'Нажмите «Поделиться номером» в чате с ботом - и вернитесь сюда': [
     'Бот менен чатта «Номер менен бөлүшүү» дегенди басып, бул жакка кайтыңыз',
     'Tap «Share my number» in the chat with the bot, then come back here',
   ],

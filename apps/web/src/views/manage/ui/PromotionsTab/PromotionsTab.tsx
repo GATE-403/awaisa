@@ -31,7 +31,7 @@ const KIND_LABEL: Record<Promotion['kind'], string> = {
   promo_code: 'Промокод',
 }
 
-// «Акции»: discounts the business runs — by hours, for first visits, by promo code.
+// «Акции»: discounts the business runs - by hours, for first visits, by promo code.
 export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
   const t = useT()
   const toast = useToast()
@@ -77,7 +77,7 @@ export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
     <section className={styles.section} aria-label={t('Акции')}>
       <SectionHeader
         title={t('Акции')}
-        description={t('Скидки не суммируются — клиент получает самую большую.')}
+        description={t('Скидки не суммируются - клиент получает самую большую.')}
         isFloatingOnPhone
         actions={
           <Button size='sm' onClick={() => setEditing('new')}>

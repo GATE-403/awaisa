@@ -209,7 +209,7 @@
   }
 }
 
-/* The questionnaire's interests: separate tiles two a row, like picking topics — a chosen one
+/* The questionnaire's interests: separate tiles two a row, like picking topics - a chosen one
    is tinted in the accent with a check, so no hairlines to line up. */
 .interestGrid {
   display: grid;
@@ -280,7 +280,7 @@
   }
 }
 
-/* Touch screens: the row glides with the finger and its momentum — snapping to a card made a
+/* Touch screens: the row glides with the finger and its momentum - snapping to a card made a
    short swipe feel stuck on phones. */
 @media (hover: none) {
   .track {

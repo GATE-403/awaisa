@@ -128,7 +128,7 @@
   }
 }
 
-/* Simple and quiet: both capsules on the same neutral fill, told apart by their state glyph —
+/* Simple and quiet: both capsules on the same neutral fill, told apart by their state glyph -
    the visit under way an hourglass in green (as on its card), the next one a clock. */
 .pill[data-kind="now"] {
   background: var(--color-fill);

@@ -147,7 +147,7 @@
   white-space: nowrap;
 }
 
-/* ——— Phones: like an event in iOS Calendar ———
+/* --- Phones: like an event in iOS Calendar ---
    Everything centred: the face, the name, «service · master», when, the price; then the four ways
    to reach the client as bare glyphs with a word under each (no tiles, no fills); the outcome. */
 @media (pointer: coarse), (max-width: 639px) {
@@ -268,7 +268,7 @@
   }
 }
 
-/* ——— Cancelled ———
+/* --- Cancelled ---
    One quiet line on top instead of a red pill and struck-through lines. */
 .status {
   display: inline-flex;

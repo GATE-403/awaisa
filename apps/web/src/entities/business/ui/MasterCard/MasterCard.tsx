@@ -29,7 +29,7 @@ interface MasterCardProps {
   onSelect?: () => void
 }
 
-// A master as a 3:4 picture card — the photo, or the white mascot on their own colour — with
+// A master as a 3:4 picture card - the photo, or the white mascot on their own colour - with
 // the first name and ★ rating · role on a scrim. One card for the business page («Мастера») and
 // the booking form's master step, so the face picked there is the one seen here.
 export const MasterCard = ({

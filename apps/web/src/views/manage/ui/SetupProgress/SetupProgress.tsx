@@ -38,7 +38,7 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
   const next = steps.find((step) => !step.isDone)
   const isComplete = !next
 
-  // The last step done: say plainly that booking is open and hand over the link to share —
+  // The last step done: say plainly that booking is open and hand over the link to share -
   // a first-time owner otherwise does not know what to do with the page now.
   useEffect(() => {
     if (!isComplete) {

@@ -53,7 +53,7 @@ const Meter = ({ share }: { share: number | null }) =>
   ) : null
 
 // Platform admins read the funnels here: where people drop out of each scenario, on which
-// devices, and what trips them up — the same codes the telemetry stores, put into words.
+// devices, and what trips them up - the same codes the telemetry stores, put into words.
 export const InsightsPage = ({ initial }: InsightsPageProps) => {
   const t = useT()
   const insights = useInsights(initial)
@@ -211,7 +211,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
                 <EmptyState
                   variant='inline'
                   text={t(
-                    'За этот период таких устройств здесь не было — выберите другой период или уберите отбор.',
+                    'За этот период таких устройств здесь не было - выберите другой период или уберите отбор.',
                   )}
                 />
               ) : (

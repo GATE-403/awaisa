@@ -90,7 +90,7 @@ test.describe('Own profile', () => {
     ).toBe(404)
     await guest.close()
     await page.reload()
-    await expect(page.getByText('Профиль скрыт — его видите только вы')).toBeVisible()
+    await expect(page.getByText('Профиль скрыт - его видите только вы')).toBeVisible()
 
     // «Изменить» on one's own page opens the editor with the live preview.
     await page.getByRole('button', { name: 'Изменить' }).click()
@@ -130,7 +130,7 @@ test.describe('Own profile', () => {
     await expect(storySheet.getByRole('button', { name: 'Скачать картинку' })).toBeVisible()
     await storySheet.getByRole('button', { name: 'Закрыть' }).click()
 
-    // A friend books by the link: once they have come, they count — points and «Привёл друга».
+    // A friend books by the link: once they have come, they count - points and «Привёл друга».
     const friendPhone = randomClientPhone()
     await createPastVisit('E2E Друг', friendPhone, 0, undefined, handle)
     await expect

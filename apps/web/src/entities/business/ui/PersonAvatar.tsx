@@ -9,7 +9,7 @@ import { monogramTint } from './BusinessTile/BusinessTile'
 const FACE_SOURCE_WIDTH = 240
 
 // A person's face everywhere (clients, masters, the team, reviewers): their photo, or the white
-// mascot on their own colour from the name — the same person looks the same on every screen.
+// mascot on their own colour from the name - the same person looks the same on every screen.
 export const PersonAvatar = ({ name, src, style, ...props }: AvatarProps) => (
   <Avatar
     name={name}

@@ -67,7 +67,7 @@
 }
 
 /* Dark: the popup is a dark card (the surface, #1C1C1E) drawn with a light hairline, like a
-   macOS popover — the grey elevated fill merged with the grey rows inside it. The arrow carries
+   macOS popover - the grey elevated fill merged with the grey rows inside it. The arrow carries
    the same line on its two outer edges. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .popup {

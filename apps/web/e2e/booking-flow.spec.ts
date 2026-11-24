@@ -80,8 +80,8 @@ test.describe('User flow: booking', () => {
     // No toast over the success screen: it says in plain words what to do next.
     await expect(page.getByText(new RegExp(`Приходите к ${time}`))).toBeVisible()
     await expect(page.getByRole('article', { name: /^Запись / })).toContainText(time)
-    // The sum is said in the sentence and leads the ticket's stub — nobody hunts for it.
-    await expect(page.getByText(/Оплата в салоне — \d[\d\s]*\sсом/)).toBeVisible()
+    // The sum is said in the sentence and leads the ticket's stub - nobody hunts for it.
+    await expect(page.getByText(/Оплата в салоне - \d[\d\s]*\sсом/)).toBeVisible()
     await expect(page.getByRole('article', { name: /^Запись / })).toContainText(/К оплате\s*\d/)
 
     await page.getByRole('main').getByRole('link', { name: 'Мои записи' }).click()
@@ -89,7 +89,7 @@ test.describe('User flow: booking', () => {
     const ticket = page.getByRole('article', { name: /^Запись / }).first()
     await expect(ticket).toContainText('Мужская стрижка')
 
-    // The ticket alone, large, with a way to save it — like showing it at the door.
+    // The ticket alone, large, with a way to save it - like showing it at the door.
     await ticket.getByRole('button', { name: 'Показать талон' }).click()
     const ticketSheet = page.getByRole('dialog', { name: 'Талон' })
     await expect(ticketSheet.getByRole('article', { name: /^Запись / })).toBeVisible()

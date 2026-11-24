@@ -1,5 +1,5 @@
 /* The open step sits right on the sheet, no card of its own: the question large, then what to
-   pick — the stack above is the only thing with a body. */
+   pick - the stack above is the only thing with a body. */
 .step {
   display: flex;
   flex-direction: column;

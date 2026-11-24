@@ -1,5 +1,5 @@
 // How many requests a second one API process takes before answers slow down: the browse mix
-// at a rising arrival rate (open model — new requests keep coming however slow answers get).
+// at a rising arrival rate (open model - new requests keep coming however slow answers get).
 // Run: pnpm --filter api load:capacity (see load/README.md).
 import { check } from 'k6'
 import http from 'k6/http'
@@ -63,7 +63,7 @@ export default ({ slugs, pages }) => {
   check(response, { ok: (r) => r.status === 200 })
 }
 
-// Requests a second, answers and latency every 10 s as the rate climbs — where it bends is the
+// Requests a second, answers and latency every 10 s as the rate climbs - where it bends is the
 // process's ceiling.
 export const handleSummary = (data) => ({
   [`/scripts/results/${__ENV.RUN || 'capacity'}.json`]: JSON.stringify(data, null, 2),

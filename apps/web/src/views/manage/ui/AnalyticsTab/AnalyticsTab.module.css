@@ -78,7 +78,7 @@
   min-width: 0;
 }
 
-/* ——— Выручка ——— */
+/* --- Выручка --- */
 
 .revenue {
   display: flex;
@@ -219,7 +219,7 @@
   background: color-mix(in srgb, var(--color-foreground) 24%, transparent);
 }
 
-/* ——— Визиты и клиенты: four figures in a row, no tiles ——— */
+/* --- Визиты и клиенты: four figures in a row, no tiles --- */
 
 .stats {
   display: grid;
@@ -365,7 +365,7 @@
   border-radius: 50%;
 }
 
-/* ——— Lists: rows on the page with hairlines between them, like the reviews thread ——— */
+/* --- Lists: rows on the page with hairlines between them, like the reviews thread --- */
 
 .rows {
   margin: 0;
@@ -529,7 +529,7 @@
   }
 }
 
-/* ——— Heatmap: one hue in five steps, from the neutral fill to the full accent ——— */
+/* --- Heatmap: one hue in five steps, from the neutral fill to the full accent --- */
 
 .heatmapWrap {
   display: flex;
@@ -693,8 +693,8 @@ button.heatmapCell:active {
   }
 }
 
-/* ——— «Требует внимания»: the whole row one tap target — a thin glyph in its colour (no tinted
-   disc), what it is, the action named at its end ——— */
+/* --- «Требует внимания»: the whole row one tap target - a thin glyph in its colour (no tinted
+   disc), what it is, the action named at its end --- */
 
 .attentionRow {
   display: flex;
@@ -789,7 +789,7 @@ button.heatmapCell:active {
   }
 }
 
-/* ——— Why the money moved, the month's goal ——— */
+/* --- Why the money moved, the month's goal --- */
 
 .reasons {
   margin: var(--space-1) 0 0;
@@ -900,7 +900,7 @@ button.heatmapCell:active {
   align-self: flex-start;
 }
 
-/* ——— A master's period in a sheet: the quiet profile head ——— */
+/* --- A master's period in a sheet: the quiet profile head --- */
 
 .masterHead {
   display: flex;

@@ -219,7 +219,7 @@ const scoreCandidate = (
   }
 
   // «С этим часто берут» (Amazon's item-to-item, by kind): what clients book after what this one
-  // is choosing or had lately — brows after a manicure, a beard trim after a haircut.
+  // is choosing or had lately - brows after a manicure, a beard trim after a haircut.
   const sources = new Set([
     ...(focus ? interestsOf(focus.name) : []),
     ...recentKinds,
@@ -355,7 +355,7 @@ const rankCandidates = <T extends Candidate>(
   const perSlug = new Map<string, number>()
   const names = new Set<string>()
   const result: ({ candidate: T } & Scored)[] = []
-  // score-v2: one card per name is the client's own place for a service they had there — a
+  // score-v2: one card per name is the client's own place for a service they had there - a
   // better-rated «Стрижка» across town used to push their own salon's off the shelf.
   const ownPlaces = new Map<string, Set<string>>()
   if (version !== 'score-v1') {

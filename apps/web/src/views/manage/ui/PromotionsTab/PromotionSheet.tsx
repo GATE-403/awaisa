@@ -176,7 +176,7 @@ export const PromotionSheet = ({
             {kind === 'happy_hours' &&
               t('Заполните тихие часы: скидка действует в выбранные дни и время начала визита.')}
             {kind === 'first_visit' &&
-              t('Для тех, кто записывается к вам впервые — по номеру телефона.')}
+              t('Для тех, кто записывается к вам впервые - по номеру телефона.')}
             {kind === 'promo_code' &&
               t('Клиент вводит код при записи. Раздайте его в Instagram или на визитке.')}
           </p>
@@ -269,7 +269,7 @@ export const PromotionSheet = ({
               <Switch checked={isActive} onCheckedChange={setIsActive} />
             </label>
           </div>
-          <p className={sheet.groupFooter}>{t('Без даты — пока не выключите.')}</p>
+          <p className={sheet.groupFooter}>{t('Без даты - пока не выключите.')}</p>
         </section>
 
         {onDelete && (

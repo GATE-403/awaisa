@@ -6,7 +6,7 @@ import { MapPage } from '@/views/map'
 
 export const metadata: Metadata = {
   title: 'Карта',
-  description: 'Салоны и мастера рядом с вами — на карте, со свободным временем.',
+  description: 'Салоны и мастера рядом с вами - на карте, со свободным временем.',
   // Kinds are views of this one page.
   alternates: { canonical: '/map' },
 }

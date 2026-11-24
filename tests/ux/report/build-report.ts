@@ -138,7 +138,7 @@ const fileLinks = (root: string, files: string[]) =>
     )
     .join('<br>')
 
-const ms = (value?: number) => (value === undefined ? '—' : `${(value / 1000).toFixed(1)} с`)
+const ms = (value?: number) => (value === undefined ? '-' : `${(value / 1000).toFixed(1)} с`)
 
 const metric = (label: string, value: string, budget: string | undefined, isOver: boolean) =>
   `<span class="metric${isOver ? ' over' : ''}">${escapeHtml(label)}: <b>${escapeHtml(value)}</b>${budget ? ` <small>/ ${escapeHtml(budget)}</small>` : ''}</span>`
@@ -204,7 +204,7 @@ const buildReport = (outputDir: string) => {
             const row = rows.find(
               (item) => item.flowTitle === title && item.project === project.project,
             )
-            if (!row) return '<td class="none">—</td>'
+            if (!row) return '<td class="none">-</td>'
             const counts = SEVERITIES.map(
               (severity) => row.findings.filter((f) => f.severity === severity).length,
             )
@@ -290,7 +290,7 @@ const buildReport = (outputDir: string) => {
     .map((row) => {
       const { metrics } = row
       const b = metrics.budgets
-      return `<details id="${anchor(row)}" class="run"><summary><span class="badge ${row.status}">${STATUS_TEXT[row.status]}</span> ${escapeHtml(row.personaName)} · ${escapeHtml(row.deviceLabel)} — <b>${escapeHtml(row.flowTitle)}</b> <small>${row.findings.length} замечаний</small></summary>
+      return `<details id="${anchor(row)}" class="run"><summary><span class="badge ${row.status}">${STATUS_TEXT[row.status]}</span> ${escapeHtml(row.personaName)} · ${escapeHtml(row.deviceLabel)} - <b>${escapeHtml(row.flowTitle)}</b> <small>${row.findings.length} замечаний</small></summary>
         <p class="metrics">${[
           metric(
             'до интерактивности',
@@ -327,7 +327,7 @@ const buildReport = (outputDir: string) => {
                 .sort((x, y) => SEVERITIES.indexOf(x.severity) - SEVERITIES.indexOf(y.severity))
                 .map(
                   (f) =>
-                    `<li><span class="sev ${f.severity}">${SEVERITY_TEXT[f.severity]}</span> ${escapeHtml(f.title)} <small>— ${escapeHtml(f.detail ?? '')} (${escapeHtml(f.step)})</small>${f.screenshot ? ` <a href="${escapeHtml(f.screenshot)}">скриншот</a>` : ''}</li>`,
+                    `<li><span class="sev ${f.severity}">${SEVERITY_TEXT[f.severity]}</span> ${escapeHtml(f.title)} <small>- ${escapeHtml(f.detail ?? '')} (${escapeHtml(f.step)})</small>${f.screenshot ? ` <a href="${escapeHtml(f.screenshot)}">скриншот</a>` : ''}</li>`,
                 )
                 .join('')}</ul>`
             : ''
@@ -378,9 +378,9 @@ code{font-size:12px;background:var(--bg);padding:1px 4px;border-radius:4px;word-
         `<a class="card" href="#sev-${severity}" style="text-decoration:none;color:inherit"><b style="color:var(--${severity})">${count}</b>${SEVERITY_TEXT[severity]}</a>`,
     )
     .join('')}</div>
-<h2>Персона × сценарий</h2><p class="lead">«Не пройден» — сценарий оборвался, «Проблемы» — есть критичные или серьёзные замечания, «Замечания» — только умеренные.</p>
+<h2>Персона × сценарий</h2><p class="lead">«Не пройден» - сценарий оборвался, «Проблемы» - есть критичные или серьёзные замечания, «Замечания» - только умеренные.</p>
 <div class="scroll">${matrix}</div>
-<h2>Нарушения по приоритету</h2><p class="lead">Одинаковые замечания собраны вместе; выше те, что задевают больше людей. «Править» — файлы, найденные по CSS-классу элемента; «Шаг затрагивает» — компоненты шага сценария.</p>
+<h2>Нарушения по приоритету</h2><p class="lead">Одинаковые замечания собраны вместе; выше те, что задевают больше людей. «Править» - файлы, найденные по CSS-классу элемента; «Шаг затрагивает» - компоненты шага сценария.</p>
 ${bySeverity || '<p>Замечаний нет.</p>'}
 <h2>Все прогоны</h2>${details}
 </main></body></html>`

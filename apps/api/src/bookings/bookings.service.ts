@@ -287,7 +287,7 @@ export class BookingsService {
     if (booking.status !== 'confirmed') throw new BadRequestException('Запись отменена')
     const now = new Date()
     if (booking.startsAt <= now)
-      throw new BadRequestException('Визит уже начался — перенести нельзя')
+      throw new BadRequestException('Визит уже начался - перенести нельзя')
 
     const request = await this.availability.resolveRequest(
       booking.serviceId,
@@ -454,12 +454,12 @@ export class BookingsService {
   // Undo for a cancellation made moments ago: the slot is taken back unless someone booked it.
   async restore(booking: Booking) {
     if (booking.paymentStatus === 'expired') {
-      throw new BadRequestException('Время на оплату вышло — запишитесь заново')
+      throw new BadRequestException('Время на оплату вышло - запишитесь заново')
     }
     if (booking.status === 'cancelled') {
       const elapsed = booking.cancelledAt ? Date.now() - booking.cancelledAt.getTime() : Infinity
       if (elapsed > UNDO_WINDOW_SECONDS * 1000) {
-        throw new BadRequestException('Вернуть уже нельзя — запишитесь заново')
+        throw new BadRequestException('Вернуть уже нельзя - запишитесь заново')
       }
       try {
         await this.bookings.update(

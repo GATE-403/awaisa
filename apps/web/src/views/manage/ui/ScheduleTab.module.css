@@ -78,8 +78,8 @@
 }
 
 /* The toolbar: the view switch, «Перерыв» and «Новая запись» in one row. On phones it takes the
-   whole line — the switch stretches, the two actions become round glyph buttons (their names
-   stay for screen readers) — instead of wrapping into a heap of capsules. */
+   whole line - the switch stretches, the two actions become round glyph buttons (their names
+   stay for screen readers) - instead of wrapping into a heap of capsules. */
 .toolbar {
   display: flex;
   align-items: center;
@@ -202,7 +202,7 @@
   translate: -50% 0;
 }
 
-/* On every screen: on a phone it gives the day the page's gutters and square corners — every
+/* On every screen: on a phone it gives the day the page's gutters and square corners - every
    pixel counts there. */
 .wideToggle {
   display: contents;
@@ -235,7 +235,7 @@
   box-shadow: none;
 }
 
-/* Phones: «Сейчас», «Далее» and the visits to mark share one line that scrolls sideways — two
+/* Phones: «Сейчас», «Далее» and the visits to mark share one line that scrolls sideways - two
    wrapped rows of capsules took a fifth of the screen over the day. What asks for action (the
    orange capsule) leads. */
 @media (max-width: 639px) {
@@ -273,8 +273,8 @@
   }
 }
 
-/* Phones: the toolbar floats over the window's foot in the tab bar's material — the view switch,
-   the day's tools and «+» in one glass capsule — so the day takes the line it used to fill. The
+/* Phones: the toolbar floats over the window's foot in the tab bar's material - the view switch,
+   the day's tools and «+» in one glass capsule - so the day takes the line it used to fill. The
    day ends above it (`bottomInset`, measured). */
 @media (max-width: 639px) {
   .toolbar.toolbar {

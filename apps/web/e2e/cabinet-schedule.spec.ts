@@ -199,11 +199,11 @@ test.describe('Cabinet schedule', () => {
     const sheet = page.getByRole('dialog', { name: 'Свободные окна' })
     const message = sheet.getByRole('region', { name: 'Сообщение для клиентов' })
     // The rest of the day after the visit is free until closing at 20:00.
-    await expect(message).toContainText(`${addMinutes(visit.time, 60)}–20:00 — ${master}`)
+    await expect(message).toContainText(`${addMinutes(visit.time, 60)}–20:00 - ${master}`)
     if (visit.time !== '10:00')
-      await expect(message).toContainText(`10:00–${visit.time} — ${master}`)
+      await expect(message).toContainText(`10:00–${visit.time} - ${master}`)
     // The visit's own hour is not offered.
-    await expect(message).not.toContainText(`${visit.time}–${addMinutes(visit.time, 60)} —`)
+    await expect(message).not.toContainText(`${visit.time}–${addMinutes(visit.time, 60)} -`)
     await expect(message.getByRole('link', { name: /Ссылка/ })).toHaveAttribute(
       'href',
       new RegExp(`/${business.slug}/book\\?date=${visit.date}$`),
