@@ -1,5 +1,5 @@
 /* A place without a logo: the white mascot on a vivid circle of the place's colour, lit from the
-   top like an app icon — the same look as people's faces (`PersonAvatar`). */
+   top like an app icon - the same look as people's faces (`PersonAvatar`). */
 .tile {
   display: inline-flex;
   align-items: center;

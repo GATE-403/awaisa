@@ -45,7 +45,7 @@ const VisitRow = ({ booking, onSelect }: { booking: Booking; onSelect?: () => vo
   )
 }
 
-// «Снова к мастеру» where people start looking — the search panel, like recent searches:
+// «Снова к мастеру» where people start looking - the search panel, like recent searches:
 // one tap books the same service with the same master at their next free time.
 export const RecentVisits = ({ onSelect }: RecentVisitsProps) => {
   const t = useT()

@@ -163,7 +163,7 @@ div.row,
 }
 
 /* Like the cabinet's «Настройки» («нужно настройки сделать как в админке»): the groups lie right
-   on the page — no card, no fill — hairlines between rows from the label on, one left edge for
+   on the page - no card, no fill - hairlines between rows from the label on, one left edge for
    captions, rows and footnotes; a row under the mouse takes the link colour, no hover fill. */
 .list.list {
   overflow: visible;

@@ -12,7 +12,7 @@
 :global(:root[data-category-nav]) .bar {
   box-shadow: none;
 }
-/* Phones: one 48pt row — the business and its sections, scrolling freely (booking is on the page). */
+/* Phones: one 48pt row - the business and its sections, scrolling freely (booking is on the page). */
 .inner {
   display: grid;
   grid-template-areas: "identity sections";
@@ -177,7 +177,7 @@
   }
 }
 
-/* A 44pt tap target around the smaller control, invisible — it looks the same (WCAG 2.5.8 and
+/* A 44pt tap target around the smaller control, invisible - it looks the same (WCAG 2.5.8 and
    our 44pt rule). `:where` keeps the control's own position if it has one. */
 :where(.business) {
   position: relative;

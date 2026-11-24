@@ -42,7 +42,7 @@ export class RankingsService {
 
   /**
    * The masters' leaderboard for one kind of place (barbers by default): the same score as the
-   * wreaths, with what a card needs — face, place, rating, how many reviews and recent visits.
+   * wreaths, with what a card needs - face, place, rating, how many reviews and recent visits.
    */
   async leaderboard(kind: string, limit: number) {
     const rows = (await this.dataSource.query(

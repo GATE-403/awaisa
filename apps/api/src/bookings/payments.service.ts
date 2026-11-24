@@ -37,8 +37,8 @@ type OrderHandler = {
 const RESULT_SCRIPT = 'result'
 
 // Deposits go through one acquirer at a time (PAYMENT_DRIVER):
-// · test — built in: the checkout is our own /pay page with a «pay» button (dev, e2e);
-// · freedompay — cards through Freedom Pay (init_payment.php → their page → result URL;
+// · test - built in: the checkout is our own /pay page with a «pay» button (dev, e2e);
+// · freedompay - cards through Freedom Pay (init_payment.php → their page → result URL;
 //   the status is always confirmed with get_status3.php; refunds via revoke.php).
 @Injectable()
 export class PaymentsService {
@@ -144,7 +144,7 @@ export class PaymentsService {
       this.logger.error(`Freedom Pay init failed: ${response.pg_error_description ?? 'no answer'}`)
       payment.status = 'failed'
       await this.payments.save(payment)
-      throw new ServiceUnavailableException('Оплата сейчас недоступна — попробуйте позже')
+      throw new ServiceUnavailableException('Оплата сейчас недоступна - попробуйте позже')
     }
     payment.providerRef = response.pg_payment_id ?? null
     payment.checkoutUrl = response.pg_redirect_url

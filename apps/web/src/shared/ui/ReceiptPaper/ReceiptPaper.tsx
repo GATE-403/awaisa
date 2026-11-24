@@ -35,7 +35,7 @@ const dateFormat = new Intl.DateTimeFormat('ru-RU', {
 const money = (value: number) => moneyFormat.format(value)
 const formatCount = (value: number) => (Number.isInteger(value) ? String(value) : money(value))
 
-/** A rate on the receipt: «НДС 12%», «НсП 2%» — the same rate on every line reads once. */
+/** A rate on the receipt: «НДС 12%», «НсП 2%» - the same rate on every line reads once. */
 const rateOf = (receipt: FiscalReceipt, key: 'vatRate' | 'salesTaxRate') => {
   const rates = [...new Set(receipt.lines.map((line) => line[key]))]
   return rates.length === 1 ? ` ${rates[0]}%` : ''

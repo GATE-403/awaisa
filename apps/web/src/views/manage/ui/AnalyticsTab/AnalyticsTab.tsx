@@ -101,7 +101,7 @@ const SAME: Record<AnalyticsDays, string> = {
 
 const visits = (t: Translate, count: number) => t.count(count, ['визит', 'визита', 'визитов'])
 
-// Direction is shown twice — arrow and sign — so it never relies on colour.
+// Direction is shown twice - arrow and sign - so it never relies on colour.
 const Delta = ({ value }: DeltaProps) => {
   const t = useT()
   if (value === null) {

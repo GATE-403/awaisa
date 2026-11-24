@@ -321,7 +321,7 @@
 }
 
 .totalLine,
-/* Like the ticket's rows: a small caption over the value — the price, at title size. */
+/* Like the ticket's rows: a small caption over the value - the price, at title size. */
   .totalMain {
   display: flex;
   flex-direction: column;

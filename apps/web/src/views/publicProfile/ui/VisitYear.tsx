@@ -12,7 +12,7 @@ interface VisitYearProps {
 }
 
 // The year in visits, like GitHub's contribution calendar: twelve months as columns of dots (one
-// a visit); pointing, tapping or arrowing a month reads it in the line above — how many, where
+// a visit); pointing, tapping or arrowing a month reads it in the line above - how many, where
 // and with whom. One Tab stop, arrows move (like the cabinet's heatmap).
 export const VisitYear = ({ months }: VisitYearProps) => {
   const t = useT()

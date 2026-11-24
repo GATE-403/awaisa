@@ -116,7 +116,7 @@ export class AdminService {
 
   // How full each day of a stretch is, for the day strip: booked minutes of confirmed visits
   // against the open minutes of the business hours times its active masters (masters' own hours
-  // and leaves are left out — the strip shows a share, not a promise).
+  // and leaves are left out - the strip shows a share, not a promise).
   async getLoad(business: Business, from: string, days: number) {
     return (await this.timeOff.manager.query(
       `WITH "days" AS (

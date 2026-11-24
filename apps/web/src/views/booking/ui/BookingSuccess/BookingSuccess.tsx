@@ -88,7 +88,7 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
   return (
     <div className={styles.success}>
       {/* A confirmation like Apple Pay's: a green check, the words, then the one fact that
-          matters — when. A wave of light runs out from the check over the sheet. */}
+          matters - when. A wave of light runs out from the check over the sheet. */}
       {isRippling && (
         <div ref={pondRef} className={styles.pond} aria-hidden>
           {drop && <LightWave origin={drop} duration={WAVE_MS} />}
@@ -113,13 +113,13 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
           : ''}
         .{' '}
         {/* The sum itself, in bold: «Оплата в салоне» alone sent people looking in the ticket. */}
-        {isDepositPaid ? t('Остаток в салоне —') : t('Оплата в салоне —')}{' '}
+        {isDepositPaid ? t('Остаток в салоне -') : t('Оплата в салоне -')}{' '}
         <b className={styles.amount}>{formatPrice(toPay)}</b>.{' '}
         {t('Перенести или отменить можно по ссылке из SMS.')}
       </p>
       <TelegramReminderLink bookingId={booking.id} />
       {/* The ticket itself opens the full one: details, place, download. Its own stretched
-          «Показать талон» button, not a button around the whole ticket — an article inside a
+          «Показать талон» button, not a button around the whole ticket - an article inside a
           button read as one long label that did not match what is written (WCAG 2.5.3). */}
       <div className={styles.ticket}>
         <Ticket booking={booking} onOpen={() => setIsTicketOpen(true)} />
@@ -180,7 +180,7 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
           {t(', чтобы видеть записи на любом устройстве.')}
         </p>
       )}
-      {/* What to look at next, chosen from this visit and the client's answers — a reason to
+      {/* What to look at next, chosen from this visit and the client's answers - a reason to
           keep browsing rather than a push back to the catalog. */}
       <div className={styles.next}>
         <ForYouShelf

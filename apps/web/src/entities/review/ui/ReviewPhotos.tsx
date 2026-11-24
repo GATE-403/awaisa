@@ -7,7 +7,7 @@ import styles from './ReviewItem.module.css'
 
 interface ReviewPhotosProps {
   photos: string[]
-  /** «Айгерим С.» — names each picture for screen readers. */
+  /** «Айгерим С.» - names each picture for screen readers. */
   authorName: string
 }
 
@@ -39,7 +39,7 @@ export const ReviewPhotos = ({ photos, authorName }: ReviewPhotosProps) => {
         <PhotoViewer
           photos={photos}
           startIndex={openIndex}
-          label={t('Фото из отзыва — {name}', { name: authorName })}
+          label={t('Фото из отзыва - {name}', { name: authorName })}
           onClose={() => setOpenIndex(null)}
         />
       )}

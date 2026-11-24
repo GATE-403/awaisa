@@ -590,7 +590,7 @@ type TelegramLoginConfig = {
 
 /**
  * `POST /auth/telegram/check`: waiting for the number in the bot, signed in (the session cookie
- * is set), or gone (expired, already used, unknown) — start again.
+ * is set), or gone (expired, already used, unknown) - start again.
  */
 type TelegramLoginState =
   | { status: 'pending' | 'expired' }
@@ -1612,7 +1612,7 @@ type MailingsOverview = {
   birthdayGreeting: string | null
 }
 
-// Funnel telemetry (POST /telemetry/events): which step of which scenario a device reached —
+// Funnel telemetry (POST /telemetry/events): which step of which scenario a device reached -
 // never what anyone typed. A step belongs to exactly one flow; the API works the flow out.
 type FunnelFlow =
   | 'booking'

@@ -15,7 +15,7 @@ interface StoryButtonProps {
 type Story = { file: File; url: string }
 
 // A 9:16 card for Instagram or Telegram stories. It opens as a preview first: the result is
-// visible, and «Поделиться» / «Скачать» are pressed by the person themselves — Safari refuses a
+// visible, and «Поделиться» / «Скачать» are pressed by the person themselves - Safari refuses a
 // share sheet that a finished download (not a tap) tries to open.
 export const StoryButton = ({ address }: StoryButtonProps) => {
   const t = useT()

@@ -45,7 +45,7 @@ DATABASE_URL=$DB pnpm --dir "$API_DIR" seed:demo | tail -1
   node dist-e2e/main.js </dev/null >"$STATE/api.log" 2>&1) &
 echo $! >"$STATE/api.pid"
 for _ in $(seq 1 30); do curl -sf localhost:4400/health >/dev/null && break; sleep 1; done
-echo "API on :4400 — $(curl -s localhost:4400/health)"
+echo "API on :4400 - $(curl -s localhost:4400/health)"
 
 if [ "${2:-}" = web ]; then
   # A fresh checkout has no generated tokens.css yet; the web build imports it.

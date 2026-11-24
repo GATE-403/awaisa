@@ -18,7 +18,7 @@ import type { UxContext } from '../lib/ux'
 import type { FlowId } from '../personas'
 
 // Each flow is what a person does to reach one goal, written once. `ux.step` marks a screen
-// worth judging — the persona's checks run there; `ux.tap/fill/press` are the person's actions,
+// worth judging - the persona's checks run there; `ux.tap/fill/press` are the person's actions,
 // counted against the effort budget. Steps name the files to look at when something fails.
 
 type Flow = {

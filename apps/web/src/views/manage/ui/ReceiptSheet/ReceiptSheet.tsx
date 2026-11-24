@@ -23,7 +23,7 @@ interface ReceiptSheetProps {
   onChange?: (receipt: FiscalReceipt) => void
 }
 
-// A sale's or a visit's fiscal receipt: the paper with its QR, then one line — the client's link
+// A sale's or a visit's fiscal receipt: the paper with its QR, then one line - the client's link
 // copied as the main action, opening it and the system share as glyphs. A receipt the provider
 // refused is sent again from here instead.
 export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: ReceiptSheetProps) => {

@@ -169,9 +169,9 @@
   z-index: 1;
 }
 
-/* ——— Swipe to dismiss on phones ———
+/* --- Swipe to dismiss on phones ---
    The toast takes the finger itself (no page scroll under it), and the covering «Открыть» button
-   lets the pointer through — Base UI never starts a swipe on a button, so openable toasts could
+   lets the pointer through - Base UI never starts a swipe on a button, so openable toasts could
    not be swiped away. A swipe up, left or right dismisses; a tap still opens. */
 .toast {
   touch-action: none;

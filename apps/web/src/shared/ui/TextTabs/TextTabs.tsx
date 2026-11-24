@@ -25,7 +25,7 @@ interface TextTabsProps {
   size?: 'md' | 'lg'
 }
 
-// Underlined text tabs (only the chosen one marked, no rule under them), like the local nav on apple.com — the one tab style of the
+// Underlined text tabs (only the chosen one marked, no rule under them), like the local nav on apple.com - the one tab style of the
 // app: links when the view is in the URL, buttons (role=tab) when it is local state.
 export const TextTabs = ({ label, items, size = 'md' }: TextTabsProps) => {
   const isButtons = items.some((item) => !item.href)

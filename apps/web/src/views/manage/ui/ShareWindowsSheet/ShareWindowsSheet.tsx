@@ -36,8 +36,8 @@ const ANY_SERVICE = 'any'
 type Window = { from: number; to: number; names: string[] }
 
 // The day's free time as a ready message for clients: windows in the order of the day, each with
-// the masters free then (a client asks «when», not «with whom»), for any service or one chosen —
-// then only the windows it fits and a link straight to it — and sent in one tap to WhatsApp or
+// the masters free then (a client asks «when», not «with whom»), for any service or one chosen -
+// then only the windows it fits and a link straight to it - and sent in one tap to WhatsApp or
 // Telegram, or copied.
 export const ShareWindowsSheet = ({
   slug,
@@ -84,7 +84,7 @@ export const ShareWindowsSheet = ({
   }
   const lines = [...windows.values()]
     .sort((first, second) => first.from - second.from || first.to - second.to)
-    .map(({ from, to, names }) => `${formatClock(from)}–${formatClock(to)} — ${names.join(', ')}`)
+    .map(({ from, to, names }) => `${formatClock(from)}–${formatClock(to)} - ${names.join(', ')}`)
 
   const day =
     nowMinutes !== null
@@ -105,7 +105,7 @@ export const ShareWindowsSheet = ({
   const handleCopy = async () => {
     const isCopied = await copyText(text)
     if (isCopied)
-      toast.show({ title: t('Скопировано — вставьте в чат или сторис'), type: 'success' })
+      toast.show({ title: t('Скопировано - вставьте в чат или сторис'), type: 'success' })
     else toast.show({ title: t('Не получилось скопировать'), type: 'error' })
   }
 
@@ -116,7 +116,7 @@ export const ShareWindowsSheet = ({
       cancelLabel={null}
       action={{ label: t('Готово'), onClick: onClose }}
     >
-      {/* One group: the service, the message as the client will read it, the link — then one
+      {/* One group: the service, the message as the client will read it, the link - then one
           wide action (copy) with the messengers as thin glyphs beside it. */}
       <div className={sheet.group}>
         <section className={sheet.list} aria-label={t('Сообщение для клиентов')}>

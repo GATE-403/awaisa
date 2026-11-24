@@ -157,7 +157,7 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
       const { conflictingBookingIds } = await createTimeOff(slug, input)
       if (conflictingBookingIds.length === 0) return t('Время закрыто')
 
-      return t('Время закрыто. В нём {count} — отмените или перенесите', {
+      return t('Время закрыто. В нём {count} - отмените или перенесите', {
         count: t.count(conflictingBookingIds.length, ['запись', 'записи', 'записей']),
       })
     })

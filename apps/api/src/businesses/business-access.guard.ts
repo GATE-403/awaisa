@@ -28,7 +28,7 @@ const OWNER_ONLY = 'ownerOnly'
 
 /**
  * Routes only the owner may use: money (analytics), setting the business up, marketing and the
- * team. Administrators («staff») run the day — schedule, bookings, clients, waitlist, reviews.
+ * team. Administrators («staff») run the day - schedule, bookings, clients, waitlist, reviews.
  */
 const OwnerOnly = () => SetMetadata(OWNER_ONLY, true)
 

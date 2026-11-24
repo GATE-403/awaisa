@@ -19,7 +19,7 @@ interface AchievementCardProps {
   onClose: () => void
 }
 
-// A medal pressed: its card beside it — the medal large, the whole name (the grid cut it to
+// A medal pressed: its card beside it - the medal large, the whole name (the grid cut it to
 // «Постоянный го…»), what it is for, the progress and, on one's own profile, where to go next.
 export const AchievementCard = ({
   achievement,

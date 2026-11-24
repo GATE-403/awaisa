@@ -1,7 +1,7 @@
 import { devices } from '@playwright/test'
 
 // One source of truth for who we test for. Every Playwright project is built from this list
-// (`playwright.config.ts`), and every spec reads its persona from the project — so a new group
+// (`playwright.config.ts`), and every spec reads its persona from the project - so a new group
 // of people is one more entry here, not a copy of the tests.
 
 type FlowId =

@@ -272,7 +272,7 @@ const text = {
   title1: { size: 28, lineHeight: 34 },
   title2: { size: 22, lineHeight: 28 },
   title3: { size: 17, lineHeight: 22 },
-  // Body text everywhere (rows, sheets, forms, lists) — one size across the app.
+  // Body text everywhere (rows, sheets, forms, lists) - one size across the app.
   body: { size: 15, lineHeight: 20 },
   // Text fields: 16px is the smallest size iOS does not zoom into on focus.
   input: { size: 16, lineHeight: 21 },

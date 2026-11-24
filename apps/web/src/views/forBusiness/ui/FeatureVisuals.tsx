@@ -24,7 +24,7 @@ const ReminderVisual = () => (
       <T>Сообщения · сегодня 12:30</T>
     </p>
     <p className={styles.bubble}>
-      <T>Barber Pro: напоминаем — сегодня в 14:30 мужская стрижка, мастер Тимур. Ждём вас!</T>
+      <T>Barber Pro: напоминаем - сегодня в 14:30 мужская стрижка, мастер Тимур. Ждём вас!</T>
     </p>
     <p className={styles.bubbleMeta}>
       <T>Доставлено</T>
@@ -35,7 +35,7 @@ const ReminderVisual = () => (
 const DragVisual = () => (
   <div className={styles.visual} aria-hidden='true'>
     <p className={styles.visualLabel}>
-      <T>Перетащите — клиент получит SMS</T>
+      <T>Перетащите - клиент получит SMS</T>
     </p>
     <div className={styles.dragDemo}>
       <span className={styles.dragFrom}>12:30 · Данияр</span>

@@ -143,7 +143,7 @@ test.describe('Booking: the time ruler', () => {
       await expect(primaryAction(page)).toHaveText(`Выбрать ${centeredTime}`)
       expect(before).not.toBe(`Выбрать ${centeredTime}`)
     } else {
-      await expect(page.getByText('Занято — прокрутите дальше')).toBeVisible()
+      await expect(page.getByText('Занято - прокрутите дальше')).toBeVisible()
     }
 
     // A tap on a free tick takes it at once: the time joins the stack, contacts open.

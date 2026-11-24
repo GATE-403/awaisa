@@ -1,7 +1,7 @@
 /**
  * Search that forgives how people type: case and «ё», the wrong keyboard layout («cnhb;rf»),
  * Latin transliteration («strizhka»), word forms («стрижку», «подстричься»), everyday words
- * («ногти», «покраска») and typos («стришка», «маникур» — fixed against the site's own words).
+ * («ногти», «покраска») and typos («стришка», «маникур» - fixed against the site's own words).
  * Pure functions; `SearchService` feeds them the vocabulary.
  */
 
@@ -246,7 +246,7 @@ const editDistance = (first: string, second: string) => {
 
 /**
  * The site's own word closest to a mistyped one, or null. Short words allow one edit, longer
- * ones two (or a trigram match), and the first letter usually stays — people rarely miss it.
+ * ones two (or a trigram match), and the first letter usually stays - people rarely miss it.
  */
 const closestWord = (word: string, vocabulary: readonly string[]) => {
   if (word.length < 3) return null

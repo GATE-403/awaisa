@@ -15,7 +15,7 @@ type QuoteRequest = {
   date: string | null
   time: string | null
   code: string | null
-  /** The typed number (guests) — a first-visit discount needs it. */
+  /** The typed number (guests) - a first-visit discount needs it. */
   phone: string
 }
 

@@ -39,7 +39,7 @@ const SWIPE_DISTANCE = 48
 // How far a pull down spreads the folded stack fully; past a third of it, it stays fanned.
 const PULL_DISTANCE = 140
 
-// Done steps become cards — torn-off parts of the ticket the booking turns into — and slide into a
+// Done steps become cards - torn-off parts of the ticket the booking turns into - and slide into a
 // stack above the open question, the newest in front. A sideways swipe shuffles the folded stack
 // (the front card goes to the back, the next one comes forward, like passes in Wallet); one tap
 // fans it out so each card can be changed; a single card is changed straight away.

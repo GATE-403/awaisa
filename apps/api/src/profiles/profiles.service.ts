@@ -395,7 +395,7 @@ export class ProfilesService {
     return sharp(source).resize({ width, withoutEnlargement: true }).png().toBuffer()
   }
 
-  /** Ended visits of the last two weeks without a review — the «Как прошло?» card asks the same. */
+  /** Ended visits of the last two weeks without a review - the «Как прошло?» card asks the same. */
   private async awaitingReview(phone: string) {
     const [row] = await this.query(
       `SELECT COUNT(*)::int AS "count" FROM "bookings" b
@@ -408,7 +408,7 @@ export class ProfilesService {
     return Number(row?.count ?? 0)
   }
 
-  /** The account with this public id, or — for guests who only left reviews — their phone. */
+  /** The account with this public id, or - for guests who only left reviews - their phone. */
   private async findPerson(id: string) {
     const salt = saltOf(this.secret())
     const isPublicId = PUBLIC_ID_PATTERN.test(id)

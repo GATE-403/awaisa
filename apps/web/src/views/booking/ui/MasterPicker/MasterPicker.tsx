@@ -37,7 +37,7 @@ export const MasterPicker = ({ specialists, value, onChange, onReselect }: Maste
           onClick={() => {
             if (value === ANY_SPECIALIST_ID) onReselect?.()
           }}
-          aria-label={t('Любой мастер — подберём свободного на выбранное время')}
+          aria-label={t('Любой мастер - подберём свободного на выбранное время')}
         />
         <Check className={styles.check} aria-hidden />
       </MasterCard>

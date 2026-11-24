@@ -124,13 +124,13 @@
   }
 }
 
-/* «На всю ширину»: the schedule's board runs to the window's foot as well as its sides — no page
+/* «На всю ширину»: the schedule's board runs to the window's foot as well as its sides - no page
    padding under it (scoped to this page, which leaves the active tree with the route). */
 .page:has([data-schedule-board][data-wide]) {
   padding-bottom: 0;
 }
 
-/* Phones: the schedule runs to the window's foot under the floating toolbar — the page's own
+/* Phones: the schedule runs to the window's foot under the floating toolbar - the page's own
    padding there would only push it up. */
 @media (max-width: 639px) {
   .page:has([data-schedule-board]) {
@@ -138,7 +138,7 @@
   }
 }
 
-/* Phones: the schedule's one-line head sits close under the tabs — the toolbar floats at the
+/* Phones: the schedule's one-line head sits close under the tabs - the toolbar floats at the
    foot now, so the air kept for a second row was empty. */
 @media (max-width: 639px) {
   .content:has([data-schedule-board]) {
@@ -159,7 +159,7 @@
   }
 }
 
-/* Phones: the cabinet is dense, like Settings — 8pt under the bar, 16pt between blocks. The 20 and
+/* Phones: the cabinet is dense, like Settings - 8pt under the bar, 16pt between blocks. The 20 and
    24 of wide screens left a screen's worth of air over a list («много свободного места»). */
 @media (max-width: 639px) {
   .content {

@@ -24,7 +24,7 @@ export const ShareProfile = ({ name, address, isOwn }: ShareProfileProps) => {
   const share = async () => {
     const url = isOwn ? inviteUrl(address) : `${window.location.origin}/u/${address}`
     const text = isOwn
-      ? t('Записывайся к мастерам через Awaisa — вот мой профиль')
+      ? t('Записывайся к мастерам через Awaisa - вот мой профиль')
       : t('{name} в Awaisa', { name })
     const result = await shareLink({ title: text, text, url, isTouchOnly: true })
     if (result === 'copied') {

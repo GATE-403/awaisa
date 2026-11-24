@@ -61,7 +61,7 @@ const kindsOf = (user: User, context: Context) => {
 
 const popularInCategory: Recommender = {
   name: 'popular-in-category',
-  description: 'Популярное в категориях (типе места), где клиент уже бывал; иначе — popular.',
+  description: 'Популярное в категориях (типе места), где клиент уже бывал; иначе - popular.',
   recommend: (user, context, k) => {
     const kinds = kindsOf(user, context)
     const ranked = popularIds(context)
@@ -75,7 +75,7 @@ const popularInCategory: Recommender = {
 const repeatPlaces: Recommender = {
   name: 'repeat-places',
   description:
-    'Проверка данных: услуги мест, где клиент уже был (свои — первыми), затем popular. Не кандидат в прод.',
+    'Проверка данных: услуги мест, где клиент уже был (свои - первыми), затем popular. Не кандидат в прод.',
   recommend: (user, context, k) => {
     const own = new Map<string, number>()
     const places = new Set<string>()

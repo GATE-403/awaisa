@@ -216,7 +216,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     if (command === '/start' && argument && this.clientMessages.isClientParam(argument)) {
       const isLinked = await this.clientMessages.link(chatId, argument)
       if (!isLinked)
-        return this.send(chatId, 'Запись не нашли — откройте ссылку из записи ещё раз.')
+        return this.send(chatId, 'Запись не нашли - откройте ссылку из записи ещё раз.')
       return
     }
     if (command === '/start' && argument) return this.link(chatId, argument, message.from)
@@ -265,7 +265,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     }
   }
 
-  // Mondays at 10:00 Bishkek (04:00 UTC): the week in one message — the money, visits, the best
+  // Mondays at 10:00 Bishkek (04:00 UTC): the week in one message - the money, visits, the best
   // master, no-shows and what waits, then the week's reviews.
   @Cron('0 4 * * 1')
   async sendWeeklyDigest() {

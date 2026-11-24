@@ -6,7 +6,7 @@
   transition: opacity var(--duration-fast) var(--ease-standard);
 }
 
-/* The time under the needle, large — the one thing this step asks for. */
+/* The time under the needle, large - the one thing this step asks for. */
 .readout {
   display: flex;
   flex-direction: column;

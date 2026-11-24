@@ -37,7 +37,7 @@ const SEGMENT_COLUMNS = {
 } as const satisfies Record<keyof FunnelSegment, string>
 
 /**
- * Where people drop out of each scenario, on which devices, and what breaks for them — kept in
+ * Where people drop out of each scenario, on which devices, and what breaks for them - kept in
  * our own database, no tracker in the browser. Errors are also sent, scrubbed, to Sentry when
  * SENTRY_DSN is set. Writes never fail a request: telemetry is best-effort.
  */
@@ -117,7 +117,7 @@ export class TelemetryService {
   }
 
   /**
-   * Distinct sessions per step of one flow over the last `days`, in the flow's order — for
+   * Distinct sessions per step of one flow over the last `days`, in the flow's order - for
    * everyone, or only the devices matching `segment` (phones with large text, slow networks…).
    */
   async funnel({ days, flow, ...filters }: FunnelReportQuery): Promise<FunnelReport> {

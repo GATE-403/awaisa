@@ -1,7 +1,7 @@
 // Copies a merged PR's «## Что нового» section into apps/web/src/shared/config/updates.json, the
 // entries «Что нового» (/updates) shows next to the hand-written ones. One line per entry:
 //
-//   - Для бизнеса: Заголовок — Текст в одно-два предложения. [Попробовать](/manage)
+//   - Для бизнеса: Заголовок - Текст в одно-два предложения. [Попробовать](/manage)
 //
 // Audience: «Для клиентов», «Для бизнеса» or «Для всех». The link is optional and must be a path
 // on the site. «- нет», an empty section or no section adds nothing. Run by the updates workflow
@@ -17,7 +17,7 @@ const AUDIENCES = {
   'для всех': 'everyone',
 }
 
-const ENTRY = /^[-*]\s+(Для клиентов|Для бизнеса|Для всех)\s*:\s*(.+?)\s+[—–-]\s+(.+)$/i
+const ENTRY = /^[-*]\s+(Для клиентов|Для бизнеса|Для всех)\s*:\s*(.+?)\s+[-–—]\s+(.+)$/i
 const LINK = /\s*\[([^\]]+)\]\((\/[^)\s]*)\)\s*$/
 
 const section = (body) => {

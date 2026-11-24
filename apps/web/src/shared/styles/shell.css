@@ -4,7 +4,7 @@
   --row-height: 52px;
   /* Text over pictures (offer, place, master, «Для вас», work and service cards): one scrim,
      clear over the top third and nearly black at the foot, eased so it never shows a band, and
-     a soft shadow under the letters — light photos used to swallow white text. */
+     a soft shadow under the letters - light photos used to swallow white text. */
   --card-scrim: linear-gradient(
     to bottom,
     rgb(0 0 0 / 0) 30%,
@@ -104,7 +104,7 @@ body {
   animation-timing-function: var(--ease-standard);
 }
 
-/* Android: the morph animates full-page snapshots, too heavy for mid-range GPUs — switch at once. */
+/* Android: the morph animates full-page snapshots, too heavy for mid-range GPUs - switch at once. */
 @supports not (-webkit-touch-callout: none) {
   @media (pointer: coarse) {
     ::view-transition-group(*),
@@ -126,7 +126,7 @@ body {
 }
 
 /* Soft edges on sideways rows (`data-edge-fade`), only with a mouse: on phones a mask over a
-   scrolling row repaints every frame. The edges follow the scroll — no fade at the start until the
+   scrolling row repaints every frame. The edges follow the scroll - no fade at the start until the
    row has moved, none at the end once it is reached. Without scroll timelines only the right edge
    fades, as before. */
 @property --edge-start {
@@ -267,8 +267,8 @@ html {
   outline-offset: 2px;
 }
 
-/* A picture frame (cards, covers, faces' photos): until its picture has loaded — or when a
-   skeleton stands in for it — the frame is a quiet fill with the mascot in the middle, so it reads
+/* A picture frame (cards, covers, faces' photos): until its picture has loaded - or when a
+   skeleton stands in for it - the frame is a quiet fill with the mascot in the middle, so it reads
    as «a picture is coming», not as an empty grey box. The picture covers it once decoded. */
 :where([data-picture-frame]) {
   position: relative;

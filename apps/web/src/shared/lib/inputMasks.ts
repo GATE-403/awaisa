@@ -31,7 +31,7 @@ const maskLocalPhoneInput = (value: string) => {
 }
 
 // What is wrong with a typed phone before it is sent, or null when it is a whole Kyrgyz number
-// (+996 and 9 digits) — a half-typed number must not go out as a sign-in request.
+// (+996 and 9 digits) - a half-typed number must not go out as a sign-in request.
 const phoneProblem = (value: string): string | null => {
   const trimmed = value.trim()
   const digits = trimmed.replace(/\D/g, '')

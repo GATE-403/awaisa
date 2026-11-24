@@ -72,7 +72,7 @@
   text-transform: none;
 }
 
-/* ——— Стратегия: three figures in a row, like «Визиты и клиенты» ——— */
+/* --- Стратегия: three figures in a row, like «Визиты и клиенты» --- */
 
 .stats {
   display: grid;
@@ -121,7 +121,7 @@
   line-height: var(--text-footnote-line-height);
 }
 
-/* ——— The funnel: its tabs, the one big share, the cuts, the steps ——— */
+/* --- The funnel: its tabs, the one big share, the cuts, the steps --- */
 
 .funnel {
   display: flex;
@@ -202,7 +202,7 @@
   margin: 0;
 }
 
-/* ——— Rows: words left, the figure right, the share as a meter on the row's hairline ——— */
+/* --- Rows: words left, the figure right, the share as a meter on the row's hairline --- */
 
 .rows {
   margin: 0;

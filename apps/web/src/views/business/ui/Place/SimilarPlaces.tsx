@@ -14,7 +14,7 @@ interface SimilarPlacesProps {
 
 const SHOWN = 10
 
-// «Похожие места» at the foot of a place: others of the same kind, as the catalog shows them —
+// «Похожие места» at the foot of a place: others of the same kind, as the catalog shows them -
 // somewhere to go next when this one is full or far.
 export const SimilarPlaces = ({ business, places }: SimilarPlacesProps) => {
   const t = useT()

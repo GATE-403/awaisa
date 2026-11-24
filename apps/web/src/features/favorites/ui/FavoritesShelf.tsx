@@ -59,7 +59,7 @@ export const FavoritesShelf = ({ layout = 'row' }: FavoritesShelfProps) => {
           text={
             <>
               {t('Нажмите ♡ на услуге в')} <NextLink href='/'>{t('каталоге')}</NextLink>
-              {t(' — она появится здесь.')}
+              {t(' - она появится здесь.')}
             </>
           }
         />

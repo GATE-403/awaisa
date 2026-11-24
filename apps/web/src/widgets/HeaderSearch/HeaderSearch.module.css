@@ -26,7 +26,7 @@
 }
 
 .form:focus-within {
-  /* Focus lifts the capsule onto the surface with a soft shadow, like Spotlight — no blue frame. */
+  /* Focus lifts the capsule onto the surface with a soft shadow, like Spotlight - no blue frame. */
   background: var(--color-surface);
   box-shadow:
     inset 0 0 0 0.5px var(--color-border),
@@ -428,7 +428,7 @@
   }
 }
 
-/* A 44pt tap target around the smaller control, invisible — it looks the same (WCAG 2.5.8 and
+/* A 44pt tap target around the smaller control, invisible - it looks the same (WCAG 2.5.8 and
    our 44pt rule). `:where` keeps the control's own position if it has one. */
 :where(.where) {
   position: relative;
@@ -441,7 +441,7 @@
   inset-inline: min(0px, calc((100% - 44px) / 2));
 }
 
-/* A 44pt tap target around the smaller control, invisible — it looks the same (WCAG 2.5.8 and
+/* A 44pt tap target around the smaller control, invisible - it looks the same (WCAG 2.5.8 and
    our 44pt rule). `:where` keeps the control's own position if it has one. */
 :where(.submit),
 :where(.clear) {

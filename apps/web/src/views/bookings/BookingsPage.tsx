@@ -76,13 +76,13 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
   }, [])
 
   // Back from the deposit checkout (`?paid=<booking>`): say it worked, once. Read from the URL in
-  // an effect — this page is also the prerendered shell, where search params do not exist.
+  // an effect - this page is also the prerendered shell, where search params do not exist.
   // biome-ignore lint/correctness/useExhaustiveDependencies: runs once on arrival
   useEffect(() => {
     if (!new URLSearchParams(window.location.search).has('paid')) return
     toast.show({
       title: t('Предоплата внесена'),
-      description: t('Вы записаны — ждём вас'),
+      description: t('Вы записаны - ждём вас'),
       type: 'success',
     })
     router.replace('/bookings', { scroll: false })
@@ -145,7 +145,7 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                 {bookings.length === 0 ? (
                   <EmptyState
                     title={t('Запишитесь к мастеру')}
-                    text={t('Найдите салон и выберите время — запись появится здесь')}
+                    text={t('Найдите салон и выберите время - запись появится здесь')}
                     action={
                       <ButtonLink render={<NextLink href='/' />} size='lg'>
                         {t('Найти, куда записаться')}

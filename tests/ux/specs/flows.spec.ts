@@ -8,7 +8,7 @@ for (const persona of personas)
   for (const flowId of persona.flows) {
     const flow = flowById(flowId)
     // The tag picks the projects: each persona's devices grep for `@<persona id>`.
-    test(`${flow.title} — ${persona.name} @${persona.id} @a11y`, async ({ ux }) => {
+    test(`${flow.title} - ${persona.name} @${persona.id} @a11y`, async ({ ux }) => {
       ux.begin(flow.id, flow.title)
       await flow.run(ux)
       expect.soft(ux.blocking(), `${flow.goal}: серьёзные проблемы`).toEqual([])

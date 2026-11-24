@@ -110,7 +110,7 @@ const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
       className={styles.header}
       data-scrolled={isScrolled || undefined}
       data-slim={isSlim || undefined}
-      // Full-screen on phones: the feed (like Shorts), the map and the profile — only the tab bar.
+      // Full-screen on phones: the feed (like Shorts), the map and the profile - only the tab bar.
       data-phone-hidden={
         pathname === '/feed' ||
         pathname === '/bookings' ||

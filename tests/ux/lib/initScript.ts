@@ -1,6 +1,6 @@
 // Runs in the page before any of its scripts (page.addInitScript). It records what a person
-// would notice over time — paint and long tasks for «time to interactive», messages that vanish
-// on their own, text that changes by itself — and gives checks one way to describe an element.
+// would notice over time - paint and long tasks for «time to interactive», messages that vanish
+// on their own, text that changes by itself - and gives checks one way to describe an element.
 
 type UxInit = { textVars: Record<string, string> }
 

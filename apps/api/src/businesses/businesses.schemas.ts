@@ -73,7 +73,7 @@ const hoursSchema = z
   .max(7)
   .refine(
     (days) => new Set(days.map((day) => day.weekday)).size === days.length,
-    'Каждый день недели — один раз',
+    'Каждый день недели - один раз',
   )
 
 // Pages for the catalog's endless scroll: `offset` and `limit` (≤ 60); `sort=price` orders the

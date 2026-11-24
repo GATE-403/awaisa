@@ -209,7 +209,7 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                 data-tone='success'
                 aria-hidden
               />
-              <p className={styles.stateTitle}>Оплачено — вы записаны</p>
+              <p className={styles.stateTitle}>Оплачено - вы записаны</p>
               <ButtonLink render={<NextLink href='/bookings' />} size='lg' fullWidth>
                 Мои записи
               </ButtonLink>
@@ -249,7 +249,7 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
           ) : (
             <div className={styles.state}>
               {payment.driver === 'test' && (
-                <p className={styles.testBadge}>Тестовый режим — деньги не списываются</p>
+                <p className={styles.testBadge}>Тестовый режим - деньги не списываются</p>
               )}
               {payment.driver === 'freedompay' && payment.checkoutUrl ? (
                 <ButtonLink

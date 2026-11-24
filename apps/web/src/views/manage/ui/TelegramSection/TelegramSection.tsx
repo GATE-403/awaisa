@@ -134,7 +134,7 @@ export const TelegramSection = ({ slug, fallback = null }: TelegramSectionProps)
       </div>
       <p className={styles.footer}>
         {t(
-          'Новые записи, отмены и отзывы — сразу, расписание на день — в 9:00. В боте: /today — записи на сегодня, /stop — отключить.',
+          'Новые записи, отмены и отзывы - сразу, расписание на день - в 9:00. В боте: /today - записи на сегодня, /stop - отключить.',
         )}
       </p>
     </div>

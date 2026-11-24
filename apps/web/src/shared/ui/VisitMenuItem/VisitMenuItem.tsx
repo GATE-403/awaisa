@@ -11,8 +11,8 @@ interface VisitMenuItemsProps {
   isMasterShown?: boolean
 }
 
-// Visits in a pull-down menu, like a macOS menu: one line each — the time in a quiet column, the
-// client in regular weight, «service · master» fading after — no rules between them.
+// Visits in a pull-down menu, like a macOS menu: one line each - the time in a quiet column, the
+// client in regular weight, «service · master» fading after - no rules between them.
 export const VisitMenuItems = ({ visits, onPick, isMasterShown = false }: VisitMenuItemsProps) =>
   visits.map((booking) => (
     <MenuItem key={booking.id} className={styles.item} onClick={() => onPick(booking)}>

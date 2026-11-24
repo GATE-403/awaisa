@@ -23,7 +23,7 @@ interface StoryTileProps {
   chip?: string
   /** A quiet second line under the label («Пора снова», «Рядом · 1,2 км»). */
   note?: string
-  /** `new` — an accent ring (something not seen yet), `seen` — a grey one, `none` — no ring. */
+  /** `new` - an accent ring (something not seen yet), `seen` - a grey one, `none` - no ring. */
   ring?: 'new' | 'seen' | 'none'
   isEager?: boolean
   onOpen?: () => void

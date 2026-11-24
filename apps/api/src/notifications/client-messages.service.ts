@@ -74,7 +74,7 @@ export class ClientMessagesService {
     )
     await this.sendTelegram(
       chatId,
-      'Готово: напоминания о визитах будут приходить сюда, а не по SMS. Отключить — /stop.',
+      'Готово: напоминания о визитах будут приходить сюда, а не по SMS. Отключить - /stop.',
     )
     return true
   }

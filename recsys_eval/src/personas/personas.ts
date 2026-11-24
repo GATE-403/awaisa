@@ -2,7 +2,7 @@ import type { Item, StatedPreferences, User } from '../types.ts'
 
 // The clients from docs/ux-testing/personas.md (Нурлан is an owner there, not a client) as
 // recommendation cases: who they are, what they would book, and a made-up visit history. All of
-// it is invented — this is the only material the LLM judge ever sees.
+// it is invented - this is the only material the LLM judge ever sees.
 
 const DAY_MS = 86_400_000
 
@@ -25,7 +25,7 @@ const SERGEY = `Сергей, 46 лет, офисный работник. Стр
 с офисом, до 1 000 сом за визит. Сравнивает места по цене и отзывам, женские услуги ему не нужны.`
 
 const AIPERI = `Айпери, 21 год, студентка, только телефон. Маникюр с покрытием каждые 3 недели, брови и
-ресницы — раз в 1–2 месяца. Бюджет до 1 000 сом, хочет записаться сегодня или завтра.`
+ресницы - раз в 1–2 месяца. Бюджет до 1 000 сом, хочет записаться сегодня или завтра.`
 
 const PERSONAS: Persona[] = [
   {

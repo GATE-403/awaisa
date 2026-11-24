@@ -166,9 +166,9 @@ const SlotCursor = ({ store, specialistId, render }: SlotCursorProps) => {
   return minutes === null ? null : render(minutes)
 }
 
-// A visit's state as its own glyph, never a bare dot: waiting — a clock; under way — an
-// hourglass; ended unmarked — a dashed circle, a tick still to be put; came — a ticked circle;
-// did not come — a person taken away; cancelled — a struck circle; deposit not paid — a card.
+// A visit's state as its own glyph, never a bare dot: waiting - a clock; under way - an
+// hourglass; ended unmarked - a dashed circle, a tick still to be put; came - a ticked circle;
+// did not come - a person taken away; cancelled - a struck circle; deposit not paid - a card.
 const STATE_GLYPHS: Record<string, ComponentType<IconProps>> = {
   Ждём: Clock,
   Сейчас: HourglassMedium,
@@ -362,7 +362,7 @@ export const DayCalendar = ({
     isTimeline ? { left: toPx(minutes - range.start) } : { top: toPx(minutes - range.start) }
   const daySize: CSSProperties = isTimeline ? { width: span } : { height: span }
   // On the timeline the grid is laid out by hand: hours across the top, then a row per master
-  // (its name, then its day) — the same elements as the columns, placed differently.
+  // (its name, then its day) - the same elements as the columns, placed differently.
   const cell = (row: number, column: number): CSSProperties =>
     isTimeline ? { gridRow: row, gridColumn: column } : {}
   const hourMarks = Array.from(
@@ -498,7 +498,7 @@ export const DayCalendar = ({
 
   // The day fills the window down to its foot in both views, so the page itself does not scroll
   // for it: measured from where the box starts (which moves when the bars above it change), with
-  // a small margin under it — floating bars («Все пришли») sit over the day's foot.
+  // a small margin under it - floating bars («Все пришли») sit over the day's foot.
   useEffect(() => {
     const scroller = scrollerRef.current
     if (!scroller) return
@@ -531,7 +531,7 @@ export const DayCalendar = ({
 
   // On a short screen (iPhone SE) the day keeps its least height and runs under the floating
   // «Все пришли» bar: the corner controls (masters, zoom, «Сейчас») rise above the bar by as much
-  // as it covers. Written to a CSS variable on scroll — no re-render.
+  // as it covers. Written to a CSS variable on scroll - no re-render.
   useEffect(() => {
     const box = frameRef.current
     if (!box) return
@@ -603,7 +603,7 @@ export const DayCalendar = ({
           ? { start: scroller.scrollLeft, size: scroller.clientWidth, inset }
           : { start: scroller.scrollTop, size: scroller.clientHeight - inset, inset }
         // Re-render only when a visit crosses an edge of the view (the tabs change), not on every
-        // scrolled frame — a re-render of the whole day per frame made it shake.
+        // scrolled frame - a re-render of the whole day per frame made it shake.
         setView((current) =>
           current.size === next.size &&
           current.inset === next.inset &&
@@ -671,7 +671,7 @@ export const DayCalendar = ({
   }
 
   // The day scrolls inside its own box; on today it opens with the red line a third of the way
-  // in, once per layout — the minute ticks after that must not pull the view back.
+  // in, once per layout - the minute ticks after that must not pull the view back.
   // Another day (no «now») forgets it, so coming back to today opens at now again; the scroll waits
   // a frame, until the day's width and the box's height are laid out.
   useEffect(() => {
@@ -914,8 +914,8 @@ export const DayCalendar = ({
       </span>
     )
   }
-  // A tab flush with the day's edge: the nearest visit beyond it and how many more. One visit —
-  // a tap glides to it; several — the kit's pull-down menu lists who is there, nearest first.
+  // A tab flush with the day's edge: the nearest visit beyond it and how many more. One visit -
+  // a tap glides to it; several - the kit's pull-down menu lists who is there, nearest first.
   const edgeTab = (side: 'before' | 'after', visits: ReturnType<typeof edgeVisits>['before']) => {
     const [nearest] = visits
     if (!nearest) return null
@@ -947,11 +947,11 @@ export const DayCalendar = ({
             onClick={() => goToVisit(nearest.booking.id, nearest.from)}
           >
             {content}
-            <span className={styles.srOnlyText}> — {count}</span>
+            <span className={styles.srOnlyText}> - {count}</span>
           </button>
         ) : (
           <Menu
-            label={`${nearest.booking.time} +${more} — ${count}`}
+            label={`${nearest.booking.time} +${more} - ${count}`}
             className={styles.edgeHint}
             trigger={content}
           >
@@ -969,7 +969,7 @@ export const DayCalendar = ({
       </span>
     )
   }
-  // How many visits sit off each side of the view, per lane — what the edge capsules show.
+  // How many visits sit off each side of the view, per lane - what the edge capsules show.
   useEffect(() => {
     edgeKeyRef.current = (left, width) =>
       specialists
@@ -1012,7 +1012,7 @@ export const DayCalendar = ({
       {isTimeline && specialists.length > 1 && (
         // Whose day to show, as one track of faces like the kit's segmented control: each face in a
         // ring of how full their day is; the chosen one opens into a white capsule with the name
-        // and when they are free next — where a new client fits.
+        // and when they are free next - where a new client fits.
         <div className={styles.viewBar}>
           <fieldset className={styles.track}>
             <legend className={styles.trackLegend}>{t('Мастера')}</legend>
@@ -1440,7 +1440,7 @@ export const DayCalendar = ({
                       height?: number
                     }
                     // One press marks an ended visit arrived, right on its card (shown on hover;
-                    // always on touch screens) — the sheet stays for anything more.
+                    // always on touch screens) - the sheet stays for anything more.
                     // An ended visit nobody marked asks its question on the card itself: both
                     // answers as capsules at its foot, always shown (where the phone was).
                     const isMarkable =

@@ -32,7 +32,7 @@ interface OfferCardProps {
   onSelect?: () => void
 }
 
-// A service card: the service, where (the place's name), the price and when — and «Записаться» on
+// A service card: the service, where (the place's name), the price and when - and «Записаться» on
 // it, so it is never taken for a place card (those show a logo, rating and the number of services).
 export const OfferCard = ({
   offer,

@@ -22,7 +22,7 @@ import type {
 const UNAUTHORIZED = 401
 
 // Personal data rendered on the server: the request's cookies (the httpOnly session the API set
-// through the /api rewrite) go to the API as they are. Never cached — it differs per visitor.
+// through the /api rewrite) go to the API as they are. Never cached - it differs per visitor.
 // Callers sit behind <Suspense>, so the rest of the page stays in the prerendered shell.
 const withSession = async <Result>(path: string, headers?: Record<string, string>) => {
   // Request time from here on: with cookies alone the dev prerender went on into the fetch and

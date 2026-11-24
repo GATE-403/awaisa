@@ -157,7 +157,7 @@ export const CreateBusinessPage = () => {
                     // «Адрес» read as the street: the link is said to be what clients get.
                     description={
                       form.isSlugAvailable
-                        ? t('Свободна: awaisa.kg/{slug} — её получат клиенты', { slug: form.slug })
+                        ? t('Свободна: awaisa.kg/{slug} - её получат клиенты', { slug: form.slug })
                         : t('Латиница, цифры и дефис')
                     }
                     className={styles.fieldRow}
@@ -269,7 +269,7 @@ export const CreateBusinessPage = () => {
                   </section>
                 ) : (
                   <p className={styles.groupFooter}>
-                    {t('Услуги добавите в кабинете — название, длительность и цену.')}
+                    {t('Услуги добавите в кабинете - название, длительность и цену.')}
                   </p>
                 ))}
 

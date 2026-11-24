@@ -1,5 +1,5 @@
 .page {
-  /* At least a screen tall, so the footer stays below the fold until the page streams in —
+  /* At least a screen tall, so the footer stays below the fold until the page streams in -
      a short placeholder showed the footer, which the content then pushed away (CLS 0.26). */
   min-height: 100svh;
   display: flex;

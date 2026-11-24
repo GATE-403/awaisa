@@ -11,7 +11,7 @@ interface BookingStepProps {
 }
 
 // The one open step: a large card under the stack of done ones, asking its question in title
-// size. Choosing answers it — the card turns into a stack card and the next question opens.
+// size. Choosing answers it - the card turns into a stack card and the next question opens.
 export const BookingStep = ({ id, title, eyebrow, children }: BookingStepProps) => (
   <section id={`step-${id}`} aria-labelledby={`step-${id}-title`} className={styles.step}>
     {eyebrow && <p className={styles.eyebrow}>{eyebrow}</p>}

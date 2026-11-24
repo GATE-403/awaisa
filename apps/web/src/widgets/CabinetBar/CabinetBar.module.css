@@ -122,7 +122,7 @@
   }
 }
 
-/* A 44pt tap target around the smaller control, invisible — it looks the same (WCAG 2.5.8 and
+/* A 44pt tap target around the smaller control, invisible - it looks the same (WCAG 2.5.8 and
    our 44pt rule). `:where` keeps the control's own position if it has one. */
 :where(.icon) {
   position: relative;
@@ -335,7 +335,7 @@
   }
 
   /* The tabs' own bleed is for the page edge; in the bar they sit in the row (doubled: over the
-     tabs' own rule, whichever stylesheet loads last — the bleed ran the tabs under the tools). */
+     tabs' own rule, whichever stylesheet loads last - the bleed ran the tabs under the tools). */
   .nav.nav > * {
     margin: 0;
     padding: 0;

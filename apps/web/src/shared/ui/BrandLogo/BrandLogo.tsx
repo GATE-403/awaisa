@@ -7,7 +7,7 @@ interface BrandLogoProps {
   'aria-hidden'?: boolean | 'true'
 }
 
-// The services' own marks in their own colours — people know them by colour first. Brand colours
+// The services' own marks in their own colours - people know them by colour first. Brand colours
 // are the one place a hard-coded colour is right: they belong to the brands, not to our theme.
 
 const TelegramMark = ({ className }: BrandLogoProps) => (

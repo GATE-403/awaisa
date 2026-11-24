@@ -53,7 +53,7 @@ export class WorkPhotosService {
       [businessId],
     )
     if (Number(row?.count) >= MAX_PHOTOS) {
-      throw new BadRequestException(`Можно до ${MAX_PHOTOS} фото работ — удалите старые`)
+      throw new BadRequestException(`Можно до ${MAX_PHOTOS} фото работ - удалите старые`)
     }
   }
 
@@ -137,7 +137,7 @@ export class WorkPhotosService {
   }
 
   /**
-   * Removes the row and returns its URL for the storage — or null when a client's review still
+   * Removes the row and returns its URL for the storage - or null when a client's review still
    * shows the same file (review photos are added to «Работы» without a copy).
    */
   async remove(businessId: string, id: string) {
@@ -158,7 +158,7 @@ export class WorkPhotosService {
     return used ? null : url
   }
 
-  /** Whether there is room for one more, without refusing — for photos that only may go here. */
+  /** Whether there is room for one more, without refusing - for photos that only may go here. */
   async hasRoom(businessId: string) {
     const [row] = await this.query(
       'SELECT COUNT(*)::int AS "count" FROM "work_photos" WHERE "business_id" = $1',
@@ -193,7 +193,7 @@ export class WorkPhotosService {
   }
 
   /**
-   * The feed: visible photos of published businesses, newest first — or nearest first (by 3 km
+   * The feed: visible photos of published businesses, newest first - or nearest first (by 3 km
    * rings, newest inside a ring) when the viewer shared a location. `start` puts one photo on
    * top (the one tapped on a business page); `business` keeps to one place.
    */

@@ -10,7 +10,7 @@ const resolveQuerySchema = z.object({ q: z.string().trim().min(1).max(80) })
 export class SearchController {
   constructor(private readonly search: SearchService) {}
 
-  /** What a query was read as — «Показаны результаты для «стрижка»» on the catalog. */
+  /** What a query was read as - «Показаны результаты для «стрижка»» on the catalog. */
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get('resolve')
   async resolve(

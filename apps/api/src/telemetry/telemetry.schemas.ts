@@ -47,7 +47,7 @@ const STEP_FLOW = new Map<FunnelStep, FunnelFlow>(
 )
 
 const SESSION_SCHEMA = z.string().regex(/^[A-Za-z0-9-]{8,40}$/)
-// Codes only: a field's name, a channel, a kind of action — never something a person typed.
+// Codes only: a field's name, a channel, a kind of action - never something a person typed.
 const CODE = z.string().regex(/^[a-z0-9_]{1,24}$/)
 
 const deviceSchema = z.object({

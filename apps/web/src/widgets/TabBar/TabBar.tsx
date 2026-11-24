@@ -47,7 +47,7 @@ export const TabBar = () => {
       className={styles.tabBar}
       data-tucked={isTucked || undefined}
     >
-      {/* One highlight that slides to the chosen tab, like iOS's tab bar — not a fill per tab. */}
+      {/* One highlight that slides to the chosen tab, like iOS's tab bar - not a fill per tab. */}
       <span
         className={styles.indicator}
         data-hidden={activeIndex < 0 || undefined}

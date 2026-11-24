@@ -277,7 +277,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
               }
             >
               {profile.isOwn && !profile.isPublic && (
-                <p className={styles.hidden}>{t('Профиль скрыт — его видите только вы')}</p>
+                <p className={styles.hidden}>{t('Профиль скрыт - его видите только вы')}</p>
               )}
             </ProfileHeadText>
           </ProfileHead>

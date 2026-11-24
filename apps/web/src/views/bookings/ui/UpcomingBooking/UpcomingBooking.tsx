@@ -36,8 +36,8 @@ interface UpcomingBookingProps {
   onCancel: () => void
   onMoved: (booking: Booking) => void
   /**
-   * `next` — the nearest visit, large, its everyday actions in plain sight (route, call, move);
-   * `row` — a later visit, one quiet line, every action behind «⋯».
+   * `next` - the nearest visit, large, its everyday actions in plain sight (route, call, move);
+   * `row` - a later visit, one quiet line, every action behind «⋯».
    */
   variant?: 'next' | 'row'
 }
