@@ -4,8 +4,8 @@ import { messages as ky } from '@/locales/ky/messages'
 import { messages as ru } from '@/locales/ru/messages'
 import { DEFAULT_LOCALE, isLocale, type Locale } from './locales'
 
-// Compiled catalogs (`pnpm --filter web i18n:compile`). The server holds all three; a page sends
-// the browser only its own language's messages (`LinguiClientProvider`).
+// Compiled catalogs (`pnpm --filter web i18n:compile`). The server holds all three; the browser
+// loads only its own language's messages as a chunk of their own (`LinguiClientProvider`).
 const CATALOGS: Record<Locale, Messages> = { en, ru, ky }
 
 // One instance per language for the server process: requests in different languages never
@@ -21,4 +21,4 @@ const getI18nInstance = (value: string): I18n => {
   return i18n
 }
 
-export { CATALOGS, getI18nInstance }
+export { getI18nInstance }
