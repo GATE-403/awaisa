@@ -26,7 +26,7 @@ const bootstrap = async () => {
   })
   const config = app.get<ConfigService<Env, true>>(ConfigService)
 
-  app.set('trust proxy', 'loopback, linklocal, uniquelocal')
+  app.set('trust proxy', config.get('TRUST_PROXY', { infer: true }))
   app.use(requestLog)
   app.use(helmet())
   app.use(cookieParser())

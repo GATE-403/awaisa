@@ -37,6 +37,10 @@ const nextConfig: NextConfig = {
   // The story picture reads Inter from disk (images get no web fonts): ship it with the route.
   outputFileTracingIncludes: { '/u/[id]/story': ['./assets/fonts/**'] },
   poweredByHeader: false,
+  // The build checks the app, not its tests: some tests import the API's source to compare both
+  // sides, and the Docker image of the web (turbo prune web) has no apps/api. `pnpm typecheck`
+  // still checks everything with tsconfig.json.
+  typescript: { tsconfigPath: 'tsconfig.build.json' },
   transpilePackages: ['@awaisa/ui', '@awaisa/tokens', '@awaisa/contracts'],
   allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '172.*.*.*'],
   experimental: {
