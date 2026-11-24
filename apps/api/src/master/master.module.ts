@@ -9,6 +9,7 @@ import { FollowsModule } from '../follows/follows.module.js'
 import { PayrollModule } from '../payroll/payroll.module.js'
 import { MasterController } from './master.controller.js'
 import { MasterGuard } from './master.guard.js'
+import { MasterService } from './master.service.js'
 
 @Module({
   imports: [
@@ -21,6 +22,6 @@ import { MasterGuard } from './master.guard.js'
     FollowsModule,
   ],
   controllers: [MasterController],
-  providers: [MasterGuard],
+  providers: [MasterGuard, MasterService],
 })
 export class MasterModule {}

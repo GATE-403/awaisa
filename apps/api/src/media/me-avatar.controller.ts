@@ -1,7 +1,5 @@
-import { randomUUID } from 'node:crypto'
 import type { AvatarUpload } from '@awaisa/contracts'
 import {
-  BadRequestException,
   Controller,
   Delete,
   HttpCode,
@@ -11,12 +9,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
 import { AuthGuard, CurrentCustomer } from '../auth/auth.guard.js'
-import { Customer } from '../customers/customer.entity.js'
-import { processImage } from './images.js'
-import { StorageService } from './storage.service.js'
+import type { Customer } from '../customers/customer.entity.js'
+import { MediaUploadsService } from './media-uploads.service.js'
 
 const imageUpload = FileInterceptor('file', {
   limits: { fileSize: 10 * 1024 * 1024, files: 1 },
@@ -27,31 +22,20 @@ const imageUpload = FileInterceptor('file', {
 @Controller('me/avatar')
 @UseGuards(AuthGuard)
 export class MeAvatarController {
-  constructor(
-    @InjectRepository(Customer) private readonly customers: Repository<Customer>,
-    private readonly storage: StorageService,
-  ) {}
+  constructor(private readonly uploads: MediaUploadsService) {}
 
   @Post()
   @UseInterceptors(imageUpload)
-  async upload(
+  upload(
     @CurrentCustomer() customer: Customer,
     @UploadedFile() file: { buffer: Buffer } | undefined,
   ): Promise<AvatarUpload> {
-    if (!file) throw new BadRequestException('Выберите фото')
-    const url = await this.storage.put(
-      `customers/${randomUUID()}.webp`,
-      await processImage(file.buffer, 'avatar'),
-    )
-    if (customer.avatarUrl) await this.storage.remove(customer.avatarUrl)
-    await this.customers.update({ id: customer.id }, { avatarUrl: url })
-    return { avatarUrl: url }
+    return this.uploads.setAvatar(customer, file)
   }
 
   @Delete()
   @HttpCode(204)
-  async remove(@CurrentCustomer() customer: Customer) {
-    if (customer.avatarUrl) await this.storage.remove(customer.avatarUrl)
-    await this.customers.update({ id: customer.id }, { avatarUrl: null })
+  remove(@CurrentCustomer() customer: Customer): Promise<void> {
+    return this.uploads.removeAvatar(customer)
   }
 }

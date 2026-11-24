@@ -1,10 +1,7 @@
-import { randomUUID } from 'node:crypto'
 import type { FeedLikes, FeedPage, UploadedPhoto } from '@awaisa/contracts'
 import {
-  BadRequestException,
   Body,
   Controller,
-  ForbiddenException,
   Get,
   Param,
   ParseUUIDPipe,
@@ -15,15 +12,12 @@ import {
   UseInterceptors,
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { InjectDataSource } from '@nestjs/typeorm'
-import { DataSource } from 'typeorm'
 import type { Business } from '../businesses/business.entity.js'
 import { BusinessAccessGuard, CurrentBusiness } from '../businesses/business-access.guard.js'
 import { Cached } from '../cache/cached.decorator.js'
 import type { Specialist } from '../catalog/specialist.entity.js'
 import { CurrentMaster, MasterGuard } from '../master/master.guard.js'
-import { processImage } from './images.js'
-import { StorageService } from './storage.service.js'
+import { MediaUploadsService } from './media-uploads.service.js'
 import {
   type FeedQuery,
   feedQuerySchema,
@@ -40,9 +34,8 @@ const imageUpload = FileInterceptor('file', {
 @Controller()
 export class FeedController {
   constructor(
-    @InjectDataSource() private readonly dataSource: DataSource,
     private readonly workPhotos: WorkPhotosService,
-    private readonly storage: StorageService,
+    private readonly uploads: MediaUploadsService,
   ) {}
 
   /** «Работы»: a vertical feed of finished work, each photo one tap from booking it. */
@@ -78,7 +71,7 @@ export class FeedController {
     @UploadedFile() file: { buffer: Buffer } | undefined,
     @Body() body: { bookingId?: string },
   ): Promise<UploadedPhoto> {
-    return this.saveVisitPhoto(business, body?.bookingId, file, master.id)
+    return this.uploads.saveVisitPhoto(business, body?.bookingId, file, master.id)
   }
 
   /** The same from the cabinet: an owner or administrator snaps the visit they just marked. */
@@ -90,36 +83,6 @@ export class FeedController {
     @Param('bookingId', ParseUUIDPipe) bookingId: string,
     @UploadedFile() file: { buffer: Buffer } | undefined,
   ): Promise<UploadedPhoto> {
-    return this.saveVisitPhoto(business, bookingId, file, null)
-  }
-
-  // `masterId`: only that master's visits (a master signed in by phone); null for the cabinet.
-  private async saveVisitPhoto(
-    business: Business,
-    bookingId: string | undefined,
-    file: { buffer: Buffer } | undefined,
-    masterId: string | null,
-  ) {
-    if (!file) throw new BadRequestException('Выберите фото')
-    const [booking] = (await this.dataSource.query(
-      `SELECT "service_id" AS "serviceId", "specialist_id" AS "specialistId" FROM "bookings"
-       WHERE "id" = $1 AND "business_id" = $2`,
-      [bookingId ?? null, business.id],
-    )) as { serviceId: string; specialistId: string }[]
-    if (!booking) throw new BadRequestException('Визит не найден')
-    if (masterId && booking.specialistId !== masterId)
-      throw new ForbiddenException('Это визит другого мастера')
-    const freed = await this.workPhotos.makeRoomForVisit(business.id)
-    if (freed) await this.storage.remove(freed).catch(() => undefined)
-    const url = await this.storage.put(
-      `${business.id}/${randomUUID()}.webp`,
-      await processImage(file.buffer, 'photo'),
-    )
-    await this.workPhotos.add(business.id, url, {
-      serviceId: booking.serviceId,
-      specialistId: booking.specialistId,
-      bookingId,
-    })
-    return { url }
+    return this.uploads.saveVisitPhoto(business, bookingId, file, null)
   }
 }
