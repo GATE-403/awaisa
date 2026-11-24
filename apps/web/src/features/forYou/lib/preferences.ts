@@ -1,6 +1,7 @@
 'use client'
 
 import { useSyncExternalStore } from 'react'
+import { parseJson, readText, writeJson } from '@/shared/lib/storage'
 
 type Interest =
   | 'haircut'
@@ -46,24 +47,17 @@ let cachedRaw: string | null = null
 let cached: Preferences | null = null
 
 const read = (): Preferences | null => {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (raw !== cachedRaw) {
-      cachedRaw = raw
-      cached = raw ? (JSON.parse(raw) as Preferences) : null
-    }
-    return cached
-  } catch {
-    return null
+  const raw = readText(STORAGE_KEY)
+  if (raw !== cachedRaw) {
+    cachedRaw = raw
+    cached = parseJson<Preferences>(raw)
   }
+  return cached
 }
 
+// Private mode: the answers live for this page only.
 const savePreferences = (preferences: Preferences) => {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences))
-  } catch {
-    // Private mode: the answers live for this page only.
-  }
+  writeJson(STORAGE_KEY, preferences)
   window.dispatchEvent(new Event(EVENT))
 }
 

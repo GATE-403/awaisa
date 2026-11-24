@@ -7,6 +7,7 @@ import NextLink from 'next/link'
 import { type ComponentType, useEffect } from 'react'
 import type { Business } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
+import { shareLink } from '@/shared/lib/share'
 import { trackStep } from '@/shared/lib/telemetry'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import styles from './Place.module.css'
@@ -46,13 +47,9 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
   }, [business.slug])
 
   const handleShare = async () => {
-    const url = window.location.href
-    if (navigator.share) {
-      await navigator.share({ title: business.name, url }).catch(() => {})
-      return
-    }
-    await navigator.clipboard.writeText(url)
-    toast.show({ title: t('Ссылка скопирована'), type: 'success' })
+    // A sheet that failed or was closed says nothing.
+    const result = await shareLink({ title: business.name, url: window.location.href })
+    if (result === 'copied') toast.show({ title: t('Ссылка скопирована'), type: 'success' })
   }
 
   const actions: Action[] = [

@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { parseBookings, readRaw } from '@/entities/booking'
 import type { Booking } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
+import { isArray, onlyStrings, readJson, writeJson } from '@/shared/lib/storage'
 import { RateVisitSheet } from '../RateVisitSheet/RateVisitSheet'
 import styles from './RateRecent.module.css'
 
@@ -20,14 +21,7 @@ const DISMISSED_KEY = 'awaisa:rate-dismissed:v1'
 const ASK_DAYS = 14
 const DAY_MS = 24 * 60 * 60 * 1000
 
-const readDismissed = (): string[] => {
-  try {
-    const value: unknown = JSON.parse(window.localStorage.getItem(DISMISSED_KEY) ?? '[]')
-    return Array.isArray(value) ? value.filter((item) => typeof item === 'string') : []
-  } catch {
-    return []
-  }
-}
+const readDismissed = (): string[] => onlyStrings(readJson(DISMISSED_KEY, isArray))
 
 const whenLabel = (date: string, today: { dayKey: string }) => {
   const days = Math.round(
@@ -76,11 +70,8 @@ export const RateRecent = ({ history, today, onRated }: RateRecentProps) => {
   const handleDismiss = () => {
     const next = [...(dismissed ?? []), visit.id].slice(-50)
     setDismissed(next)
-    try {
-      window.localStorage.setItem(DISMISSED_KEY, JSON.stringify(next))
-    } catch {
-      // Private mode: it is only asked again next time.
-    }
+    // Private mode: it is only asked again next time.
+    writeJson(DISMISSED_KEY, next)
   }
 
   return (

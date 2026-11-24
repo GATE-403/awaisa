@@ -1,4 +1,5 @@
 import type { Booking } from '@/shared/api/types'
+import { isArray, parseJson, readText, writeJson } from '@/shared/lib/storage'
 
 type StoredBooking = {
   id: string
@@ -9,13 +10,7 @@ type StoredBooking = {
 const STORAGE_KEY = 'awaisa:bookings:v2'
 const CHANGE_EVENT = 'awaisa:bookings-change'
 
-const readRaw = () => {
-  try {
-    return window.localStorage.getItem(STORAGE_KEY)
-  } catch {
-    return null
-  }
-}
+const readRaw = () => readText(STORAGE_KEY)
 
 // Bookings saved before the platform went multi-business all belong to Awaisa Studio.
 const LEGACY_BUSINESS: Booking['business'] = {
@@ -41,23 +36,17 @@ const isStoredBooking = (value: unknown): value is StoredBooking =>
   typeof value.token === 'string'
 
 const parseBookings = (raw: string | null): StoredBooking[] => {
-  if (!raw) return []
-
+  const value = parseJson(raw, isArray) ?? []
   try {
-    const value: unknown = JSON.parse(raw)
-    return Array.isArray(value) ? value.filter(isStoredBooking).map(withBusiness) : []
+    return value.filter(isStoredBooking).map(withBusiness)
   } catch {
+    // A snapshot of a shape no version wrote: start empty.
     return []
   }
 }
 
 const writeBookings = (bookings: StoredBooking[]) => {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings))
-  } catch {
-    return
-  }
-
+  if (!writeJson(STORAGE_KEY, bookings)) return
   window.dispatchEvent(new Event(CHANGE_EVENT))
 }
 
