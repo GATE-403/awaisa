@@ -4,6 +4,7 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { toBusinessParts } from '../common/business-time.js'
+import { returnedRows } from '../common/sql.js'
 import type { Env } from '../config/env.js'
 import { ClientMessagesService } from './client-messages.service.js'
 import { returnVisitMessage } from './messages.js'
@@ -74,9 +75,7 @@ export class ReturnVisitsService {
       `,
       [DUE_WINDOW_DAYS],
     )
-    const due = (
-      Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result
-    ) as DueReturn[]
+    const due = returnedRows<DueReturn>(result)
     if (due.length === 0) return
 
     // One message per client and service even if several old visits came due together.

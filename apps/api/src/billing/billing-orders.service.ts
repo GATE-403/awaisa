@@ -18,11 +18,12 @@ import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { PaymentsService } from '../bookings/payments.service.js'
 import type { Business } from '../businesses/business.entity.js'
+import { returnedRows } from '../common/sql.js'
 import type { Env } from '../config/env.js'
 import type { Customer } from '../customers/customer.entity.js'
 import { SmsService } from '../notifications/sms.service.js'
 import { TelegramBotService } from '../telegram/telegram-bot.service.js'
-import { BillingService, rowsOf, toAccessView, toPlanView } from './billing.service.js'
+import { BillingService, toAccessView, toPlanView } from './billing.service.js'
 import { formatDay, orderTitle, reminderText } from './billing-messages.js'
 import { extendUntil, PERIODS, periodPrice, reminderDue, resolveAccess } from './plan-rules.js'
 
@@ -164,7 +165,7 @@ export class BillingOrdersService implements OnModuleInit {
       const due = reminderDue(access, row.lastReminder, now)
       if (!due || !access.endsAt) continue
       // Claimed first: a second instance or a rerun says nothing twice.
-      const claimed = rowsOf(
+      const claimed = returnedRows(
         await this.dataSource.query(
           `UPDATE "business_subscriptions" SET "last_reminder" = $2
            WHERE "business_id" = $1 AND "last_reminder" IS DISTINCT FROM $2 RETURNING 1`,
@@ -283,7 +284,7 @@ export class BillingOrdersService implements OnModuleInit {
 
   /** Claimed once (pending → paid), then the plan is extended or the SMS added. */
   private async onPaid(orderId: string) {
-    const claimed = rowsOf(
+    const claimed = returnedRows(
       await this.dataSource.query(
         `UPDATE "plan_orders" SET "status" = 'paid', "paid_at" = now()
          WHERE "id" = $1 AND "status" <> 'paid' RETURNING "id"`,

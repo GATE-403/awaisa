@@ -6,6 +6,7 @@ import { visitNames, visitPrice } from '../bookings/visit-sql.js'
 import type { Business } from '../businesses/business.entity.js'
 import { formatMinutes, toBusinessParts } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
+import { toNumber } from '../common/sql.js'
 import { ClientRecord } from './client-record.entity.js'
 import { LAPSED_DAYS, segmentClients } from './client-segments.js'
 import type { ClientsQuery, UpdateClientInput } from './clients.schemas.js'
@@ -19,7 +20,6 @@ const HISTORY_LIMIT = 50
 const VISIT = `b."status" = 'confirmed' AND b."starts_at" <= now() AND b."outcome" IS DISTINCT FROM 'no_show'`
 const EARNED = `COALESCE(b."paid_amount", ${visitPrice()} - COALESCE(b."discount_amount", 0))`
 
-const toNumber = (value: unknown) => Number(value ?? 0)
 const toDate = (value: unknown) => (value ? new Date(value as string).toISOString() : null)
 
 // The business's client base: everyone who booked, grouped by phone, with what they brought.

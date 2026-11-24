@@ -3,6 +3,7 @@ import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import type { Business } from '../businesses/business.entity.js'
 import { BusinessesService } from '../businesses/businesses.service.js'
+import { returnedRows } from '../common/sql.js'
 import type { Customer } from '../customers/customer.entity.js'
 import { TelegramBotService } from '../telegram/telegram-bot.service.js'
 import { questionText } from '../telegram/telegram-messages.js'
@@ -103,8 +104,8 @@ export class QuestionsService {
        SET "answer" = NULLIF($3, ''), "answered_at" = CASE WHEN $3 = '' THEN NULL ELSE now() END
        WHERE "id" = $1 AND "business_id" = $2 RETURNING ${COLUMNS}`,
       [id, business.id, text],
-    )) as [Row[], number] | Row[]
-    const [row] = Array.isArray(rows[0]) ? (rows[0] as Row[]) : (rows as Row[])
+    )) as unknown
+    const [row] = returnedRows<Row>(rows)
     if (!row) throw new NotFoundException('Вопрос не найден')
 
     return toView(row)
@@ -114,8 +115,8 @@ export class QuestionsService {
     const rows = (await this.dataSource.query(
       `DELETE FROM "business_questions" WHERE "id" = $1 AND "business_id" = $2 RETURNING "id"`,
       [id, business.id],
-    )) as [unknown[], number] | unknown[]
-    const removed = Array.isArray(rows[0]) ? (rows[0] as unknown[]) : rows
+    )) as unknown
+    const removed = returnedRows(rows)
     if (removed.length === 0) throw new NotFoundException('Вопрос не найден')
   }
 }

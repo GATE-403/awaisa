@@ -1,4 +1,4 @@
-import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
+import { randomBytes, timingSafeEqual } from 'node:crypto'
 import {
   BadRequestException,
   ConflictException,
@@ -17,6 +17,7 @@ import { CatalogService } from '../catalog/catalog.service.js'
 import { Service } from '../catalog/service.entity.js'
 import { Specialist } from '../catalog/specialist.entity.js'
 import { toBusinessParts } from '../common/business-time.js'
+import { hashToken } from '../common/hash.js'
 import { normalizePhone } from '../common/phone.js'
 import type { Env } from '../config/env.js'
 import type { Customer } from '../customers/customer.entity.js'
@@ -26,8 +27,6 @@ import { whatsappWaitlistFreed } from '../notifications/whatsapp-messages.js'
 import type { JoinWaitlistInput } from './waitlist.schemas.js'
 import { WaitlistEntry } from './waitlist-entry.entity.js'
 import { waitlistGroupKey } from './waitlist-visit.js'
-
-const hashToken = (token: string) => createHash('sha256').update(token).digest('hex')
 
 type WaitlistView = {
   id: string

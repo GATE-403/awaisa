@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { BUSINESS_UTC_OFFSET_MINUTES } from '../common/business-time.js'
+import { toNumber } from '../common/sql.js'
 
 // A client counts as returning when they book online again within this many days.
 const REPEAT_WINDOW_DAYS = 60
@@ -16,8 +17,6 @@ const CHANNELS: BookingChannel[] = [
   'salon_link',
   'other',
 ]
-
-const toNumber = (value: unknown) => Number(value ?? 0)
 
 /**
  * The numbers that say whether the strategy works: businesses running their day in the cabinet,

@@ -1,20 +1,15 @@
-import { createHash } from 'node:crypto'
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, LessThan, Repository } from 'typeorm'
+import { hashToken } from '../common/hash.js'
 import { normalizePhone } from '../common/phone.js'
+import { returnedRows } from '../common/sql.js'
 import type { Env } from '../config/env.js'
 import { SmsService } from '../notifications/sms.service.js'
 import { AuthService } from './auth.service.js'
 import { TelegramLogin } from './telegram-login.entity.js'
 import { isLoginToken, LOGIN_TTL_MINUTES } from './telegram-login.js'
-
-const sha256 = (value: string) => createHash('sha256').update(value).digest('hex')
-
-// `UPDATE … RETURNING` through TypeORM answers `[rows, count]` on Postgres.
-const returnedRows = <Row>(result: unknown) =>
-  (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as Row[]
 
 type ContactResult = 'confirmed' | 'refused' | 'none'
 
@@ -49,7 +44,7 @@ export class TelegramLoginService {
       .createQueryBuilder()
       .insert()
       .values({
-        tokenHash: sha256(token),
+        tokenHash: hashToken(token),
         expiresAt: new Date(Date.now() + LOGIN_TTL_MINUTES * 60_000),
       })
       .orIgnore()
@@ -63,7 +58,7 @@ export class TelegramLoginService {
       .update()
       .set({ chatId })
       .where('token_hash = :hash AND status = :status AND expires_at > now()', {
-        hash: sha256(token),
+        hash: hashToken(token),
         status: 'pending',
       })
       .execute()
@@ -115,7 +110,7 @@ export class TelegramLoginService {
   /** What the page sees while it waits; a confirmed token opens a session once. */
   async check(token: string): Promise<CheckResult> {
     if (!isLoginToken(token)) return { status: 'expired' }
-    const hash = sha256(token)
+    const hash = hashToken(token)
     const login = await this.logins.findOneBy({ tokenHash: hash })
     if (!login || login.status === 'used') return { status: 'expired' }
     if (login.status === 'pending') {

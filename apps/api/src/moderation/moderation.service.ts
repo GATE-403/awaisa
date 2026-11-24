@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { publicIdSql, saltOf } from '../common/public-id.js'
+import { returnedRows } from '../common/sql.js'
 import type { Env } from '../config/env.js'
 import type { Customer } from '../customers/customer.entity.js'
 import { StorageService } from '../media/storage.service.js'
@@ -283,7 +284,7 @@ export class ModerationService {
        WHERE b."id" = r."booking_id" AND b."customer_phone" = $1 RETURNING r."specialist_id" AS "id"`,
       [phone],
     )
-    const ids = new Set(this.rows(specialists).map((row) => String(row.id)))
+    const ids = new Set(returnedRows(specialists).map((row) => String(row.id)))
     for (const specialistId of ids) await this.refreshRating(specialistId)
   }
 
@@ -436,11 +437,6 @@ export class ModerationService {
       phone,
       specialistId: null,
     }
-  }
-
-  // UPDATE/DELETE … RETURNING come back as [rows, affected] from TypeORM on Postgres.
-  private rows(result: unknown) {
-    return (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as Row[]
   }
 
   private query(sql: string, params: unknown[]) {

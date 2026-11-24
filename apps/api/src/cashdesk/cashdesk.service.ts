@@ -16,6 +16,7 @@ import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource, type EntityManager } from 'typeorm'
 import { addDays, businessDateTimeToUtc, toBusinessParts } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
+import { returnedRows, toNumber } from '../common/sql.js'
 import { FiscalService } from '../fiscal/fiscal.service.js'
 import { InventoryService } from '../inventory/inventory.service.js'
 import {
@@ -39,7 +40,6 @@ type Row = Record<string, unknown>
 const CLOSED_SHIFTS = 10
 const UNIQUE_VIOLATION = '23505'
 
-const toNumber = (value: unknown) => Number(value ?? 0)
 const toIso = (value: unknown) =>
   (value instanceof Date ? value : new Date(String(value))).toISOString()
 const toNullableNumber = (value: unknown) =>
@@ -145,7 +145,7 @@ export class CashDeskService {
         view.expectedCash,
         input.note ?? null,
       ],
-    ).then((result) => this.rows(result))
+    ).then((result) => returnedRows(result))
     if (!row) throw new BadRequestException('Смена уже закрыта')
     return this.toShift(row)
   }
@@ -186,7 +186,7 @@ export class CashDeskService {
         input.branchId ?? (booking?.branch_id as string | null) ?? null,
       )
       const itemIds = [...new Set(input.items.map((line) => line.itemId))]
-      const products = this.rows(
+      const products = returnedRows(
         await manager.query(
           `SELECT "id", "name", "quantity", "unit_cost", "sale_price" FROM "stock_items"
            WHERE "business_id" = $1 AND "id" = ANY($2) AND "is_for_sale" FOR UPDATE`,
@@ -225,13 +225,13 @@ export class CashDeskService {
         businessId,
         input.sellerId ?? (booking?.specialist_id as string | null) ?? null,
       )
-      const [shift] = this.rows(
+      const [shift] = returnedRows(
         await manager.query(
           'SELECT "id" FROM "cash_shifts" WHERE "branch_id" = $1 AND "closed_at" IS NULL',
           [branchId],
         ),
       )
-      const [sale] = this.rows(
+      const [sale] = returnedRows(
         await manager.query(
           `INSERT INTO "sales" ("business_id", "branch_id", "booking_id", "shift_id", "customer_phone",
              "customer_name", "seller_specialist_id", "created_by", "payment_method", "total", "cost")
@@ -279,7 +279,7 @@ export class CashDeskService {
   /** Undo: the sale stays in the history as cancelled and its products go back on the shelf. */
   async cancelSale(businessId: string, saleId: string) {
     await this.dataSource.transaction(async (manager) => {
-      const [sale] = this.rows(
+      const [sale] = returnedRows(
         await manager.query(
           `UPDATE "sales" SET "cancelled_at" = now()
            WHERE "id" = $1 AND "business_id" = $2 AND "cancelled_at" IS NULL RETURNING "id"`,
@@ -287,7 +287,7 @@ export class CashDeskService {
         ),
       )
       if (!sale) {
-        const [exists] = this.rows(
+        const [exists] = returnedRows(
           await manager.query('SELECT 1 FROM "sales" WHERE "id" = $1 AND "business_id" = $2', [
             saleId,
             businessId,
@@ -296,7 +296,7 @@ export class CashDeskService {
         if (!exists) throw new NotFoundException('Продажа не найдена')
         return
       }
-      const removed = this.rows(
+      const removed = returnedRows(
         await manager.query(
           `DELETE FROM "stock_movements" WHERE "sale_id" = $1 AND "kind" = 'sale'
            RETURNING "item_id", "delta"`,
@@ -348,7 +348,7 @@ export class CashDeskService {
   }
 
   private async findBooking(manager: EntityManager, businessId: string, bookingId: string) {
-    const [row] = this.rows(
+    const [row] = returnedRows(
       await manager.query(
         `SELECT "id", "branch_id", "customer_phone", "customer_name", "specialist_id", "status"
          FROM "bookings" WHERE "id" = $1 AND "business_id" = $2`,
@@ -362,7 +362,7 @@ export class CashDeskService {
 
   /** The asked branch when it is the business's own, else its first one. */
   private async resolveBranch(manager: EntityManager, businessId: string, branchId: string | null) {
-    const [row] = this.rows(
+    const [row] = returnedRows(
       await manager.query(
         `SELECT "id" FROM "branches" WHERE "business_id" = $1
          ORDER BY ("id" = $2::uuid) DESC NULLS LAST, "position", "created_at" LIMIT 1`,
@@ -376,7 +376,7 @@ export class CashDeskService {
 
   private async resolveSeller(manager: EntityManager, businessId: string, sellerId: string | null) {
     if (!sellerId) return null
-    const [row] = this.rows(
+    const [row] = returnedRows(
       await manager.query('SELECT "id" FROM "specialists" WHERE "id" = $1 AND "business_id" = $2', [
         sellerId,
         businessId,
@@ -476,11 +476,6 @@ export class CashDeskService {
       isCancelled: row.cancelled_at !== null && row.cancelled_at !== undefined,
       receipt: null,
     }
-  }
-
-  // DELETE/UPDATE … RETURNING come back as [rows, affected] from TypeORM on Postgres.
-  private rows(result: unknown) {
-    return (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as Row[]
   }
 
   private query(sql: string, params: unknown[]) {
