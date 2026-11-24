@@ -36,7 +36,14 @@ const parseTime = (time: string) => {
   return hours * 60 + minutes
 }
 
+/** A business day as a UTC range: from its midnight to the next one in business time. */
+const businessDayBounds = (dateKey: string) => ({
+  dayStart: businessDateTimeToUtc(dateKey, 0),
+  dayEnd: businessDateTimeToUtc(dateKey, 24 * 60),
+})
+
 export {
+  businessDayBounds,
   addDays,
   BUSINESS_UTC_OFFSET_MINUTES,
   businessDateTimeToUtc,

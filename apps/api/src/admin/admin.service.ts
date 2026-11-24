@@ -6,7 +6,6 @@ import { In, Repository } from 'typeorm'
 import { UNDO_WINDOW_SECONDS } from '../bookings/booking-rules.js'
 import { BookingsService } from '../bookings/bookings.service.js'
 import { SalonBookingsService } from '../bookings/salon-bookings.service.js'
-import { visitPrice } from '../bookings/visit-sql.js'
 import type { Business } from '../businesses/business.entity.js'
 import { BusinessesService } from '../businesses/businesses.service.js'
 import { CatalogService } from '../catalog/catalog.service.js'
@@ -14,14 +13,12 @@ import { clampToWindow } from '../catalog/master-hours.js'
 import { MasterScheduleService } from '../catalog/master-schedule.service.js'
 import {
   businessDateTimeToUtc,
+  businessDayBounds,
   formatMinutes,
   parseTime,
   toBusinessParts,
 } from '../common/business-time.js'
 import type { Env } from '../config/env.js'
-import { FiscalService } from '../fiscal/fiscal.service.js'
-import { InventoryService } from '../inventory/inventory.service.js'
-import { LoyaltyService } from '../loyalty/loyalty.service.js'
 import { ClientMessagesService } from '../notifications/client-messages.service.js'
 import { rescheduleMessage, salonCancellationMessage } from '../notifications/messages.js'
 import {
@@ -45,11 +42,6 @@ const toTimeOffView = (timeOff: TimeOff) => {
   }
 }
 
-const dayBounds = (date: string) => ({
-  dayStart: businessDateTimeToUtc(date, 0),
-  dayEnd: businessDateTimeToUtc(date, 24 * 60),
-})
-
 @Injectable()
 export class AdminService {
   constructor(
@@ -61,13 +53,10 @@ export class AdminService {
     private readonly businesses: BusinessesService,
     private readonly clientMessages: ClientMessagesService,
     private readonly config: ConfigService<Env, true>,
-    private readonly loyalty: LoyaltyService,
-    private readonly inventory: InventoryService,
-    private readonly fiscal: FiscalService,
   ) {}
 
   async getSchedule(business: Business, date: string) {
-    const bounds = dayBounds(date)
+    const bounds = businessDayBounds(date)
     const specialists = await this.catalog.listActiveSpecialists(business.id)
     const [bookings, timeOff] = await Promise.all([
       this.salonBookings.getAdminViews(business.id, bounds),
@@ -153,44 +142,6 @@ export class AdminService {
        ORDER BY 1`,
       [business.id, from, days],
     )) as ScheduleLoad
-  }
-
-  // «Все пришли»: every ended visit of the day without an outcome counts as arrived, paid the
-  // price in cash. The ids come back so the toast can undo exactly these.
-  async closeDay(business: Business, date: string) {
-    const rows = (await this.timeOff.manager.query(
-      `UPDATE "bookings" AS b SET "outcome" = 'arrived', "paid_amount" = ${visitPrice()} - COALESCE(b."discount_amount", 0),
-         "payment_method" = 'cash', "outcome_at" = now()
-       FROM "services" AS s
-       WHERE s."id" = b."service_id" AND b."business_id" = $1 AND b."status" = 'confirmed'
-         AND b."outcome" IS NULL AND b."ends_at" < now()
-         AND b."starts_at" >= $2 AND b."starts_at" < $3
-       RETURNING b."id"`,
-      [business.id, ...Object.values(dayBounds(date))],
-    )) as unknown
-    const list = (Array.isArray(rows) && Array.isArray(rows[0]) ? rows[0] : rows) as {
-      id: string
-    }[]
-
-    const ids = list.map((row) => row.id)
-    await this.loyalty.usePlannedSubscriptions(ids)
-    await this.loyalty.earnForVisits(ids)
-    await this.inventory.useForVisits(ids)
-    await this.fiscal.syncVisits(business.id, ids)
-
-    return { ids }
-  }
-
-  async reopen(business: Business, ids: string[]) {
-    await this.timeOff.manager.query(
-      `UPDATE "bookings" SET "outcome" = NULL, "paid_amount" = NULL, "payment_method" = NULL,
-         "outcome_at" = NULL
-       WHERE "business_id" = $1 AND "id" = ANY($2::uuid[])`,
-      [business.id, ids],
-    )
-    await this.loyalty.revertVisits(ids)
-    await this.inventory.revertVisits(ids)
-    await this.fiscal.syncVisits(business.id, ids)
   }
 
   async createBooking(business: Business, input: StaffBookingInput) {
