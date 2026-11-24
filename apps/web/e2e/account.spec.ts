@@ -8,7 +8,7 @@ import {
   submitBooking,
 } from './helpers'
 
-test.describe('Account: sign in by SMS', () => {
+test.describe('Account: sign in with a code in Telegram', () => {
   test.afterEach(async ({ page }) => {
     const stored = await readStoredBookings(page).catch(() => [])
     await Promise.all(stored.map(cancelViaApi))
@@ -21,8 +21,11 @@ test.describe('Account: sign in by SMS', () => {
     await page.goto('/login?next=/bookings')
 
     await page.getByLabel('Номер телефона').fill(phone)
-    await page.getByRole('button', { name: 'Получить код' }).click()
-    await expect(page.getByText(`Код отправлен по SMS на ${formatPhone(phone)}`)).toBeVisible()
+    await expect(page.getByText('Код придёт в Telegram')).toBeVisible()
+    await page.getByRole('button', { name: 'Получить код в Telegram' }).click()
+    await expect(page.getByText(`Код отправлен в Telegram на ${formatPhone(phone)}`)).toBeVisible()
+    // No SMS anywhere: the code goes to Telegram only.
+    await expect(page.getByText(/SMS/)).toHaveCount(0)
 
     const code = page.getByLabel('Код подтверждения')
     await expect(code).toHaveAttribute('autocomplete', 'one-time-code')
@@ -118,6 +121,26 @@ test.describe('Account: sign in by SMS', () => {
     expect((await (await page.request.get('/api/me')).json()).avatarUrl).toBeNull()
   })
 
+  test('without a Telegram Gateway only the bot is offered', async ({ page }) => {
+    await page.route('**/api/auth/telegram', (route) =>
+      route.fulfill({
+        json: { isAvailable: true, botUsername: 'awaisa_e2e_bot', isCodeAvailable: false },
+      }),
+    )
+    await page.route('**/api/auth/telegram/check', (route) =>
+      route.fulfill({ json: { status: 'pending' } }),
+    )
+    await page.goto('/login')
+
+    const bot = page.getByRole('link', { name: 'Войти через Telegram' })
+    await expect(bot).toBeVisible()
+    // Alone it is white: the accent blue clashed with Telegram's own blue mark.
+    await expect(bot).toHaveAttribute('data-variant', 'contrast')
+    await expect(bot).toHaveAttribute('href', /^https:\/\/t\.me\/awaisa_e2e_bot\?start=login_/)
+    await expect(page.getByLabel('Номер телефона')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /Получить код/ })).toHaveCount(0)
+  })
+
   test('a half-typed number is not sent: the page says what is missing', async ({ page }) => {
     await page.goto('/login')
     await page.getByLabel('Номер телефона').fill('555 12')
@@ -131,6 +154,11 @@ test.describe('Account: sign in by SMS', () => {
     await page.goto('/login')
     await page.getByLabel('Номер телефона').fill(randomClientPhone())
     await page.getByRole('button', { name: 'Получить код' }).click()
+    // Square cells in every browser: the kit's capsule `.input` must not win over `.cell`.
+    const cell = page.getByLabel('Код подтверждения')
+    const box = await cell.boundingBox()
+    expect(box && Math.round(box.width)).toBe(box && Math.round(box.height))
+    await expect(cell).toHaveCSS('border-radius', '12px')
     await page.getByLabel('Код подтверждения').fill('000000')
 
     await expect(page.getByText('Неверный код, осталось попыток: 4')).toBeVisible()

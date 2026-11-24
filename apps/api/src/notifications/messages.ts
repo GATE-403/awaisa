@@ -6,8 +6,6 @@ type BookingMessageInput = {
   time: string
 }
 
-const PLATFORM_NAME = 'Awaisa'
-
 const MONTHS = [
   'января',
   'февраля',
@@ -27,9 +25,6 @@ const formatDate = (dateKey: string) => {
   const [, month = 1, day = 1] = dateKey.split('-').map(Number)
   return `${day} ${MONTHS[month - 1]}`
 }
-
-const otpMessage = (code: string) =>
-  `${code} - код для входа в ${PLATFORM_NAME}. Никому его не сообщайте.`
 
 // `link` opens the visit without signing in (common/visit-link.ts): move or cancel from there.
 const confirmationMessage = (booking: BookingMessageInput, link: string) =>
@@ -80,7 +75,6 @@ export {
   adminInviteMessage,
   confirmationMessage,
   masterInviteMessage,
-  otpMessage,
   reminderMessage,
   returnVisitMessage,
   waitlistFreedMessage,

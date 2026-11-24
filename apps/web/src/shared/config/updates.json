@@ -1,5 +1,16 @@
 [
   {
+    "id": "pr155-1",
+    "date": "2026-11-24",
+    "audience": "everyone",
+    "title": "Вход через Telegram",
+    "text": "Код для входа теперь приходит в Telegram, а не по SMS. Можно войти и через бота, не вводя номер.",
+    "link": {
+      "href": "/login",
+      "label": "Войти"
+    }
+  },
+  {
     "id": "pr138-1",
     "date": "2026-11-24",
     "audience": "business",

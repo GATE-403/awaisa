@@ -16,7 +16,7 @@
 - [ ] Домен (по коду ожидается `awaisa.kg`) и DNS.
 - [ ] Сервер: для старта хватит одного VPS на 2 vCPU и 4 ГБ (нагрузочные тесты: один процесс API держит ~700 запросов/с без кэша, `apps/api/load/README.md`).
 - [ ] SMS: аккаунт Twilio с отправкой в Кыргызстан (`SMS_DRIVER` знает только `console` и `twilio`; местного шлюза в коде нет). Проверить цену и доставку на номера +996 до запуска.
-- [ ] Telegram Gateway (`TELEGRAM_GATEWAY_TOKEN`): коды входа через Telegram дешевле SMS. Необязательно, но снижает расходы на SMS.
+- [ ] Telegram Gateway (`TELEGRAM_GATEWAY_TOKEN`): коды входа приходят только в Telegram, по SMS их больше нет. Без шлюза на `/login` остаётся только «Войти через Telegram» (бот), так что бот обязателен в любом случае.
 - [ ] Бот для владельцев в BotFather (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`): уведомления о записях, вход через Telegram, алерты.
 - [ ] Хранилище фото: бакет Cloudflare R2 с публичным адресом.
 - [ ] Sentry или GlitchTip (бесплатного плана хватит).
@@ -31,7 +31,7 @@
 - [ ] `REDIS_URL`: обязателен, потому что compose запускает раздельные `api` и `worker` (`PROCESS_ROLE=api|worker` без Redis не стартует).
 - [ ] `WEB_ORIGIN=https://awaisa.kg` и `PUBLIC_WEB_URL=https://awaisa.kg`: из них строятся ссылки в SMS и Telegram.
 - [ ] `ADMIN_PHONES`: доступ к `/insights`, `/moderation` и любому кабинету.
-- [ ] `SMS_DRIVER=twilio` с `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` и `TWILIO_FROM` или `TWILIO_MESSAGING_SERVICE_SID`. Без них коды входа только пишутся в лог, и войти никто не сможет.
+- [ ] `SMS_DRIVER=twilio` с `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` и `TWILIO_FROM` или `TWILIO_MESSAGING_SERVICE_SID`. Нужны для сообщений клиентам (подтверждения, напоминания, отмены), вход по SMS не идёт.
 - [ ] `SMS_ALLOWED_COUNTRY_CODES=996` (по умолчанию так и есть): SMS и коды только на кыргызские номера.
 - [ ] `STORAGE_DRIVER=s3`, `S3_BUCKET`, `S3_ENDPOINT`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_PUBLIC_URL`. Без них фото лежат в томе `uploads` на одном сервере.
 - [ ] Убедиться, что **не задан** `OTP_TEST_CODE` (API откажется стартовать) и не задан `PAYMENT_DRIVER=test` или `FISCAL_DRIVER=log` (тоже откажется).
@@ -81,7 +81,7 @@
 
 Пройти руками на дешёвом Android и на iPhone, на продовой сборке:
 
-- [ ] Вход по SMS на реальный номер +996: код приходит меньше чем за минуту.
+- [ ] Вход на реальный номер +996: «Войти через Telegram» (бот) и код в Telegram приходят меньше чем за минуту.
 - [ ] Регистрация бизнеса, услуги, мастер, часы работы, обложка (фото уходит в R2).
 - [ ] Запись гостем с телефона: SMS-подтверждение пришло, ссылка из SMS открывает визит.
 - [ ] Отмена с «Вернуть», перенос, напоминание за 2 часа.

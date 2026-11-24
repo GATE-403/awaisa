@@ -15,7 +15,11 @@ test.describe('Sign-in through the Telegram bot', () => {
   }) => {
     test.skip(isMobile, 'API only')
     const config = await (await page.request.get('/api/auth/telegram')).json()
-    expect(config).toEqual({ isAvailable: true, botUsername: 'awaisa_e2e_bot' })
+    expect(config).toEqual({
+      isAvailable: true,
+      botUsername: 'awaisa_e2e_bot',
+      isCodeAvailable: true,
+    })
 
     const token = randomBytes(32).toString('base64url')
     const phone = randomClientPhone()
