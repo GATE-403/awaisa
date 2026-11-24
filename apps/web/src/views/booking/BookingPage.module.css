@@ -91,16 +91,6 @@
   min-width: 0;
 }
 
-.hint {
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
-  line-height: var(--text-sm-line-height);
-}
-
 .fields {
   display: flex;
   flex-direction: column;
@@ -246,10 +236,7 @@
   font-weight: var(--font-weight-medium);
 }
 
-.extras > details[open],
-.extras > p,
-/* Contacts as one inset group of Settings rows; an error sits under its row. */
-  .group {
+.group {
   overflow: hidden;
   border-radius: var(--radius-xl);
   background: var(--color-surface);
@@ -440,23 +427,6 @@ button.fieldRow {
   flex-direction: column;
   gap: var(--space-10);
   margin-top: var(--space-10);
-}
-
-/* Length · description on one line (cut with an ellipsis), whole on the chosen service. */
-.serviceNote {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.serviceSoon {
-  color: var(--color-foreground);
-  font-weight: var(--font-weight-medium);
-}
-
-label:has([data-checked]) .serviceNote {
-  white-space: normal;
 }
 
 /* Quiet, under the steps: not a step and not the main action. */

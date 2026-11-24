@@ -250,13 +250,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.note {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-xs);
-  line-height: var(--text-xs-line-height);
-  text-align: center;
-}
-
 .error {
   color: var(--color-danger-text);
   font-size: var(--text-sm);
@@ -278,14 +271,6 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
-}
-
-.barCaret {
-  width: 12px;
-  height: 12px;
-  margin-left: 4px;
-  color: var(--color-muted-foreground);
-  vertical-align: 1px;
 }
 
 .detailValue {

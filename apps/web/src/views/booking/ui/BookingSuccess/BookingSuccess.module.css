@@ -58,19 +58,6 @@
   scale: 0.98;
 }
 
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-2);
-  margin-top: var(--space-4);
-}
-
-.chipIcon {
-  width: 17px;
-  height: 17px;
-}
-
 /* «Ещё запись …»: a link-coloured row as wide as the column, 44pt to tap, right before the
    line of actions. */
 .another {

@@ -208,13 +208,6 @@
   display: none;
 }
 
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
-}
-
 .found {
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
@@ -254,62 +247,6 @@
   background: var(--color-border);
 }
 
-.serviceRow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--space-4);
-  min-height: 60px;
-  padding: var(--space-3) var(--space-4);
-  color: inherit;
-  transition: background-color var(--duration-fast) var(--ease-standard);
-}
-
-.serviceRow:active {
-  background: var(--color-fill);
-}
-
-.rowText,
-.rowSide {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.rowSide {
-  align-items: flex-end;
-}
-
-.rowTitle {
-  font-size: var(--text-body);
-  line-height: var(--text-body-line-height);
-  font-weight: var(--font-weight-semibold);
-}
-
-.rowMeta {
-  overflow: hidden;
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  line-height: var(--text-footnote-line-height);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.rowPrice {
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-semibold);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.popularSlot {
-  color: var(--color-link);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-medium);
-  white-space: nowrap;
-}
-
 .serviceGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -323,12 +260,6 @@
   .serviceGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
-  }
-}
-
-@media (hover: hover) {
-  .serviceRow:hover {
-    background: var(--color-fill);
   }
 }
 
@@ -426,37 +357,12 @@
   box-shadow: var(--shadow-sm);
 }
 
-.cardCaption {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--tracking-caption);
-  text-transform: uppercase;
-}
-
-.slot {
-  margin-top: var(--space-1);
-  font-family: var(--font-display);
-  font-size: var(--text-title2);
-  line-height: var(--text-title2-line-height);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--tracking-title);
-}
-
-.slot[data-loading] {
-  color: var(--color-tertiary-foreground);
-}
-
 .slotMeta {
   overflow: hidden;
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.slotButton {
-  margin-top: var(--space-4);
 }
 
 /* Facts as Settings rows: coloured glyph, small label over the value, an accessory on the right. */
@@ -589,11 +495,6 @@ details[open] > .info .infoChevron {
 .card .visitMap > * {
   margin-top: 0;
   border-radius: 0;
-}
-
-.infoMuted {
-  color: var(--color-muted-foreground);
-  font-weight: var(--font-weight-regular);
 }
 
 .visit {
@@ -763,12 +664,6 @@ details[open] > .info .infoChevron {
 @media (hover: hover) {
   .infoAction:hover {
     text-decoration: underline;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .serviceRow {
-    transition: none;
   }
 }
 

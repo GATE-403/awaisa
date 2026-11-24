@@ -62,10 +62,3 @@
   border-radius: var(--radius-xs);
   box-shadow: var(--focus-ring);
 }
-
-.footer {
-  padding: 0;
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  line-height: var(--text-footnote-line-height);
-}

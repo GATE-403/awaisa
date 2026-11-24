@@ -75,13 +75,5 @@ const analyticsFormat = (t: Translate) => {
   return { formatDay, formatMoney, toBuckets }
 }
 
-// A clean axis maximum: 1, 2 or 5 × 10ⁿ above the data.
-const niceCeiling = (value: number) => {
-  if (value <= 0) return 1000
-  const magnitude = 10 ** Math.floor(Math.log10(value))
-  const step = [1, 2, 2.5, 5, 10].find((factor) => factor * magnitude >= value) ?? 10
-  return step * magnitude
-}
-
 export type { Bucket }
-export { analyticsFormat, formatTick, niceCeiling, numberFormatter }
+export { analyticsFormat, formatTick, numberFormatter }
