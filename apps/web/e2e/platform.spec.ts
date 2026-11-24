@@ -1,6 +1,13 @@
 import { expect, type Page, test } from '@playwright/test'
 import { randomClientPhone, signInViaApi } from './account'
-import { bookingSteps, pickFirstFreeSlot, submitBooking, waitForToastsToLeave } from './helpers'
+import {
+  bookingSteps,
+  clickUntilUrl,
+  pickFirstFreeSlot,
+  searchCatalog,
+  submitBooking,
+  waitForToastsToLeave,
+} from './helpers'
 
 // 16×10 px PNG; the API re-encodes it as WebP.
 const TINY_PNG =
@@ -104,13 +111,14 @@ test.describe('Platform: a new business goes live', () => {
     const client = await browser.newContext()
     const clientPage = await client.newPage()
     await clientPage.goto('/')
-    const search = clientPage.getByRole('searchbox', { name: 'Search salons and specialists' })
     // By the unique part of the name: other specs of the run leave many «E2E …» places, and
     // a search for «E2E Barber …» would list them all with this one somewhere down the list.
-    await search.fill(suffix)
-    await search.press('Enter')
-    await clientPage.getByRole('link', { name: new RegExp(name) }).click()
-    await expect(clientPage).toHaveURL(new RegExp(`/${slug}$`))
+    await searchCatalog(clientPage, suffix)
+    await clickUntilUrl(
+      clientPage,
+      clientPage.getByRole('link', { name: new RegExp(name) }).first(),
+      new RegExp(`/${slug}$`),
+    )
     // The head's «Book» opens the booking form itself, on every screen size.
     await clientPage.locator('[data-place-book]').click()
     await expect(clientPage).toHaveURL(new RegExp(`/${slug}/book$`))
