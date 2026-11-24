@@ -4,38 +4,32 @@
 
 <h1 align="center">Awaisa</h1>
 
-<p align="center">Запись к мастерам в Бишкеке. Без звонков.</p>
+<p align="center">Book your master in Bishkek. No phone calls.</p>
 
-Платформа онлайн-записи: любой бизнес (барбершоп, салон, ногти, SPA, стоматология) регистрируется и получает свою страницу `/<slug>`. Клиенты находят места и услуги в каталоге, выбирают мастера и время и записываются сами. У владельца кабинет: расписание, клиенты, аналитика, акции и настройки страницы.
+## What it is
 
-## Монорепо
+Awaisa is where people in Bishkek find a barber, a nail artist, a brow master, a massage therapist or a dentist, see their work and their free time, and book in a few taps. Any business, from a one-chair barbershop to a salon with several branches, gets its own page and a calm place to run its day: the schedule, clients, reviews, money.
 
-Turborepo + pnpm workspaces.
+## Why we started
 
-| Пакет | Что внутри |
-| --- | --- |
-| `apps/web` | Next.js (App Router): каталог, страницы бизнесов, запись, кабинет |
-| `apps/api` | NestJS + TypeORM + PostgreSQL, Redis для кэша |
-| `apps/mobile` | Expo-оболочка, показывает `apps/web` в WebView |
-| `packages/tokens` | дизайн-токены (цвета, отступы, типографика) |
-| `packages/ui` | UI-кит на Base UI и CSS Modules |
-| `packages/contracts` | типы запросов и ответов API, общие для web и api |
+Booking a haircut here still means calling, writing to an Instagram account and waiting for a reply, or sending voice messages back and forth in WhatsApp. The salon keeps the day in a notebook or in someone's head, and the client never knows whether 18:00 is free until somebody answers.
 
-## Запуск
+We wanted the opposite: you open the app, see real photos of real work, see «Сегодня с 15:30», tap, and you are booked. The master knows at once, the reminder comes by itself, and moving the visit is one more tap, not another call.
 
-```bash
-cp .env.example .env
-pnpm install
-pnpm db:up      # PostgreSQL и Redis в Docker
-pnpm db:seed    # демо-данные (только для разработки)
-pnpm dev        # web :3000, api :4000 (/health), Expo
-```
+## What inspires us
 
-```bash
-pnpm test       # юнит-тесты
-pnpm test:e2e   # Playwright (нужен pnpm db:up)
-```
+- **Pictures first.** People choose a master by their work, so the work leads: photos of haircuts, nails and brows, not lists and forms.
+- **Apple's restraint.** Quiet interfaces where content speaks and every screen has one clear next step. Facts instead of sentences, nothing that only decorates.
+- **Respect for the people who do the work.** A master's craft, their regulars and their reputation belong to them. Awaisa should help them grow, not stand between them and their clients.
+- **Made for here.** Phones first, slow networks and weak devices in mind, Russian and Kyrgyz, local payment and messaging habits.
 
-`pnpm dev` запускает и Expo (`apps/mobile`): `i` / `a` в его панели или QR-код в Expo Go. Полный стек в Docker: `docker compose --profile app up --build`. Демо UI-кита: http://localhost:3000/ui.
+## Where we are going
 
-Архитектура, правила дизайна, API и тесты описаны в [AGENTS.md](AGENTS.md).
+- **From booking to discovery.** «Образы», a feed of finished work, and «Для вас», picks that learn what each person likes, so people find new masters, not only rebook old ones.
+- **Masters as people.** Follow a master, hear when their time frees up, follow them when they move to another place.
+- **The whole day of a business in one place.** Schedule, cash desk and receipts, stock, loyalty and analytics that answer «what should I do today?», so a small salon runs as smoothly as a big one.
+- **A habit, not a tool.** Booking a master should feel as ordinary as ordering a taxi, for every neighbourhood of Bishkek and, later, other cities of Kyrgyzstan.
+
+## For developers
+
+Architecture, design rules, commands and tests are in [AGENTS.md](AGENTS.md).
