@@ -73,7 +73,7 @@ export const QuietReplySheet = ({ counts, template, onSend, onClose }: QuietRepl
             </div>
           </div>
           <p className={sheet.groupFooter}>
-            {t('{reviews} without text get the reply. Answer reviews with text yourself.', {
+            {t('The reply goes to {reviews} without text. Answer reviews with text yourself.', {
               reviews: t.count(count, [...REVIEW_WORDS]),
             })}
           </p>

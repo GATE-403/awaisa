@@ -92,7 +92,7 @@ export const FiscalTab = ({ slug }: FiscalTabProps) => {
         {header}
         <EmptyState
           title={t('Receipts are not connected yet')}
-          text={t('Sales and visits are recorded in "Till" as before, without fiscal receipts.')}
+          text={t('Sales and visits are recorded in “Till” as before, without fiscal receipts.')}
         />
       </section>
     )
@@ -134,7 +134,7 @@ export const FiscalTab = ({ slug }: FiscalTabProps) => {
           {settings.isEnabled
             ? [
                 t(
-                  'A receipt is issued by itself after a sale and after "Arrived" paid in money; cancelling a sale issues a refund receipt.',
+                  'A receipt is issued by itself after a sale and after “Arrived” paid in money; cancelling a sale issues a refund receipt.',
                 ),
                 DRIVER_NOTE[settings.driver] ? t(DRIVER_NOTE[settings.driver]) : '',
               ]

@@ -31,11 +31,11 @@ test.describe('Import from another booking system', () => {
 
     try {
       await page.goto(`/manage/${SLUG}?tab=clients`)
-      await page.getByRole('button', { name: 'Импорт', exact: true }).click()
-      const sheet = page.getByRole('dialog', { name: 'Импорт' })
+      await page.getByRole('button', { name: 'Import', exact: true }).click()
+      const sheet = page.getByRole('dialog', { name: 'Import' })
 
-      // Clients: YCLIENTS-style headers, «;» between cells, a quoted note with a separator.
-      await sheet.getByLabel('Файл CSV').setInputFiles({
+      // Clients: YCLIENTS-style headers, “;” between cells, a quoted note with a separator.
+      await sheet.getByLabel('CSV file').setInputFiles({
         name: 'clients.csv',
         mimeType: 'text/csv',
         buffer: Buffer.from(
@@ -46,15 +46,15 @@ test.describe('Import from another booking system', () => {
           ].join('\n'),
         ),
       })
-      await expect(sheet.getByText('clients.csv · 2 строки')).toBeVisible()
-      await expect(sheet.getByText(/Первая строка: E2E Импорт Клиентов/)).toBeVisible()
-      await sheet.getByRole('button', { name: 'Загрузить' }).click()
-      await expect(sheet.getByText('Загружено 1 · пропущено 1')).toBeVisible()
-      await expect(sheet.getByText('нет телефона')).toBeVisible()
-      await sheet.getByRole('button', { name: 'Готово' }).click()
+      await expect(sheet.getByText('clients.csv · 2 rows')).toBeVisible()
+      await expect(sheet.getByText(/First row: E2E Импорт Клиентов/)).toBeVisible()
+      await sheet.getByRole('button', { name: 'Load' }).click()
+      await expect(sheet.getByText('Loaded 1 · skipped 1')).toBeVisible()
+      await expect(sheet.getByText('no phone')).toBeVisible()
+      await sheet.getByRole('button', { name: 'Done' }).click()
 
       // The client is in the base before any booking, with the note and birthday.
-      await page.getByLabel('Поиск клиента').fill('E2E Импорт Клиентов')
+      await page.getByLabel('Find a client').fill('E2E Импорт Клиентов')
       await expect(page.getByRole('button', { name: /E2E Импорт Клиентов/ })).toBeVisible()
       const card = await (
         await page.request.get(`${manage}/clients/${encodeURIComponent(clientPhone)}`)
@@ -67,9 +67,9 @@ test.describe('Import from another booking system', () => {
 
       // Bookings: Altegio-style headers, comma-separated; an off-grid time goes in as it is,
       // a past visit and an unknown service are skipped with the reason.
-      await page.getByRole('button', { name: 'Импорт', exact: true }).click()
-      await sheet.getByRole('radio', { name: 'Записи' }).check({ force: true })
-      await sheet.getByLabel('Файл CSV').setInputFiles({
+      await page.getByRole('button', { name: 'Import', exact: true }).click()
+      await sheet.getByRole('radio', { name: 'Bookings' }).check({ force: true })
+      await sheet.getByLabel('CSV file').setInputFiles({
         name: 'records.csv',
         mimeType: 'text/csv',
         buffer: Buffer.from(
@@ -81,11 +81,11 @@ test.describe('Import from another booking system', () => {
           ].join('\n'),
         ),
       })
-      await expect(sheet.getByText('records.csv · 3 строки')).toBeVisible()
-      await sheet.getByRole('button', { name: 'Загрузить' }).click()
-      await expect(sheet.getByText('Загружено 1 · пропущено 2')).toBeVisible()
-      await expect(sheet.getByText('визит уже прошёл')).toBeVisible()
-      await expect(sheet.getByText('нет услуги «Несуществующая услуга»')).toBeVisible()
+      await expect(sheet.getByText('records.csv · 3 rows')).toBeVisible()
+      await sheet.getByRole('button', { name: 'Load' }).click()
+      await expect(sheet.getByText('Loaded 1 · skipped 2')).toBeVisible()
+      await expect(sheet.getByText('the visit is in the past')).toBeVisible()
+      await expect(sheet.getByText('no service “Несуществующая услуга”')).toBeVisible()
 
       const schedule = await (await page.request.get(`${manage}/schedule?date=${day.iso}`)).json()
       const booking = schedule.bookings.find(
@@ -117,7 +117,7 @@ test.describe('Import from another booking system', () => {
       })
       expect(await again.json()).toMatchObject({
         imported: 0,
-        skipped: [{ row: 1, reason: 'уже импортирована' }],
+        skipped: [{ row: 1, reason: 'already imported' }],
       })
     } finally {
       for (const id of created) await page.request.post(`${manage}/bookings/${id}/cancel`)

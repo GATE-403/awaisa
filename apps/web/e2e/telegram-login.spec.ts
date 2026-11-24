@@ -6,7 +6,7 @@ import { withDb } from './visits'
 
 const WEBHOOK_SECRET = 'e2e-webhook-secret'
 
-// «Войти через Telegram»: the page's token, the bot's /start, the person's own number shared
+// “Sign in with Telegram”: the page's token, the bot's /start, the person's own number shared
 // in the chat, then the page's check opens a session on that number.
 test.describe('Sign-in through the Telegram bot', () => {
   test('a shared number signs the page in once; a forwarded one does not', async ({
@@ -84,12 +84,12 @@ test.describe('Sign-in through the Telegram bot', () => {
     // The bot link opens Telegram in a new tab; the test stays on our page.
     await context.route('https://t.me/**', (route) => route.fulfill({ body: 'Telegram' }))
     await page.goto('/login?next=/bookings')
-    const button = page.getByRole('link', { name: 'Войти через Telegram' })
+    const button = page.getByRole('link', { name: 'Sign in with Telegram' })
     await expect(button).toHaveAttribute('href', /^https:\/\/t\.me\/awaisa_e2e_bot\?start=login_/)
     const href = (await button.getAttribute('href')) ?? ''
     const token = href.split('login_')[1] ?? ''
     await button.click()
-    await expect(page.getByRole('heading', { name: 'Подтвердите в Telegram' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Confirm in Telegram' })).toBeVisible()
 
     const phone = randomClientPhone()
     const chatId = 7_100_000_000 + Math.floor(Math.random() * 1_000_000)
@@ -105,9 +105,9 @@ test.describe('Sign-in through the Telegram bot', () => {
     await bot({ contact: { phone_number: phone, user_id: chatId } })
 
     // A new client: the page asks for a name, then goes where it was asked to.
-    await expect(page.getByRole('heading', { name: 'Вы вошли' })).toBeVisible()
-    await page.getByLabel('Имя').fill('E2E Telegram')
-    await page.getByRole('button', { name: 'Готово' }).click()
+    await expect(page.getByRole('heading', { name: 'You are signed in' })).toBeVisible()
+    await page.getByLabel('Name').fill('E2E Telegram')
+    await page.getByRole('button', { name: 'Done' }).click()
     await expect(page).toHaveURL(/\/bookings$/)
 
     await withDb((client) =>

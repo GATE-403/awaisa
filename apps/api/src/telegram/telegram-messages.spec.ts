@@ -49,7 +49,7 @@ describe('Telegram messages', () => {
         authorName: 'Dayan',
         specialistName: 'Aigerim',
       }),
-    ).toMatch(/^★★★★☆ .*«Great»/s)
+    ).toMatch(/^★★★★☆ .*“Great”/s)
   })
 
   it('asks for an answer in person on a poor rating only', () => {

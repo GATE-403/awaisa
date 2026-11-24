@@ -101,7 +101,7 @@ export const ContactClientSheet = ({
             {chosen
               ? t('The promo code is added at the end of the message.')
               : t(
-                  'The messenger opens with this text. Once you agree, mark the review "Resolved".',
+                  'The messenger opens with this text. Once you agree, mark the review “Resolved”.',
                 )}
           </p>
         </section>

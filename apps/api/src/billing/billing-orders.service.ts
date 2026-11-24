@@ -277,7 +277,7 @@ export class BillingOrdersService implements OnModuleInit {
       order.kind === 'sms'
         ? `${order.smsCount ?? 0} SMS added`
         : paidUntil
-          ? `The «${planTitle ?? ''}» plan is paid until ${formatDay(paidUntil)}`
+          ? `The “${planTitle ?? ''}” plan is paid until ${formatDay(paidUntil)}`
           : 'Plan paid'
 
     return {

@@ -27,7 +27,7 @@ const VOCABULARY = vocabularyOf([
 ])
 
 describe('readingsOf', () => {
-  it('lower-cases and folds «ё»', () => {
+  it('lower-cases and folds “ё”', () => {
     expect(readingsOf('  ПРИЧЁСКА!! ')[0]).toBe('прическа')
   })
 

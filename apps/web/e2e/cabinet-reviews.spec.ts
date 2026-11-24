@@ -38,10 +38,10 @@ const ratedVisit = async (
   return visit
 }
 
-const QUICK_REPLY = 'Рады видеть, {имя}! {услуга} удалась'
+const QUICK_REPLY = 'Good to see you, {name}! The {service} went well'
 
 // A new review reaches the owners' Telegram with buttons under it: a quick reply publishes at once,
-// «Свой ответ» asks for words and the owner's reply to that prompt becomes the review's reply. Only
+// «Own reply» asks for words and the owner's reply to that prompt becomes the review's reply. Only
 // a chat linked to the review's business may answer, and only while it has no reply. The bot has
 // no token in tests: what Telegram would send is posted to the webhook.
 const WEBHOOK_SECRET = 'e2e-webhook-secret'
@@ -59,7 +59,7 @@ const sendUpdate = async (page: Page, update: Record<string, unknown>) => {
 
 const randomChat = () => 7_000_000_000 + Math.floor(Math.random() * 900_000_000)
 
-// The owner taps «Подключить Telegram», then «Start» in the bot.
+// The owner taps «Connect Telegram», then «Start» in the bot.
 const linkChat = async (page: Page, business: OwnBusiness, chatId: number) => {
   const link = await (await page.request.post(`/api/manage/${business.slug}/telegram/link`)).json()
   await sendUpdate(page, {
@@ -82,18 +82,18 @@ const reviewsOf = async (page: Page, business: OwnBusiness) => {
 }
 
 test.describe('Cabinet reviews', () => {
-  test('«Ответы на отзывы» keeps a new quick reply', async ({ page }) => {
+  test('“Review replies” keeps a new quick reply', async ({ page }) => {
     const business = await createOwnBusiness(page)
     await page.goto(`/manage/${business.slug}?tab=reviews`)
-    await page.getByRole('button', { name: 'Ответы на отзывы' }).click()
-    const settings = page.getByRole('dialog', { name: 'Ответы на отзывы' })
+    await page.getByRole('button', { name: 'Review replies' }).click()
+    const settings = page.getByRole('dialog', { name: 'Review replies' })
     // A fresh business starts with three quick replies.
-    await expect(settings.getByRole('textbox', { name: /^Быстрый ответ \d$/ })).toHaveCount(3)
-    await settings.getByRole('button', { name: 'Добавить ответ' }).click()
-    await settings.getByRole('textbox', { name: 'Быстрый ответ 4' }).fill(QUICK_REPLY)
-    await settings.getByRole('button', { name: 'Готово' }).click()
+    await expect(settings.getByRole('textbox', { name: /^Quick reply \d$/ })).toHaveCount(3)
+    await settings.getByRole('button', { name: 'Add a reply' }).click()
+    await settings.getByRole('textbox', { name: 'Quick reply 4' }).fill(QUICK_REPLY)
+    await settings.getByRole('button', { name: 'Done' }).click()
     await expect(settings).toHaveCount(0)
-    await expect(page.getByText('Сохранено')).toBeVisible()
+    await expect(page.getByText('Saved')).toBeVisible()
     await expect
       .poll(async () => {
         const saved = await page.request.get(`/api/manage/${business.slug}/reviews/settings`)
@@ -102,36 +102,38 @@ test.describe('Cabinet reviews', () => {
       .toEqual([expect.any(String), expect.any(String), expect.any(String), QUICK_REPLY])
   })
 
-  test('poor reviews lead «Без ответа»; quick replies, «Решено» and «Ответить всем» answer them', async ({
+  test('poor reviews lead “Unanswered”; quick replies, “Resolved” and “Reply to all” answer them', async ({
     page,
   }) => {
     test.setTimeout(90_000)
     const business = await createOwnBusiness(page)
-    // Authors read as «E2E Т.», «E2E Б.», «E2E Н.»: one letter tells them apart.
+    // Authors read as «E2E Q.», «E2E C.», «E2E U.»: one letter tells them apart.
     // The poor one is the oldest visit, so leading the list is its rating, not its date.
-    await ratedVisit(business, 'E2E Недоволен', 3, 2, 'E2E Долго ждал')
-    await ratedVisit(business, 'E2E Болтун', 2, 5, 'E2E Всё понравилось')
-    await ratedVisit(business, 'E2E Тихая', 1, 5, '')
+    await ratedVisit(business, 'E2E Unhappy', 3, 2, 'E2E Waited too long')
+    await ratedVisit(business, 'E2E Chatty', 2, 5, 'E2E Loved everything')
+    await ratedVisit(business, 'E2E Quiet', 1, 5, '')
     const readReviews = async () => {
       const summary = await (await page.request.get(`/api/manage/${business.slug}/reviews`)).json()
       const byLetter = (letter: string) =>
         (summary.items as ManagedReview[]).find((item) => item.authorName === `E2E ${letter}.`)
-      return { quiet: byLetter('Т'), wordy: byLetter('Б'), poor: byLetter('Н') }
+      return { quiet: byLetter('Q'), wordy: byLetter('C'), poor: byLetter('U') }
     }
 
     await page.goto(`/manage/${business.slug}?tab=reviews`)
-    const tabs = page.getByRole('tablist', { name: 'Отзывы и вопросы' })
-    await expect(tabs.getByRole('tab', { name: /Без ответа/ })).toHaveAttribute(
+    const tabs = page.getByRole('tablist', { name: 'Reviews and questions' })
+    await expect(tabs.getByRole('tab', { name: /Unanswered/ })).toHaveAttribute(
       'aria-selected',
       'true',
     )
-    await expect(tabs.getByRole('tab', { name: /Без ответа/ })).toContainText('3')
-    const reviews = page.getByRole('listitem').filter({ has: page.getByLabel('Ответ на отзыв') })
+    await expect(tabs.getByRole('tab', { name: /Unanswered/ })).toContainText('3')
+    const reviews = page
+      .getByRole('listitem')
+      .filter({ has: page.getByLabel('Reply to the review') })
     await expect(reviews).toHaveCount(3)
     // Poor unsettled first, then the rest newest first.
-    await expect(reviews.nth(0)).toContainText('E2E Н.')
-    await expect(reviews.nth(1)).toContainText('E2E Т.')
-    await expect(reviews.nth(2)).toContainText('E2E Б.')
+    await expect(reviews.nth(0)).toContainText('E2E U.')
+    await expect(reviews.nth(1)).toContainText('E2E Q.')
+    await expect(reviews.nth(2)).toContainText('E2E C.')
 
     // A quick reply of the owner's own, with the client's and the service's names in it (the
     // sheet that saves it has a test of its own above).
@@ -144,42 +146,42 @@ test.describe('Cabinet reviews', () => {
     expect(saved.ok()).toBe(true)
     await page.reload()
 
-    const wordy = reviews.filter({ hasText: 'E2E Б.' })
-    await wordy.getByLabel('Ответ на отзыв').click()
-    const quick = wordy.getByRole('listbox', { name: 'Быстрые ответы' })
-    await quick.getByRole('option', { name: 'Рады видеть, E2E! стрижка удалась' }).click()
-    await expect(wordy.getByLabel('Ответ на отзыв')).toHaveValue(
-      'Рады видеть, E2E! стрижка удалась',
+    const wordy = reviews.filter({ hasText: 'E2E C.' })
+    await wordy.getByLabel('Reply to the review').click()
+    const quick = wordy.getByRole('listbox', { name: 'Quick replies' })
+    await quick.getByRole('option', { name: 'Good to see you, E2E! The haircut went well' }).click()
+    await expect(wordy.getByLabel('Reply to the review')).toHaveValue(
+      'Good to see you, E2E! The haircut went well',
     )
-    await wordy.getByRole('button', { name: 'Отправить ответ' }).click()
-    await expect(page.getByText('Ответ опубликован')).toBeVisible()
+    await wordy.getByRole('button', { name: 'Send reply' }).click()
+    await expect(page.getByText('Reply published')).toBeVisible()
     await expect
       .poll(async () => (await readReviews()).wordy?.reply)
-      .toBe('Рады видеть, E2E! стрижка удалась')
+      .toBe('Good to see you, E2E! The haircut went well')
 
-    // The poor one is settled in person: «Решено» is pressed and saved.
-    const poor = reviews.filter({ hasText: 'E2E Н.' })
-    await poor.getByRole('button', { name: 'Решено' }).click()
-    await expect(poor.getByRole('button', { name: 'Решено' })).toHaveAttribute(
+    // The poor one is settled in person: «Resolved» is pressed and saved.
+    const poor = reviews.filter({ hasText: 'E2E U.' })
+    await poor.getByRole('button', { name: 'Resolved' }).click()
+    await expect(poor.getByRole('button', { name: 'Resolved' })).toHaveAttribute(
       'aria-pressed',
       'true',
     )
     await expect.poll(async () => (await readReviews()).poor?.resolvedAt).not.toBeNull()
 
-    // «Ответить всем» thanks only the good rating left without words.
-    await page.getByRole('button', { name: /^Ответить всем: 1 оценка без текста/ }).click()
-    const quiet = page.getByRole('dialog', { name: 'Ответить всем' })
-    await expect(quiet).toContainText('Ответ получат 1 отзыв без текста')
-    await quiet.getByRole('button', { name: 'Отправить' }).click()
-    await expect(page.getByText('Ответили на 1 отзыв')).toBeVisible()
+    // «Reply to all» thanks only the good rating left without words.
+    await page.getByRole('button', { name: /^Reply to all: 1 rating without text/ }).click()
+    const quiet = page.getByRole('dialog', { name: 'Reply to all' })
+    await expect(quiet).toContainText('The reply goes to 1 review without text')
+    await quiet.getByRole('button', { name: 'Send' }).click()
+    await expect(page.getByText('Replied to 1 review')).toBeVisible()
     const after = await readReviews()
     // The default template, filled with this client's first name.
     expect(after.quiet).toMatchObject({
-      reply: expect.stringContaining('Спасибо, E2E!'),
+      reply: expect.stringContaining('Thank you, E2E!'),
       isAutoReply: true,
     })
     expect(after.wordy).toMatchObject({
-      reply: 'Рады видеть, E2E! стрижка удалась',
+      reply: 'Good to see you, E2E! The haircut went well',
       isAutoReply: false,
     })
     expect(after.poor?.reply).toBeNull()
@@ -191,7 +193,7 @@ test.describe('Cabinet reviews', () => {
   }) => {
     test.setTimeout(60_000)
     const business = await createOwnBusiness(page)
-    await ratedVisit(business, 'E2E Тихая', 1, 5, '')
+    await ratedVisit(business, 'E2E Quiet', 1, 5, '')
     const staffPhone = randomClientPhone()
     expect(
       (
@@ -204,7 +206,7 @@ test.describe('Cabinet reviews', () => {
     const staffContext = await browser.newContext()
     const staff = await staffContext.newPage()
     try {
-      await signInViaApi(staff, staffPhone, 'E2E Админ Салона')
+      await signInViaApi(staff, staffPhone, 'E2E Salon Admin')
       const settings = await staff.request.get(`/api/manage/${business.slug}/reviews/settings`)
       expect(settings.status()).toBe(200)
       expect((await settings.json()).quickReplies.length).toBeGreaterThan(0)
@@ -213,7 +215,7 @@ test.describe('Cabinet reviews', () => {
       })
       expect(put.status()).toBe(403)
       const bulk = await staff.request.post(`/api/manage/${business.slug}/reviews/bulk-reply`, {
-        data: { minRating: 5, template: 'E2E спасибо' },
+        data: { minRating: 5, template: 'E2E thank you' },
       })
       expect(bulk.status()).toBe(403)
       const goal = await staff.request.put(`/api/manage/${business.slug}/analytics/goal`, {
@@ -223,11 +225,11 @@ test.describe('Cabinet reviews', () => {
 
       // In the tab: the review with its field and the quick replies, no owner's tools.
       await staff.goto(`/manage/${business.slug}?tab=reviews`)
-      const field = staff.getByLabel('Ответ на отзыв')
+      const field = staff.getByLabel('Reply to the review')
       await field.click()
-      await expect(staff.getByRole('listbox', { name: 'Быстрые ответы' })).toBeVisible()
-      await expect(staff.getByRole('button', { name: 'Ответы на отзывы' })).toHaveCount(0)
-      await expect(staff.getByRole('button', { name: /^Ответить всем/ })).toHaveCount(0)
+      await expect(staff.getByRole('listbox', { name: 'Quick replies' })).toBeVisible()
+      await expect(staff.getByRole('button', { name: 'Review replies' })).toHaveCount(0)
+      await expect(staff.getByRole('button', { name: /^Reply to all/ })).toHaveCount(0)
     } finally {
       await staffContext.close()
     }
@@ -238,7 +240,7 @@ test.describe('Cabinet reviews', () => {
 })
 
 test.describe('Answering reviews from the owners’ Telegram', () => {
-  test('quick reply and «Свой ответ» publish once, from a chat of this business only', async ({
+  test('quick reply and “Own reply” publish once, from a chat of this business only', async ({
     page,
     browser,
     isMobile,
@@ -246,8 +248,8 @@ test.describe('Answering reviews from the owners’ Telegram', () => {
     test.skip(isMobile, 'API only')
     test.setTimeout(90_000)
     const business = await createOwnBusiness(page)
-    await ratedVisit(business, 'E2E Тимур', 2, 5)
-    await ratedVisit(business, 'E2E Асель', 1, 4)
+    await ratedVisit(business, 'E2E Timur', 2, 5)
+    await ratedVisit(business, 'E2E Asel', 1, 4)
     const ownChat = randomChat()
     await linkChat(page, business, ownChat)
 
@@ -263,8 +265,8 @@ test.describe('Answering reviews from the owners’ Telegram', () => {
     }
 
     const reviews = await reviewsOf(page, business)
-    const quick = reviews.find((review) => review.authorName === 'E2E Т.')
-    const own = reviews.find((review) => review.authorName === 'E2E А.')
+    const quick = reviews.find((review) => review.authorName === 'E2E T.')
+    const own = reviews.find((review) => review.authorName === 'E2E A.')
     if (!quick || !own) throw new Error('Reviews not found')
     const replyOf = async (id: string) =>
       (await reviewsOf(page, business)).find((review) => review.id === id)?.reply ?? null
@@ -275,13 +277,13 @@ test.describe('Answering reviews from the owners’ Telegram', () => {
 
     // The business's own chat: the first default quick reply, with the client's first name.
     await press(page, ownChat, `rq:${quick.id}:0`)
-    expect(await replyOf(quick.id)).toBe('Спасибо, E2E! Ждём вас снова 🙏')
+    expect(await replyOf(quick.id)).toBe('Thank you, E2E! See you again soon 🙏')
 
     // An old message's other button changes nothing: the review already has its reply.
     await press(page, ownChat, `rq:${quick.id}:1`)
-    expect(await replyOf(quick.id)).toBe('Спасибо, E2E! Ждём вас снова 🙏')
+    expect(await replyOf(quick.id)).toBe('Thank you, E2E! See you again soon 🙏')
 
-    // «Свой ответ»: the bot would send a prompt; without a token it is not sent, so the prompt the
+    // «Own reply»: the bot would send a prompt; without a token it is not sent, so the prompt the
     // bot would have remembered is put in place for both chats.
     await withDb((client) =>
       client.query(
@@ -300,11 +302,11 @@ test.describe('Answering reviews from the owners’ Telegram', () => {
         },
       })
 
-    await answer(strangerChat, 502, 'E2E Чужой ответ')
+    await answer(strangerChat, 502, 'E2E Stranger reply')
     expect(await replyOf(own.id)).toBeNull()
 
-    await answer(ownChat, 501, '  E2E Спасибо, Асель, ждём снова!  ')
-    expect(await replyOf(own.id)).toBe('E2E Спасибо, Асель, ждём снова!')
+    await answer(ownChat, 501, '  E2E Thanks, Asel, see you again!  ')
+    expect(await replyOf(own.id)).toBe('E2E Thanks, Asel, see you again!')
     // The prompt is used up with the reply.
     const left = await withDb(
       async (client) =>

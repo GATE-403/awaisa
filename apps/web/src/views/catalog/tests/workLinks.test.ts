@@ -4,7 +4,7 @@ import { workFeedHref, workLookHref } from '../lib/workLinks'
 const business = { slug: 'kings', name: 'Kings', kind: 'barber' as const, address: '' }
 
 describe('workLinks', () => {
-  it('opens «Looks» on the work, within the catalog kind', () => {
+  it('opens “Looks” on the work, within the catalog kind', () => {
     expect(workFeedHref({ id: 'p1' }, 'barber')).toBe('/feed?start=p1&kind=barber')
     expect(workFeedHref({ id: 'p1' }, undefined)).toBe('/feed?start=p1')
   })

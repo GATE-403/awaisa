@@ -3,13 +3,13 @@ import { adminPhone, forgetSession, randomClientPhone, signInViaApi } from './ac
 import { bishkekDay, createOwnBusiness, createVisit } from './business'
 import { expectGoodDesign } from './design'
 
-// The design rules from docs/design/patterns.md («Тесты на дизайн») on real screens, phone and
+// The design rules from docs/design/patterns.md (“Design tests”) on real screens, phone and
 // desktop: what the owner once had to point out must never reach them again.
 
 const SLUG = 'awaisa-studio'
 
 test.describe('Design', () => {
-  test('«Мой день»: the outcome control fits its track and the day is not a row of tiles', async ({
+  test('“My day”: the outcome control fits its track and the day is not a row of tiles', async ({
     page,
     browser,
   }) => {
@@ -21,7 +21,7 @@ test.describe('Design', () => {
         await page.request.put(`/api/manage/${business.slug}/specialists/${business.master.id}`, {
           data: {
             name: 'Азамат',
-            role: 'Мастер',
+            role: 'Specialist',
             serviceIds: business.master.serviceIds,
             phone: masterPhone,
           },
@@ -40,7 +40,7 @@ test.describe('Design', () => {
     try {
       await signInViaApi(masterPage, masterPhone, 'E2E Азамат')
       await masterPage.goto(`/master/${business.slug}?date=${bishkekDay(-1)}`)
-      await expect(masterPage.getByRole('group', { name: /Итог визита/ }).first()).toBeVisible()
+      await expect(masterPage.getByRole('group', { name: /Visit outcome/ }).first()).toBeVisible()
       await expectGoodDesign(masterPage, 'main')
     } finally {
       await context.close()
@@ -88,11 +88,11 @@ test.describe('Design', () => {
 
     await page.goto(`/manage/${business.slug}?tab=analytics`)
     await page
-      .getByRole('region', { name: 'Мастера за период' })
+      .getByRole('region', { name: 'Specialists for the period' })
       .getByRole('button', { name: /Азамат/ })
       .click()
     const sheet = page.getByRole('dialog', { name: 'Азамат' })
-    await expect(sheet.getByRole('heading', { name: 'Выплаты' })).toBeVisible()
+    await expect(sheet.getByRole('heading', { name: 'Payouts' })).toBeVisible()
     await expectGoodDesign(page, '[role="dialog"]:not([data-type])')
   })
 
@@ -101,10 +101,10 @@ test.describe('Design', () => {
   }, testInfo) => {
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     await page.goto('/bookings')
-    await expect(page.getByRole('region', { name: 'Профиль' })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Profile' })).toBeVisible()
     await test.step('account card', () => expectGoodDesign(page, 'main'))
     await page.goto('/bookings?tab=settings')
-    const signOut = page.getByRole('button', { name: 'Выйти' })
+    const signOut = page.getByRole('button', { name: 'Sign out' })
     await expect(signOut).toBeVisible()
     await test.step('settings', () => expectGoodDesign(page, '[role="tabpanel"]'))
     await signOut.click()
@@ -153,10 +153,10 @@ test.describe('Design', () => {
         await page.setViewportSize({ width, height: isPhone ? 840 : 900 })
         await page.emulateMedia({ colorScheme: scheme })
         await page.goto(`/manage/${SLUG}?tab=schedule`)
-        const toolbar = page.getByRole('group', { name: 'Вид расписания' }).locator('..')
+        const toolbar = page.getByRole('group', { name: 'Schedule view' }).locator('..')
         await expect(toolbar).toBeVisible({ timeout: 15_000 })
         // Both views: the knob slides to the chosen segment and is judged once it has settled.
-        for (const view of ['Лента', 'Колонки']) {
+        for (const view of ['Timeline', 'Columns']) {
           await toolbar.getByTitle(view).click()
           await test.step(`${width}pt ${scheme} ${view}`, () => expectGoodDesign(page, 'main'))
         }

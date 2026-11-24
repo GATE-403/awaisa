@@ -246,7 +246,7 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
             query
               ? t('Check the name or number.')
               : segment === 'all'
-                ? t('They appear with the first booking, or load your base through "Import".')
+                ? t('They appear with the first booking, or load your base through “Import”.')
                 : t('Nobody in this group yet.')
           }
         />

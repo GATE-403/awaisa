@@ -25,7 +25,7 @@ type OwnBusinessOptions = {
   kind?: string
 }
 
-const DEFAULT_SERVICES = [{ name: 'Стрижка', durationMinutes: 60, price: 1000 }]
+const DEFAULT_SERVICES = [{ name: 'Haircut', durationMinutes: 60, price: 1000 }]
 
 /**
  * A business of the test's own («E2E …», deleted by the global teardown): its owner signs in on
@@ -61,7 +61,7 @@ const createOwnBusiness = async (
   const ownMasters: OwnMaster[] = []
   for (const masterName of masters) {
     const response = await page.request.post(`/api/manage/${slug}/specialists`, {
-      data: { name: masterName, role: 'Мастер', serviceIds },
+      data: { name: masterName, role: 'Specialist', serviceIds },
     })
     if (!response.ok())
       throw new Error(`Master failed: ${response.status()} ${await response.text()}`)

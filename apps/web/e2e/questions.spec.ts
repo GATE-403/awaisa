@@ -16,8 +16,8 @@ test.describe('Questions on a business page', () => {
     test.setTimeout(90_000)
     // Guests are sent to sign in first.
     await page.goto(`/${SLUG}`)
-    const section = page.getByRole('region', { name: 'Вопросы' })
-    await expect(section.getByRole('link', { name: 'Задать вопрос' })).toHaveAttribute(
+    const section = page.getByRole('region', { name: 'Questions' })
+    await expect(section.getByRole('link', { name: 'Ask a question' })).toHaveAttribute(
       'href',
       /\/login\?next=/,
     )
@@ -29,12 +29,12 @@ test.describe('Questions on a business page', () => {
 
     await signInViaApi(page, randomClientPhone(), 'E2E Вопрос Тестов')
     await page.reload()
-    await section.getByRole('button', { name: 'Задать вопрос' }).click()
-    const ask = page.getByRole('dialog', { name: 'Вопрос' })
+    await section.getByRole('button', { name: 'Ask a question' }).click()
+    const ask = page.getByRole('dialog', { name: 'Question' })
     const text = `E2E есть парковка ${testInfo.project.name} ${Date.now()}`
     await ask.getByRole('textbox').fill(text)
-    await ask.getByRole('button', { name: 'Отправить' }).click()
-    await expect(page.getByText('Вопрос отправлен')).toBeVisible()
+    await ask.getByRole('button', { name: 'Send' }).click()
+    await expect(page.getByText('Question sent')).toBeVisible()
     // Not on the page until answered.
     await expect(section).not.toContainText(text)
 
@@ -42,23 +42,23 @@ test.describe('Questions on a business page', () => {
     const ownerPage = await owner.newPage()
     await signInViaApi(ownerPage, adminPhone(testInfo), 'E2E Администратор')
     await ownerPage.goto(`/manage/${SLUG}?tab=reviews`)
-    await ownerPage.getByRole('tab', { name: /Вопросы/ }).click()
+    await ownerPage.getByRole('tab', { name: /Questions/ }).click()
     const item = ownerPage.getByRole('listitem').filter({ hasText: text })
-    await expect(item).toContainText('ждёт ответа')
-    await item.getByRole('button', { name: 'Ответить' }).click()
-    const answer = ownerPage.getByRole('dialog', { name: 'Ответ на вопрос' })
-    await answer.getByLabel('Ответ').fill('Да, во дворе')
-    await answer.getByRole('button', { name: 'Готово' }).click()
-    await expect(ownerPage.getByText('Ответ опубликован')).toBeVisible()
+    await expect(item).toContainText('awaiting an answer')
+    await item.getByRole('button', { name: 'Answer' }).click()
+    const answer = ownerPage.getByRole('dialog', { name: 'Answer to the question' })
+    await answer.getByLabel('Reply').fill('Да, во дворе')
+    await answer.getByRole('button', { name: 'Done' }).click()
+    await expect(ownerPage.getByText('Reply published')).toBeVisible()
 
     await page.goto(`/${SLUG}`)
     await expect(section).toContainText(text)
     await expect(section).toContainText('Да, во дворе')
 
     // Removed by the owner, it leaves the page.
-    await item.getByRole('button', { name: 'Изменить' }).click()
-    await ownerPage.getByRole('button', { name: 'Удалить вопрос' }).click({ delay: 1300 })
-    await expect(ownerPage.getByText('Вопрос удалён')).toBeVisible()
+    await item.getByRole('button', { name: 'Change' }).click()
+    await ownerPage.getByRole('button', { name: 'Delete question' }).click({ delay: 1300 })
+    await expect(ownerPage.getByText('Question deleted')).toBeVisible()
     await owner.close()
   })
 })

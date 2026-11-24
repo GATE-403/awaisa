@@ -61,7 +61,7 @@ export class PaymentsService {
 
   /** A module selling something else through these payments registers its kind (onModuleInit). */
   registerOrder(kind: string, handler: OrderHandler) {
-    if (kind === 'booking') throw new Error('«booking» is the deposit kind')
+    if (kind === 'booking') throw new Error('“booking” is the deposit kind')
     this.orders.set(kind, handler)
   }
 

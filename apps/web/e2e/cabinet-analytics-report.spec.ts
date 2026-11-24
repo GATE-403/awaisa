@@ -4,7 +4,7 @@ import { bishkekDay, createOwnBusiness, type OwnBusiness } from './business'
 import { API_URL } from './helpers'
 import { withDb } from './visits'
 
-// The parts of «Аналитика» that say what to do and why: what needs attention, money lost, who
+// The parts of “Analytics” that say what to do and why: what needs attention, money lost, who
 // comes back, where bookings come from, what promotions and loyalty brought. A business of the
 // test's own gets an exact history, so every figure is known in advance.
 const PRICE = 1000
@@ -91,14 +91,14 @@ test.describe('Analytics: what to do and why', () => {
   }) => {
     test.setTimeout(120_000)
     const business = await createOwnBusiness(page, {
-      services: [{ name: 'Стрижка', durationMinutes: 60, price: PRICE }],
+      services: [{ name: 'Haircut', durationMinutes: 60, price: PRICE }],
     })
     const manage = `/api/manage/${business.slug}`
     const arrived = { outcome: 'arrived' }
 
     // A product under its minimum, a promo code, a certificate.
     await page.request.post(`${manage}/stock`, {
-      data: { name: 'E2E Краска', unit: 'шт', unitCost: 50, minQuantity: 5 },
+      data: { name: 'E2E Краска', unit: 'pcs', unitCost: 50, minQuantity: 5 },
     })
     const promotion = await page.request.post(`${manage}/promotions`, {
       data: { title: 'E2E Код', kind: 'promo_code', percent: 20, code: 'E2EMINUS20' },
@@ -112,7 +112,7 @@ test.describe('Analytics: what to do and why', () => {
     ).json()
 
     // Before the period: three first visits 42–84 days ago, one of them came back 50 days ago;
-    // the one 80 days ago kept SMS on and has not been back since («давно не были»).
+    // the one 80 days ago kept SMS on and has not been back since (“not seen for a while”).
     await pastVisit(page, business, 'E2E Пропал', randomClientPhone(), 80, arrived, {
       smsConfirmation: true,
     })
@@ -155,7 +155,7 @@ test.describe('Analytics: what to do and why', () => {
           {
             date: importDate,
             time: await firstFreeSlot(business, importDate),
-            service: 'Стрижка',
+            service: 'Haircut',
             master: business.master.name,
             name: 'E2E Импорт',
             phone: randomClientPhone(),
@@ -203,7 +203,7 @@ test.describe('Analytics: what to do and why', () => {
 
     const report = await (await page.request.get(`${manage}/analytics?days=30`)).json()
 
-    // Money: 800 + 700 + 1 000 imported + 1 000 not yet marked; a month before, 1 000.
+    // Money: 800 + 700 + 1,000 imported + 1,000 not yet marked; a month before, 1,000.
     expect(report.totals).toMatchObject({
       revenue: 3500,
       visits: 4,
@@ -243,43 +243,47 @@ test.describe('Analytics: what to do and why', () => {
 
     // The tab says the same and each attention row leads to what it asks for.
     await page.goto(`/manage/${business.slug}?tab=analytics`)
-    const attention = page.getByRole('region', { name: 'Требует внимания' })
-    await expect(
-      attention.getByRole('link', { name: /1 визит без отметки.*Отметить/ }),
-    ).toHaveAttribute('href', `?tab=schedule&date=${unmarked.date}`)
-    await expect(attention.getByRole('link', { name: /Завтра свободно ≈ 10 ч/ })).toHaveAttribute(
+    const attention = page.getByRole('region', { name: 'Needs attention' })
+    await expect(attention.getByRole('link', { name: /1 visit unmarked.*Mark/ })).toHaveAttribute(
+      'href',
+      `?tab=schedule&date=${unmarked.date}`,
+    )
+    await expect(attention.getByRole('link', { name: /Free tomorrow ≈ 10 h/ })).toHaveAttribute(
       'href',
       `?tab=schedule&date=${bishkekDay(1)}`,
     )
+    await expect(attention.getByRole('link', { name: /Running low: E2E Краска/ })).toHaveAttribute(
+      'href',
+      '?tab=stock',
+    )
+
+    const losses = page.getByRole('region', { name: /Losses/ })
+    await expect(losses).toContainText(/Losses\s*2,000\ssom/)
+    await expect(losses.getByRole('listitem').filter({ hasText: 'No-shows' })).toContainText(
+      /1 visit\s*1,000\ssom/,
+    )
     await expect(
-      attention.getByRole('link', { name: /Заканчивается: E2E Краска/ }),
-    ).toHaveAttribute('href', '?tab=stock')
+      losses.getByRole('listitem').filter({ hasText: 'Late cancellations' }),
+    ).toContainText(/1,000\ssom/)
 
-    const losses = page.getByRole('region', { name: /Потери/ })
-    await expect(losses).toContainText(/Потери\s*2\s000\sсом/)
-    await expect(losses.getByRole('listitem').filter({ hasText: 'Неявки' })).toContainText(
-      /1 визит\s*1\s000\sсом/,
-    )
-    await expect(losses.getByRole('listitem').filter({ hasText: 'Поздние отмены' })).toContainText(
-      /1\s000\sсом/,
-    )
+    const sources = page.getByRole('region', { name: 'Where bookings come from' })
+    await expect(sources).toContainText(/Online\s*50%/)
+    await expect(sources).toContainText(/Administrator\s*25%/)
+    await expect(sources).toContainText(/Import\s*25%/)
 
-    const sources = page.getByRole('region', { name: 'Откуда записи' })
-    await expect(sources).toContainText(/Онлайн\s*50%/)
-    await expect(sources).toContainText(/Администратор\s*25%/)
-    await expect(sources).toContainText(/Импорт\s*25%/)
-
-    const promotions = page.getByRole('region', { name: 'Акции и лояльность' })
+    const promotions = page.getByRole('region', { name: 'Promotions and loyalty' })
     await expect(promotions.getByRole('listitem').filter({ hasText: 'E2E Код' })).toContainText(
-      /1 визит · скидки 200\sсом\s*800\sсом/,
+      /1 visit · discounts 200\ssom\s*800\ssom/,
     )
-    await expect(promotions).toContainText(/Лояльность: сертификатами 300\sсом\./)
+    await expect(promotions).toContainText(/Loyalty: with certificates 300\ssom\./)
 
-    await expect(page.getByText('возвращаются 33% за 6 недель')).toBeVisible()
+    await expect(page.getByText('33% return within 6 weeks')).toBeVisible()
 
-    // «Позвать» opens the mailing on the clients who stopped coming.
-    await attention.getByRole('button', { name: /1 клиент давно не были.*Позвать/ }).click()
-    const mailing = page.getByRole('dialog', { name: 'Рассылка' })
+    // “Invite back” opens the mailing on the clients who stopped coming.
+    await attention
+      .getByRole('button', { name: /1 client not seen for a while.*Invite back/ })
+      .click()
+    const mailing = page.getByRole('dialog', { name: 'Mailing' })
     await expect(mailing).toBeVisible()
     await expect(mailing).toContainText('E2E Пропал')
   })

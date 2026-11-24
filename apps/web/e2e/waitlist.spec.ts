@@ -64,13 +64,13 @@ test.describe('Waitlist', () => {
       await guestPage.goto(
         `/${SLUG}/book?service=${serviceId}&specialist=${master.id}&date=${date}`,
       )
-      await guestPage.getByRole('button', { name: 'Сообщить, когда освободится' }).click()
-      const sheet = guestPage.getByRole('dialog', { name: 'Лист ожидания' })
-      await sheet.getByLabel('Имя').fill(guestName)
-      await sheet.getByLabel('Телефон').fill(randomClientPhone().replace('+996', ''))
-      await sheet.getByRole('button', { name: 'Готово' }).click()
-      await expect(guestPage.getByText('Сообщим, если освободится')).toBeVisible()
-      await expect(guestPage.getByText('Ждём окна на этот день')).toBeVisible()
+      await guestPage.getByRole('button', { name: 'Tell me when a slot opens' }).click()
+      const sheet = guestPage.getByRole('dialog', { name: 'Waitlist' })
+      await sheet.getByLabel('Name').fill(guestName)
+      await sheet.getByLabel('Phone').fill(randomClientPhone().replace('+996', ''))
+      await sheet.getByRole('button', { name: 'Done' }).click()
+      await expect(guestPage.getByText('We will tell you if a slot opens up')).toBeVisible()
+      await expect(guestPage.getByText('Waiting for a slot on this day')).toBeVisible()
 
       const [entry] = await guestPage.evaluate(
         () => JSON.parse(localStorage.getItem('awaisa:waitlist:v1') ?? '[]') as StoredEntry[],
@@ -86,16 +86,16 @@ test.describe('Waitlist', () => {
 
       // The owner sees who waits for that day and can book them in from the cabinet.
       await page.goto(`/manage/${SLUG}?tab=schedule&date=${date}`)
-      await page.getByRole('button', { name: /^Ждут окна: \d+/ }).click()
-      const waiting = page.getByRole('dialog', { name: 'Ждут окна' })
+      await page.getByRole('button', { name: /^Waiting for a slot: \d+/ }).click()
+      const waiting = page.getByRole('dialog', { name: 'Waiting for a slot' })
       const waiter = waiting.getByRole('listitem').filter({ hasText: guestName })
       await expect(waiter).toBeVisible()
-      await waiter.getByRole('button', { name: 'Записать' }).click()
+      await waiter.getByRole('button', { name: 'Book' }).click()
       await expect(
         page
-          .getByRole('dialog', { name: 'Новая запись' })
+          .getByRole('dialog', { name: 'New booking' })
           .and(page.locator(':not([data-type])'))
-          .getByLabel('Имя'),
+          .getByLabel('Name'),
       ).toHaveValue(guestName)
       await page.keyboard.press('Escape')
 
@@ -108,9 +108,9 @@ test.describe('Waitlist', () => {
 
       // The profile shows it with a link straight to that time; the client can drop it.
       await guestPage.goto('/bookings')
-      const row = guestPage.getByRole('listitem', { name: /^Жду окна:/ })
-      await expect(row.getByRole('link', { name: /^Освободилось \d{2}:\d{2}/ })).toBeVisible()
-      await row.getByRole('button', { name: 'Больше не ждать' }).click()
+      const row = guestPage.getByRole('listitem', { name: /^Waiting for a slot:/ })
+      await expect(row.getByRole('link', { name: /^\d{2}:\d{2} is free/ })).toBeVisible()
+      await row.getByRole('button', { name: 'Stop waiting' }).click()
       await expect(row).toHaveCount(0)
     } finally {
       await page.request.delete(`${leaves}/${leave.id}`).catch(() => undefined)

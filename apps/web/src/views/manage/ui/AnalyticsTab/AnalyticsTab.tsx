@@ -678,7 +678,7 @@ const MastersGroup = ({ masters, onOpen }: MastersGroupProps) => {
             {isPayMissing && `${t('Some specialists have no pay set.')} `}
           </>
         ) : (
-          `${t('Set pay on the specialist’s card in "Page", and what each is owed will show here.')} `
+          `${t('Set pay on the specialist’s card in “Page”, and what each is owed will show here.')} `
         )}
         {t('Load: the share of working hours taken by visits.')}
       </p>

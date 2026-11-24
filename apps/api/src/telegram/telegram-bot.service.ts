@@ -529,7 +529,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     if (!link || link.expiresAt < new Date()) {
       return this.send(
         chatId,
-        'The link has expired. Open the dashboard and tap «Connect Telegram» again.',
+        'The link has expired. Open the dashboard and tap “Connect Telegram” again.',
       )
     }
     await this.codes.delete({ code })

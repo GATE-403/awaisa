@@ -132,21 +132,21 @@ describe('limits', () => {
   it('refuses a third master on the free plan and names the paid one', () => {
     expect(limitProblem(plans, start, 'masters', 1)).toBeNull()
     expect(limitProblem(plans, start, 'masters', 2)).toBe(
-      'The «Start» plan allows up to 2 specialists. More on the «Business» plan',
+      'The “Start” plan allows up to 2 specialists. More on the “Business” plan',
     )
   })
 
   it('names no public plan when none has more room', () => {
     expect(limitProblem(plans, business, 'branches', 3)).toBe(
-      'The «Business» plan allows up to 3 branches',
+      'The “Business” plan allows up to 3 branches',
     )
     expect(limitProblem(plans, founders, 'branches', 30)).toBeNull()
   })
 
   it('names the cheapest public plan with a locked feature', () => {
-    expect(featureLockedMessage(plans, 'cashdesk')).toBe('Available on the «Business» plan')
+    expect(featureLockedMessage(plans, 'cashdesk')).toBe('Available on the “Business” plan')
     expect(featureLockedMessage(plans, 'mailings')).toBe('Not available on your plan')
-    expect(featureLockedMessage(plans, 'fiscal')).toBe('Available on the «Business» plan')
+    expect(featureLockedMessage(plans, 'fiscal')).toBe('Available on the “Business” plan')
     expect(hasFeature(start, 'fiscal')).toBe(false)
     expect(hasFeature(founders, 'fiscal')).toBe(true)
   })

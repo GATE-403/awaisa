@@ -32,7 +32,7 @@ const WHATSAPP_TEMPLATES = {
     button: 'Rate',
   },
   return_visit: {
-    body: 'Time for another «{{1}}» at {{2}}? {{3}} is ready for you, book with the button below.',
+    body: 'Time for another “{{1}}” at {{2}}? {{3}} is ready for you, book with the button below.',
     button: 'Book',
   },
 } as const

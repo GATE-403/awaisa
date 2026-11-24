@@ -35,8 +35,8 @@ const soleOwnedBusinesses = (memberships: Membership[]) =>
 
 const soleOwnerMessage = (names: string[]) =>
   names.length === 1
-    ? `You are the only owner of ‘${names[0]}’. Hand the business over to another owner first, then delete your account.`
-    : `You are the only owner of ${names.map((name) => `‘${name}’`).join(', ')}. Hand the businesses over to other owners first, then delete your account.`
+    ? `You are the only owner of “${names[0]}”. Hand the business over to another owner first, then delete your account.`
+    : `You are the only owner of ${names.map((name) => `“${name}”`).join(', ')}. Hand the businesses over to other owners first, then delete your account.`
 
 type UpcomingBooking = { id: string; status: string; startsAt: Date }
 

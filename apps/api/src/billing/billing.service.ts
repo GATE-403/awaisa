@@ -88,7 +88,7 @@ export class BillingService {
     const plan =
       plans.find((row) => row.key === access.planKey) ??
       plans.find((row) => row.key === FREE_PLAN_KEY)
-    if (!plan) throw new Error('No free plan in «plans»')
+    if (!plan) throw new Error('No free plan in “plans”')
 
     return { access, plan, plans, subscription }
   }

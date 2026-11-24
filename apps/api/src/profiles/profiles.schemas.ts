@@ -18,7 +18,7 @@ const updateProfileStyleSchema = z.object({
     .string()
     .trim()
     .toLowerCase()
-    .regex(/^[a-z0-9][a-z0-9_.]{2,19}$/, 'Address: 3-20 Latin letters, digits, «_» or «.»')
+    .regex(/^[a-z0-9][a-z0-9_.]{2,19}$/, 'Address: 3-20 Latin letters, digits, “_” or “.”')
     .nullable()
     .optional(),
   featuredBadges: z.array(z.string().max(32)).max(3).optional(),

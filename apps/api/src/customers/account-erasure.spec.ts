@@ -55,8 +55,8 @@ describe('soleOwnedBusinesses', () => {
   })
 
   it('explains what to do first', () => {
-    expect(soleOwnerMessage(['Barbershop'])).toContain('only owner of ‘Barbershop’')
-    expect(soleOwnerMessage(['A', 'B'])).toContain('‘A’, ‘B’')
+    expect(soleOwnerMessage(['Barbershop'])).toContain('only owner of “Barbershop”')
+    expect(soleOwnerMessage(['A', 'B'])).toContain('“A”, “B”')
   })
 })
 

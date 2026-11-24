@@ -51,7 +51,7 @@ const ORDER_COPY: Partial<Record<string, OrderCopy>> = {
     doneTitle: 'Paid',
     doneHref: (slug) => `/manage/${slug}?tab=billing`,
     doneLabel: 'Back to the dashboard',
-    expiredText: 'No money was taken. Pay again in "Plan".',
+    expiredText: 'No money was taken. Pay again in “Plan”.',
     retryHref: (slug) => `/manage/${slug}?tab=billing`,
     retryLabel: 'To the plan',
   },

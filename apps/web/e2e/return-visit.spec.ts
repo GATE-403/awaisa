@@ -18,7 +18,10 @@ type Service = {
 }
 
 test.describe('Return visits', () => {
-  test('the owner sets «пора прийти снова» on a service', async ({ page, isMobile }, testInfo) => {
+  test('the owner sets “remind to come again” on a service', async ({
+    page,
+    isMobile,
+  }, testInfo) => {
     test.skip(isMobile, 'Runs once: it changes a service')
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     const managed = await (await page.request.get(`/api/manage/${SLUG}`)).json()
@@ -44,11 +47,11 @@ test.describe('Return visits', () => {
         .getByRole('button', { name: new RegExp(service.name) })
         .first()
         .click()
-      const sheet = page.getByRole('dialog', { name: 'Услуга' })
-      await sheet.getByRole('combobox', { name: 'Напомнить прийти снова' }).click()
-      await page.getByRole('option', { name: 'Через 4 недели' }).click()
-      await sheet.getByRole('button', { name: 'Сохранить' }).click()
-      await expect(page.getByText('Услуга сохранена')).toBeVisible()
+      const sheet = page.getByRole('dialog', { name: 'Service' })
+      await sheet.getByRole('combobox', { name: 'Remind to come again' }).click()
+      await page.getByRole('option', { name: 'In 4 weeks' }).click()
+      await sheet.getByRole('button', { name: 'Save' }).click()
+      await expect(page.getByText('Service saved')).toBeVisible()
       const after = await (await page.request.get(`/api/manage/${SLUG}`)).json()
       expect(
         after.catalog.services.find((item: Service) => item.id === service.id).rebookDays,
@@ -58,7 +61,7 @@ test.describe('Return visits', () => {
     }
   })
 
-  test('a returning client finds «Снова к мастеру» in the search panel', async ({ page }) => {
+  test('a returning client finds “Book again” in the search panel', async ({ page }) => {
     const business = await (await fetch(`${API_URL}/businesses/${SLUG}`)).json()
     const master = business.catalog.specialists[0]
     const service = business.catalog.services.find((item: { id: string }) =>
@@ -91,9 +94,9 @@ test.describe('Return visits', () => {
     await page.goto('/')
     // Where people start looking: opening the search shows recent masters, like recent searches.
     await page.getByRole('searchbox').first().click()
-    const again = page.getByRole('region', { name: 'Снова к мастеру' })
+    const again = page.getByRole('region', { name: 'Book again' })
     const link = again.getByRole('link', {
-      name: new RegExp(`^Записаться снова: ${service.name}`),
+      name: new RegExp(`^Book again: ${service.name}`),
     })
     await expect(link).toBeVisible()
     // The master's own nearest free time rides along when there is one.

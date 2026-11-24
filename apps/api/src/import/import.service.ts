@@ -94,9 +94,9 @@ export class ImportService {
           : !phone
             ? 'no phone'
             : !service
-              ? `no service ‘${booking.service || '-'}’`
+              ? `no service “${booking.service || '-'}”`
               : !master
-                ? `no specialist ‘${booking.master || '-'}’`
+                ? `no specialist “${booking.master || '-'}”`
                 : null
       if (reason || !date || !time || !phone || !service || !master) {
         skipped.push({ row, reason: reason ?? 'unreadable row' })

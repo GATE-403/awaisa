@@ -47,22 +47,22 @@ test.describe('Visit outcomes and the client base', () => {
     expect(early.status()).toBe(400)
 
     await page.goto(`/manage/${SLUG}?tab=clients`)
-    await page.getByLabel('Поиск клиента').fill(phone.slice(-7))
+    await page.getByLabel('Find a client').fill(phone.slice(-7))
     const row = page.getByRole('button', { name: new RegExp(name) })
-    await expect(row).toContainText('1 неявка')
+    await expect(row).toContainText('1 no-show')
     await row.click()
 
-    const sheet = page.getByRole('dialog', { name: 'Клиент' })
+    const sheet = page.getByRole('dialog', { name: 'Client' })
     await expect(sheet).toContainText(formatPhone(phone))
-    await expect(sheet).toContainText('Не пришёл 1 раз')
-    await expect(sheet).toContainText('1 234 сом, карта')
-    await sheet.getByLabel('Заметка о клиенте').fill('E2E любит кофе без сахара')
-    await sheet.getByRole('button', { name: 'Сохранить' }).click()
-    await expect(page.getByText('Карточка сохранена')).toBeVisible()
+    await expect(sheet).toContainText('No-show 1 time')
+    await expect(sheet).toContainText('1,234 som, card')
+    await sheet.getByLabel('Note about the client').fill('E2E любит кофе без сахара')
+    await sheet.getByRole('button', { name: 'Save' }).click()
+    await expect(page.getByText('Card saved')).toBeVisible()
 
     await row.click()
     await expect(
-      page.getByRole('dialog', { name: 'Клиент' }).getByLabel('Заметка о клиенте'),
+      page.getByRole('dialog', { name: 'Client' }).getByLabel('Note about the client'),
     ).toHaveValue('E2E любит кофе без сахара')
   })
 })

@@ -57,37 +57,35 @@ const firstVisit = (business: OwnBusiness, options: Partial<Parameters<typeof cr
   })
 
 test.describe('Cabinet schedule', () => {
-  test('«Колонки · Лента»: the chosen view changes the board and survives a reload', async ({
+  test('“Columns · Timeline”: the chosen view changes the board and survives a reload', async ({
     page,
   }) => {
     const business = await createOwnBusiness(page)
     await page.goto(scheduleUrl(business))
-    const view = page.getByRole('group', { name: 'Вид расписания' })
-    await expect(view.getByRole('radio', { name: 'Колонки' })).toBeChecked()
+    const view = page.getByRole('group', { name: 'Schedule view' })
+    await expect(view.getByRole('radio', { name: 'Columns' })).toBeChecked()
     await expect(board(page).locator('[data-layout="columns"]').first()).toBeVisible()
 
     // The segment is a glyph; its label names it in a tooltip.
-    await view.getByTitle('Лента').click()
+    await view.getByTitle('Timeline').click()
     await expect(board(page).locator('[data-layout="timeline"]').first()).toBeVisible()
     await expect(board(page).locator('[data-layout="columns"]')).toHaveCount(0)
 
     await page.reload()
     await expect(
-      page.getByRole('group', { name: 'Вид расписания' }).getByRole('radio', { name: 'Лента' }),
+      page.getByRole('group', { name: 'Schedule view' }).getByRole('radio', { name: 'Timeline' }),
     ).toBeChecked()
     await expect(board(page).locator('[data-layout="timeline"]').first()).toBeVisible()
     await expect(board(page).locator('[data-layout="columns"]')).toHaveCount(0)
   })
 
-  test('the day strip opens another day with its visits; «Сегодня» comes back', async ({
-    page,
-  }) => {
+  test('the day strip opens another day with its visits; “Today” comes back', async ({ page }) => {
     const business = await createOwnBusiness(page)
     const visit = await firstVisit(business, { name: 'E2E Клиент дня', fromDay: 3 })
     const today = bishkekDay()
 
     await page.goto(scheduleUrl(business))
-    const strip = page.getByRole('group', { name: 'День' })
+    const strip = page.getByRole('group', { name: 'Day' })
     await expect(strip.locator(`[data-day="${today}"]`)).toHaveAttribute('aria-pressed', 'true')
     await expect(visitCard(page, visit.name)).toHaveCount(0)
 
@@ -97,9 +95,9 @@ test.describe('Cabinet schedule', () => {
       'true',
     )
     await expect(visitCard(page, visit.name)).toBeVisible()
-    await expect(page.getByRole('region', { name: 'Расписание' })).toContainText('1 запись')
+    await expect(page.getByRole('region', { name: 'Schedule' })).toContainText('1 booking')
 
-    await page.getByRole('button', { name: 'Сегодня', exact: true }).click()
+    await page.getByRole('button', { name: 'Today', exact: true }).click()
     await expect(strip.locator(`[data-day="${today}"]`)).toHaveAttribute('aria-pressed', 'true')
     await expect(visitCard(page, visit.name)).toHaveCount(0)
   })
@@ -130,7 +128,7 @@ test.describe('Cabinet schedule', () => {
     expect(tooLong.status()).toBe(400)
   })
 
-  test('a visit opens its inspector; on its day «Пришёл» closes it', async ({ page }) => {
+  test('a visit opens its inspector; on its day “Arrived” closes it', async ({ page }) => {
     const business = await createOwnBusiness(page)
     const visit = await firstVisit(business, { name: 'E2E Клиент визита', daysBack: 2 })
 
@@ -139,15 +137,15 @@ test.describe('Cabinet schedule', () => {
     // A popover beside the card with a mouse, a sheet on phones: either way a dialog about it.
     const inspector = page.getByRole('dialog').filter({ hasText: visit.name })
     await expect(inspector).toBeVisible()
-    await expect(inspector).toContainText(`Стрижка · ${business.master.name}`)
-    await expect(inspector).toContainText(/1\s000\s*сом/)
+    await expect(inspector).toContainText(`Haircut · ${business.master.name}`)
+    await expect(inspector).toContainText(/1,000\s*som/)
     await expect(inspector).toContainText(`${visit.time}–${addMinutes(visit.time, 60)}`)
 
-    await inspector.getByText('Пришёл', { exact: true }).click()
+    await inspector.getByText('Arrived', { exact: true }).click()
     await expect.poll(() => outcomeOf(page, business, visit.date, visit.id)).toBe('arrived')
   })
 
-  test('«Все пришли» marks the day’s ended visits; «Вернуть» opens them again', async ({
+  test('“Everyone came” marks the day’s ended visits; “Undo” opens them again', async ({
     page,
   }) => {
     const business = await createOwnBusiness(page)
@@ -164,12 +162,12 @@ test.describe('Cabinet schedule', () => {
     expect(await unclosedDays()).toContain(date)
 
     await page.goto(scheduleUrl(business, date))
-    const bar = page.getByRole('region', { name: 'Неотмеченные визиты' })
-    await expect(bar).toContainText('2 визита')
+    const bar = page.getByRole('region', { name: 'Unmarked visits' })
+    await expect(bar).toContainText('2 visits')
     // Booking into a past day is not offered.
-    await expect(page.getByRole('button', { name: 'Новая запись', exact: true })).toHaveCount(0)
-    await bar.getByRole('button', { name: 'Все пришли' }).click()
-    await expect(page.getByText('Отмечено: 2 визита')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'New booking', exact: true })).toHaveCount(0)
+    await bar.getByRole('button', { name: 'Everyone came' }).click()
+    await expect(page.getByText('Marked: 2 visits')).toBeVisible()
     await expect
       .poll(async () =>
         (await readSchedule(page, business, date)).bookings.map((item) => item.outcome),
@@ -178,16 +176,16 @@ test.describe('Cabinet schedule', () => {
     await expect(bar).toHaveCount(0)
     expect(await unclosedDays()).not.toContain(date)
 
-    await page.getByRole('button', { name: 'Вернуть' }).click()
+    await page.getByRole('button', { name: 'Undo' }).click()
     await expect
       .poll(async () =>
         (await readSchedule(page, business, date)).bookings.map((item) => item.outcome),
       )
       .toEqual([null, null])
-    await expect(bar).toContainText('2 визита')
+    await expect(bar).toContainText('2 visits')
   })
 
-  test('«Поделиться свободными окнами» lists the day’s free windows with the master and a link', async ({
+  test('“Share free slots” lists the day’s free windows with the master and a link', async ({
     page,
   }) => {
     const business = await createOwnBusiness(page)
@@ -195,55 +193,55 @@ test.describe('Cabinet schedule', () => {
     const master = business.master.name
 
     await page.goto(scheduleUrl(business, visit.date))
-    await page.getByRole('button', { name: 'Поделиться свободными окнами' }).click()
-    const sheet = page.getByRole('dialog', { name: 'Свободные окна' })
-    const message = sheet.getByRole('region', { name: 'Сообщение для клиентов' })
+    await page.getByRole('button', { name: 'Share free slots' }).click()
+    const sheet = page.getByRole('dialog', { name: 'Free slots' })
+    const message = sheet.getByRole('region', { name: 'Message for clients' })
     // The rest of the day after the visit is free until closing at 20:00.
     await expect(message).toContainText(`${addMinutes(visit.time, 60)}–20:00 - ${master}`)
     if (visit.time !== '10:00')
       await expect(message).toContainText(`10:00–${visit.time} - ${master}`)
     // The visit's own hour is not offered.
     await expect(message).not.toContainText(`${visit.time}–${addMinutes(visit.time, 60)} -`)
-    await expect(message.getByRole('link', { name: /Ссылка/ })).toHaveAttribute(
+    await expect(message.getByRole('link', { name: /Link/ })).toHaveAttribute(
       'href',
       new RegExp(`/${business.slug}/book\\?date=${visit.date}$`),
     )
   })
 
-  test('«На всю ширину» stretches the board and is kept on the device', async ({ page }) => {
+  test('“Full width” stretches the board and is kept on the device', async ({ page }) => {
     const business = await createOwnBusiness(page)
     await page.goto(scheduleUrl(business))
     await expect(board(page)).not.toHaveAttribute('data-wide')
 
-    await page.getByRole('button', { name: 'На всю ширину' }).click()
+    await page.getByRole('button', { name: 'Full width' }).click()
     await expect(board(page)).toHaveAttribute('data-wide', 'true')
-    await expect(page.getByRole('button', { name: 'Обычный вид' })).toHaveAttribute(
+    await expect(page.getByRole('button', { name: 'Normal view' })).toHaveAttribute(
       'aria-pressed',
       'true',
     )
 
     await page.reload()
     await expect(board(page)).toHaveAttribute('data-wide', 'true')
-    await page.getByRole('button', { name: 'Обычный вид' }).click()
+    await page.getByRole('button', { name: 'Normal view' }).click()
     await expect(board(page)).not.toHaveAttribute('data-wide')
   })
 
-  test('a client booking made while the cabinet is open arrives as a «Новая запись» toast', async ({
+  test('a client booking made while the cabinet is open arrives as a “New booking” toast', async ({
     page,
   }) => {
     // The cabinet asks for new bookings every 20 seconds.
     test.setTimeout(60_000)
     const business = await createOwnBusiness(page)
     await page.goto(scheduleUrl(business))
-    await expect(page.getByRole('group', { name: 'День' })).toBeVisible()
+    await expect(page.getByRole('group', { name: 'Day' })).toBeVisible()
 
     const visit = await firstVisit(business, { name: 'E2E Новый клиент', fromDay: 2 })
-    const toast = page.locator('[role="dialog"][data-type]').filter({ hasText: 'Новая запись' })
+    const toast = page.locator('[role="dialog"][data-type]').filter({ hasText: 'New booking' })
     await expect(toast).toContainText(visit.name, { timeout: 30_000 })
     await expect(toast).toContainText(visit.time)
   })
 
-  test('a right click on a visit offers «Открыть запись»', async ({ page, isMobile }) => {
+  test('a right click on a visit offers “Open booking”', async ({ page, isMobile }) => {
     test.skip(isMobile, 'A context menu needs a mouse: on touch screens a long press drags')
     const business = await createOwnBusiness(page)
     const visit = await firstVisit(business, { name: 'E2E Клиент меню', fromDay: 2 })
@@ -251,10 +249,10 @@ test.describe('Cabinet schedule', () => {
     await page.goto(scheduleUrl(business, visit.date))
     await visitCard(page, visit.name).click({ button: 'right' })
     const menu = page.getByRole('menu')
-    await expect(menu.getByRole('menuitem', { name: 'Отменить запись' })).toBeVisible()
-    await menu.getByRole('menuitem', { name: 'Открыть запись' }).click()
+    await expect(menu.getByRole('menuitem', { name: 'Cancel booking' })).toBeVisible()
+    await menu.getByRole('menuitem', { name: 'Open booking' }).click()
     await expect(
-      page.getByRole('dialog', { name: `Запись: ${visit.name}, ${visit.time}` }),
+      page.getByRole('dialog', { name: `Booking: ${visit.name}, ${visit.time}` }),
     ).toBeVisible()
   })
 })

@@ -159,7 +159,7 @@ const parseTrustProxy = (value: unknown): string | number => {
   const invalid = parts.find((part) => !isValid(part))
   if (invalid !== undefined) {
     throw new Error(
-      `TRUST_PROXY must be a hop count or ${TRUST_PROXY_NAMES.join(', ')} and IP/CIDR ranges (got «${invalid}»)`,
+      `TRUST_PROXY must be a hop count or ${TRUST_PROXY_NAMES.join(', ')} and IP/CIDR ranges (got “${invalid}”)`,
     )
   }
   return parts.join(', ')

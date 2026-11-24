@@ -31,7 +31,7 @@ describe('rememberCabinetFrom', () => {
     expect(readCabinetFrom()).toBe('/map')
   })
 
-  it('never returns to sign-in, the new business form or «What’s new»', () => {
+  it('never returns to sign-in, the new business form or “What’s new”', () => {
     rememberCabinetFrom('/map', '/manage')
     for (const passage of ['/login?next=/manage', '/business/new', '/updates']) {
       rememberCabinetFrom(passage, '/manage/studio')
@@ -54,7 +54,7 @@ describe('rememberCabinetFrom', () => {
 })
 
 describe('getBackLabel', () => {
-  it('names the page «‹» leads to', () => {
+  it('names the page “‹” leads to', () => {
     expect(getBackLabel('/')).toBe('Catalogue')
     expect(getBackLabel('/map?kind=nails')).toBe('Map')
     expect(getBackLabel('/bookings')).toBe('Profile')

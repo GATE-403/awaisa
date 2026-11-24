@@ -54,7 +54,7 @@ const dragStack = async (page: Page, dx: number, dy: number) => {
 }
 
 test.describe('Booking: the stack of done steps', () => {
-  test('a sideways swipe shuffles it, a pull down fans it out, «Свернуть» folds it', async ({
+  test('a sideways swipe shuffles it, a pull down fans it out, “Hide” folds it', async ({
     page,
   }) => {
     await openWithServiceAndMaster(page)
@@ -76,33 +76,33 @@ test.describe('Booking: the stack of done steps', () => {
     await expect.poll(() => frontCardId(page)).toBe('step-specialist')
     expect(afterLeft).not.toBe('step-specialist')
 
-    // Pulled past a third, the stack stays fanned: every card shows «Изменить».
+    // Pulled past a third, the stack stays fanned: every card shows “Change”.
     await dragStack(page, 0, 90)
     await expect(stack).toHaveAttribute('data-fanned', 'true')
-    await expect(stack.getByRole('button', { name: 'Изменить' })).toHaveCount(3)
-    for (const button of await stack.getByRole('button', { name: 'Изменить' }).all()) {
+    await expect(stack.getByRole('button', { name: 'Change' })).toHaveCount(3)
+    for (const button of await stack.getByRole('button', { name: 'Change' }).all()) {
       await expect(button).toBeVisible()
     }
     // The first tap after the pull counts (the pull's own click used to swallow it).
-    await stack.getByRole('button', { name: 'Свернуть' }).click()
+    await stack.getByRole('button', { name: 'Hide' }).click()
     await expect(stack).toHaveAttribute('data-movable', 'true')
   })
 
-  test('one tap fans it out, a tap outside folds it, «Изменить» reopens that step', async ({
+  test('one tap fans it out, a tap outside folds it, “Change” reopens that step', async ({
     page,
   }) => {
     await openWithServiceAndMaster(page)
     const stack = stackOf(page)
-    await stack.getByRole('button', { name: 'Показать выбор' }).click()
+    await stack.getByRole('button', { name: 'Show your choices' }).click()
     await expect(stack).toHaveAttribute('data-fanned', 'true')
 
     // Anywhere outside the stack folds it back, like a menu.
-    await page.getByRole('heading', { name: 'Когда удобно?' }).click()
+    await page.getByRole('heading', { name: 'When suits you?' }).click()
     await expect(stack).toHaveAttribute('data-movable', 'true')
 
-    await stack.getByRole('button', { name: 'Показать выбор' }).click()
-    await bookingSteps(page).service.getByRole('button', { name: 'Изменить' }).click()
-    await expect(page.getByRole('heading', { name: 'Что делаем?' })).toBeVisible()
+    await stack.getByRole('button', { name: 'Show your choices' }).click()
+    await bookingSteps(page).service.getByRole('button', { name: 'Change' }).click()
+    await expect(page.getByRole('heading', { name: 'What are we doing?' })).toBeVisible()
   })
 })
 
@@ -111,21 +111,21 @@ test.describe('Booking: the time ruler', () => {
     page,
   }) => {
     // Tomorrow, not today: late in the day today keeps one free time and the dial has nowhere to
-    // turn (CI ran into «Выбрать 20:00» before and after the wheel).
+    // turn (CI ran into “Choose 20:00” before and after the wheel).
     await openWithServiceAndMaster(page, bishkekDay(1))
-    const ruler = page.getByRole('group', { name: 'Время' })
+    const ruler = page.getByRole('group', { name: 'Time' })
     await expect(ruler.locator('button[data-free]').first()).toBeVisible()
-    await expect(page.getByText('Листайте шкалу или нажмите на время')).toBeVisible()
+    await expect(page.getByText('Scroll the dial or tap a time')).toBeVisible()
 
     // The action names the free time under the needle.
-    await expect(primaryAction(page)).toHaveText(/^Выбрать \d{2}:\d{2}$/)
+    await expect(primaryAction(page)).toHaveText(/^Choose \d{2}:\d{2}$/)
     const before = await primaryAction(page).textContent()
 
     const box = await ruler.boundingBox()
     if (!box) throw new Error('No ruler')
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
     await page.mouse.wheel(0, 130)
-    await expect(page.getByText('Листайте шкалу или нажмите на время')).toHaveCount(0)
+    await expect(page.getByText('Scroll the dial or tap a time')).toHaveCount(0)
 
     // Stopped between ticks, the dial is pulled onto the nearest one.
     await expect
@@ -140,10 +140,10 @@ test.describe('Booking: the time ruler', () => {
     const centeredTime = (await centered.locator('span').first().textContent())?.trim() ?? ''
     const isFree = (await centered.getAttribute('data-free')) !== null
     if (isFree) {
-      await expect(primaryAction(page)).toHaveText(`Выбрать ${centeredTime}`)
-      expect(before).not.toBe(`Выбрать ${centeredTime}`)
+      await expect(primaryAction(page)).toHaveText(`Choose ${centeredTime}`)
+      expect(before).not.toBe(`Choose ${centeredTime}`)
     } else {
-      await expect(page.getByText('Занято - прокрутите дальше')).toBeVisible()
+      await expect(page.getByText('Taken - scroll on')).toBeVisible()
     }
 
     // A tap on a free tick takes it at once: the time joins the stack, contacts open.
@@ -152,6 +152,6 @@ test.describe('Booking: the time ruler', () => {
     await free.scrollIntoViewIfNeeded()
     await free.click()
     await expect(bookingSteps(page).datetime).toContainText(time)
-    await expect(bookingSteps(page).contacts.getByLabel('Имя')).toBeVisible()
+    await expect(bookingSteps(page).contacts.getByLabel('Name')).toBeVisible()
   })
 })

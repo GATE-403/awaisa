@@ -21,22 +21,22 @@ test.describe('Client flow from outside the site', () => {
     const booking = await bookAhead({ specialistIndex: 2, name: 'E2E Ссылка' })
     await page.goto(visitPath(booking.id))
     await expect(page).toHaveURL(/\/bookings$/)
-    const ticket = page.getByRole('article', { name: /^Запись / }).first()
+    const ticket = page.getByRole('article', { name: /^Booking / }).first()
     await expect(ticket).toContainText(booking.serviceName)
 
     // Under load the menu opened right after the redirect can be closed by the page settling
-    // around it (seen as «not stable», then «detached»); a person taps «Ещё» again, so does the test.
+    // around it (seen as “not stable”, then “detached”); a person taps “More” again, so does the test.
     await expect(async () => {
-      await ticket.getByRole('button', { name: 'Ещё' }).click()
-      await page.getByRole('menuitem', { name: 'Отменить запись' }).click({ timeout: 2000 })
+      await ticket.getByRole('button', { name: 'More' }).click()
+      await page.getByRole('menuitem', { name: 'Cancel booking' }).click({ timeout: 2000 })
     }).toPass({ timeout: 20_000 })
-    await expect(ticket.getByText('Отменена')).toBeVisible()
+    await expect(ticket.getByText('Cancelled')).toBeVisible()
   })
 
   test('a link with a wrong signature opens nothing', async ({ page }) => {
     const booking = await bookAhead({ specialistIndex: 2, name: 'E2E Ссылка' })
     await page.goto(`/v/${booking.id}?s=${'x'.repeat(22)}`)
-    await expect(page.getByRole('heading', { name: /Ссылка не открылась/ })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /The link did not open/ })).toBeVisible()
   })
 
   test('a returning guest finds their name and number already filled in', async ({ page }) => {
@@ -51,19 +51,17 @@ test.describe('Client flow from outside the site', () => {
     const steps = bookingSteps(page)
     await steps.service.getByRole('radio').first().click()
     await page.locator('#step-specialist [type="radio"], #step-datetime').first().waitFor()
-    const anyMaster = steps.specialist.getByRole('radio', { name: /Любой мастер/ })
+    const anyMaster = steps.specialist.getByRole('radio', { name: /Any specialist/ })
     if (await anyMaster.isVisible()) await anyMaster.click()
     await pickFirstFreeSlot(page)
-    await expect(page.locator('#step-contacts').getByLabel('Имя')).toHaveValue('E2E Постоянный')
-    await expect(page.locator('#step-contacts').getByLabel('Телефон')).toHaveValue(
-      '+996 555 000 111',
-    )
+    await expect(page.locator('#step-contacts').getByLabel('Name')).toHaveValue('E2E Постоянный')
+    await expect(page.locator('#step-contacts').getByLabel('Phone')).toHaveValue('+996 555 000 111')
   })
 
-  test('each branch has its own booking link for 2ГИС', async ({ page }, testInfo) => {
+  test('each branch has its own booking link for 2GIS', async ({ page }, testInfo) => {
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     await page.goto(`/manage/${SLUG}?tab=branches`)
-    const links = page.getByRole('heading', { name: 'Ссылки для записи' })
+    const links = page.getByRole('heading', { name: 'Booking links' })
     await expect(links).toBeVisible()
     await expect(page.getByText(new RegExp(`/${SLUG}/book`)).first()).toBeVisible()
   })

@@ -22,21 +22,21 @@ test.describe('Masters leaderboard', () => {
     expect((await request.get(`${API_URL}/rankings/masters?kind=cars`)).status()).toBe(400)
 
     await page.goto('/top')
-    await expect(page.getByRole('heading', { name: 'Лучшие барберы' })).toBeVisible()
-    const first = page.getByRole('link', { name: /^1-е место/ })
+    await expect(page.getByRole('heading', { name: 'Top barbers' })).toBeVisible()
+    const first = page.getByRole('link', { name: /^place 1\b/ })
     await expect(first).toHaveAttribute(
       'href',
       `/${masters[0]?.business.slug}/book?specialist=${masters[0]?.id}`,
     )
-    // «Мастера · Места» is a segmented control that changes the board.
-    await page.getByText('Места', { exact: true }).click()
+    // “Specialists · Places” is a segmented control that changes the board.
+    await page.getByText('Places', { exact: true }).click()
     await page.waitForURL(/\/top\?view=places/)
-    await expect(page.getByRole('heading', { name: 'Лучшие барбершопы' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Top barbershops' })).toBeVisible()
     await page.goto('/top')
 
-    await page.getByRole('link', { name: 'Ногти' }).click()
+    await page.getByRole('link', { name: 'Nails' }).click()
     await page.waitForURL(/\/top\?kind=nails/)
-    await expect(page.getByRole('heading', { name: 'Лучшие мастера маникюра' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Top manicurists' })).toBeVisible()
 
     // Places: the same board for the places themselves, reviews ≥ 5, each opening its page.
     const places = (await (
@@ -44,9 +44,9 @@ test.describe('Masters leaderboard', () => {
     ).json()) as { place: number; slug: string; reviews: number }[]
     for (const place of places) expect(place.reviews).toBeGreaterThanOrEqual(5)
     await page.goto('/top?view=places')
-    await expect(page.getByRole('heading', { name: 'Лучшие барбершопы' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Top barbershops' })).toBeVisible()
     if (places[0]) {
-      await expect(page.getByRole('link', { name: /^1-е место/ })).toHaveAttribute(
+      await expect(page.getByRole('link', { name: /^place 1\b/ })).toHaveAttribute(
         'href',
         `/${places[0].slug}`,
       )

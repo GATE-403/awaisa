@@ -53,11 +53,11 @@ describe('messages', () => {
   it('tells the recipient who it is from, the words and the code', () => {
     const text = recipientMessage(order)
     expect(text).toMatch(/^Aigul, Nurlan has given you a 3,000 som gift card for Awaisa Studio/)
-    expect(text).toContain('«Happy birthday!»')
+    expect(text).toContain('“Happy birthday!”')
     expect(text).toContain('Code ABCD2345')
   })
 
-  it('reads on /pay as «For … · from …»', () => {
+  it('reads on /pay as “For … · from …”', () => {
     expect(orderDetails('Aigul', 'Nurlan')).toBe('For Aigul · from Nurlan')
     expect(orderDetails('', 'Nurlan')).toBe('from Nurlan')
   })

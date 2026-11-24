@@ -90,12 +90,12 @@ test.describe('Calendar subscription', () => {
       const before = await masterPage.request.get(`/api/master/${SLUG}/calendar`)
       expect((await before.json()).isActive).toBe(false)
 
-      // The sheet in «Мой день» makes the link and offers it to the phone's calendar.
+      // The sheet in “My day” makes the link and offers it to the phone's calendar.
       await masterPage.goto(`/master/${SLUG}`)
-      await masterPage.getByRole('button', { name: /Календарь на телефоне/ }).click()
-      const sheet = masterPage.getByRole('dialog', { name: 'Календарь на телефоне' })
-      await sheet.getByRole('button', { name: 'Получить ссылку' }).click()
-      const subscribe = sheet.getByRole('link', { name: 'Подписаться' })
+      await masterPage.getByRole('button', { name: /Calendar on your phone/ }).click()
+      const sheet = masterPage.getByRole('dialog', { name: 'Calendar on your phone' })
+      await sheet.getByRole('button', { name: 'Get the link' }).click()
+      const subscribe = sheet.getByRole('link', { name: 'Subscribe' })
       await expect(subscribe).toHaveAttribute(
         'href',
         /^webcal:\/\/.+\/api\/calendar\/[\w-]{43}\.ics$/,
@@ -118,20 +118,20 @@ test.describe('Calendar subscription', () => {
 
       // The sheet remembers the link on this device after a reload.
       await masterPage.reload()
-      await masterPage.getByRole('button', { name: /Календарь на телефоне/ }).click()
-      await expect(sheet.getByRole('link', { name: 'Подписаться' })).toHaveAttribute(
+      await masterPage.getByRole('button', { name: /Calendar on your phone/ }).click()
+      await expect(sheet.getByRole('link', { name: 'Subscribe' })).toHaveAttribute(
         'href',
         firstUrl.replace('http://', 'webcal://'),
       )
 
-      // «Сменить ссылку»: the new one works, the old one is gone at once.
-      await sheet.getByRole('button', { name: 'Сменить ссылку' }).click()
-      await expect(sheet.getByRole('link', { name: 'Подписаться' })).not.toHaveAttribute(
+      // “Change the link”: the new one works, the old one is gone at once.
+      await sheet.getByRole('button', { name: 'Change the link' }).click()
+      await expect(sheet.getByRole('link', { name: 'Subscribe' })).not.toHaveAttribute(
         'href',
         firstUrl.replace('http://', 'webcal://'),
       )
       const secondUrl =
-        (await sheet.getByRole('link', { name: 'Подписаться' }).getAttribute('href'))?.replace(
+        (await sheet.getByRole('link', { name: 'Subscribe' }).getAttribute('href'))?.replace(
           'webcal://',
           'http://',
         ) ?? ''
@@ -195,22 +195,19 @@ test.describe('Calendar subscription', () => {
     expect((await readFeed(page, link.url)).status).toBe(404)
   })
 
-  test('the owner opens it from «Настройки → Уведомления»', async ({ page }, testInfo) => {
+  test('the owner opens it from “Settings → Notifications”', async ({ page }, testInfo) => {
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     await page.request.delete(`/api/manage/${SLUG}/calendar`)
     await page.goto(`/manage/${SLUG}?tab=notifications`)
-    const row = page.getByRole('button', { name: /Календарь на телефоне/ })
+    const row = page.getByRole('button', { name: /Calendar on your phone/ })
     await expect(row).toBeEnabled()
     await test.step('tab', () => expectGoodDesign(page, 'main'))
     await row.click()
-    const sheet = page.getByRole('dialog', { name: 'Календарь на телефоне' })
-    await expect(sheet.getByRole('combobox', { name: 'Мастер' })).toBeVisible()
-    await expect(sheet.getByRole('switch', { name: 'Номера клиентов целиком' })).toBeVisible()
-    await sheet.getByRole('button', { name: 'Получить ссылку' }).click()
-    await expect(sheet.getByRole('link', { name: 'Подписаться' })).toHaveAttribute(
-      'href',
-      /^webcal:/,
-    )
+    const sheet = page.getByRole('dialog', { name: 'Calendar on your phone' })
+    await expect(sheet.getByRole('combobox', { name: 'Specialist' })).toBeVisible()
+    await expect(sheet.getByRole('switch', { name: 'Full client numbers' })).toBeVisible()
+    await sheet.getByRole('button', { name: 'Get the link' }).click()
+    await expect(sheet.getByRole('link', { name: 'Subscribe' })).toHaveAttribute('href', /^webcal:/)
     await test.step('sheet', () => expectGoodDesign(page, '[role="dialog"]:not([data-type])'))
     await page.request.delete(`/api/manage/${SLUG}/calendar`)
   })

@@ -48,7 +48,7 @@ const parseReviewCallback = (data: string | undefined): ReviewCallback | null =>
 const replyPromptText = (authorName: string, rating: number) =>
   `✍️ Reply to <b>${escapeHtml(authorName)}</b>'s review ${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}\nSend it as a reply to this message: it will appear on your page.`
 
-const repliedText = (text: string) => `✅ Reply published:\n«${escapeHtml(text)}»`
+const repliedText = (text: string) => `✅ Reply published:\n“${escapeHtml(text)}”`
 
 const ALREADY_ANSWERED = 'This review already has a reply.'
 const NOT_YOURS = 'This review is not for your business.'

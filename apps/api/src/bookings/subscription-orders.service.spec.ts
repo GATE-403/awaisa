@@ -120,19 +120,19 @@ describe('SubscriptionOrdersService.onPaid', () => {
 
     expect(placed.checkoutUrl).toBe('/pay/pay-1?s=sig')
     expect(payments.createOrderCheckout).toHaveBeenCalledWith('subscription', 'order-1', 6000, {
-      description: 'Pass ‘5 haircuts’, Studio',
+      description: 'Pass “5 haircuts”, Studio',
       phone: '+996555111222',
     })
     expect(query.mock.calls.some(([sql]) => sql.includes('"client_subscriptions"'))).toBe(false)
   })
 
-  it('registers itself as the «subscription» kind of payments', () => {
+  it('registers itself as the “subscription” kind of payments', () => {
     const { service, payments } = setup(() => [])
     service.onModuleInit()
     expect(payments.registerOrder).toHaveBeenCalledWith('subscription', expect.any(Object))
   })
 
-  it('still issues a paid order after the plan lost «loyalty»: the money came', async () => {
+  it('still issues a paid order after the plan lost “loyalty”: the money came', async () => {
     const { service, billing } = setup(issuedRows('pending'), { hasLoyalty: false })
 
     expect(await service.onPaid('order-1')).toEqual({ subscriptionId: 'sub-1', bookingId: null })
@@ -140,7 +140,7 @@ describe('SubscriptionOrdersService.onPaid', () => {
   })
 })
 
-describe('SubscriptionOrdersService: online sale needs the «loyalty» plan feature', () => {
+describe('SubscriptionOrdersService: online sale needs the “loyalty” plan feature', () => {
   const plans = (sql: string) => {
     if (sql.includes('FROM "businesses" WHERE "slug"')) return [{ id: 'biz-1' }]
     if (sql.includes('FROM "subscription_plans"'))
@@ -148,7 +148,7 @@ describe('SubscriptionOrdersService: online sale needs the «loyalty» plan feat
     return []
   }
 
-  it('shows and sells online plans while the plan has «loyalty»', async () => {
+  it('shows and sells online plans while the plan has “loyalty”', async () => {
     const { service, billing } = setup(plans)
 
     expect(await service.listOnline('studio')).toHaveLength(1)

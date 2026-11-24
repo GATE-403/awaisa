@@ -3,7 +3,7 @@ import { parseReviewCallback, repliedText, reviewKeyboard } from './review-repli
 const ID = '6f1c2d3e-0000-4000-8000-000000000001'
 
 describe('review replies from Telegram', () => {
-  it('puts a button per quick reply, «Write my own» and the https cabinet', () => {
+  it('puts a button per quick reply, “Write my own” and the https cabinet', () => {
     const keyboard = reviewKeyboard(
       ID,
       ['Thank you, Asel!', 'X'.repeat(60)],

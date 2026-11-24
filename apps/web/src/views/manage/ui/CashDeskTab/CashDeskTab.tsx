@@ -347,8 +347,8 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
             title={t('No sales today')}
             text={
               desk.products.length > 0
-                ? t('Sell a product on its own or add it to a visit in "Visit outcome".')
-                : t('Mark stock items "Sold to clients" to sell them here.')
+                ? t('Sell a product on its own or add it to a visit in “Visit outcome”.')
+                : t('Mark stock items “Sold to clients” to sell them here.')
             }
           />
         ) : (
@@ -583,7 +583,7 @@ const ShiftDetails = ({ shift }: { shift: CashShift }) => {
           </li>
         </ul>
         <RowNote>
-          {t('Cash for visits: visits marked "Arrived" during the shift at this branch.')}
+          {t('Cash for visits: visits marked “Arrived” during the shift at this branch.')}
         </RowNote>
       </section>
       {shift.movements.length > 0 && (

@@ -64,7 +64,7 @@ export class MailingsService {
     const left = await this.billing.smsLeft(business.id)
     if (left !== null && recipients.length > left) {
       throw new PlanRequiredException(
-        `You have ${left} SMS left this month, and the mailing is for ${recipients.length}. You can buy an SMS pack in «Plan»`,
+        `You have ${left} SMS left this month, and the mailing is for ${recipients.length}. You can buy an SMS pack in “Plan”`,
       )
     }
     const link = `${this.config.get('PUBLIC_WEB_URL', { infer: true })}/${business.slug}/book`
@@ -77,7 +77,7 @@ export class MailingsService {
       await this.billing.takeSms(business.id, { isOptional: false })
       void this.sms.sendSafely(recipient.phone, renderMailing(text, recipient.name, link))
     }
-    this.logger.log(`Mailing «${segment}» for ${business.slug}: ${recipients.length}`)
+    this.logger.log(`Mailing “${segment}” for ${business.slug}: ${recipients.length}`)
 
     return { recipients: recipients.length }
   }

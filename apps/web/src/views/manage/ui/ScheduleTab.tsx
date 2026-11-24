@@ -551,7 +551,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         {schedule && !hasMasters && (
           <EmptyState
             title={t('Add specialists')}
-            text={t('Open "Specialists" and add at least yourself: the schedule will appear here.')}
+            text={t('Open “Specialists” and add at least yourself: the schedule will appear here.')}
           />
         )}
 

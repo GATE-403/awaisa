@@ -6,9 +6,9 @@ const SLUG = 'lumiere-salon'
 
 const services = (page: Page) => page.locator('#services')
 
-// The place's sections are tabs like a profile's: «Работы · Услуги · Мастера · Время».
+// The place's sections are tabs like a profile's: “Work · Services · Specialists · Time”.
 const openTab = async (page: Page, name: string) => {
-  const tab = page.getByRole('tablist', { name: 'Разделы места' }).getByRole('tab', {
+  const tab = page.getByRole('tablist', { name: 'Place sections' }).getByRole('tab', {
     name: new RegExp(`^${name}`),
   })
   await tab.click()
@@ -28,27 +28,27 @@ test.describe('Business page', () => {
   test('the menu is searched and cut by section', async ({ page }) => {
     await page.goto(`/${SLUG}`)
     const menu = services(page)
-    // The page opens on «Услуги»: people come to book a service.
+    // The page opens on “Services”: people come to book a service.
     await expect(
-      page.getByRole('tablist', { name: 'Разделы места' }).getByRole('tab', { name: /^Услуги/ }),
+      page.getByRole('tablist', { name: 'Place sections' }).getByRole('tab', { name: /^Services/ }),
     ).toHaveAttribute('aria-selected', 'true')
-    await expect(menu.getByText('Часто выбирают')).toBeVisible()
+    await expect(menu.getByText('Popular')).toBeVisible()
 
-    // A section chip keeps its own services only, and «Часто выбирают» steps aside.
-    const sections = menu.getByRole('group', { name: 'Разделы услуг' })
+    // A section chip keeps its own services only, and “Popular” steps aside.
+    const sections = menu.getByRole('group', { name: 'Service sections' })
     await sections.getByRole('button', { name: /^Уход/ }).click()
     await expect(sections.getByRole('button', { name: /^Уход/ })).toHaveAttribute(
       'aria-pressed',
       'true',
     )
-    await expect(menu.getByText('Часто выбирают')).toHaveCount(0)
+    await expect(menu.getByText('Popular')).toHaveCount(0)
     await expect(menu.getByRole('article')).toHaveCount(1)
     await expect(menu.getByRole('article', { name: /^Кератиновое восстановление/ })).toBeVisible()
 
-    await sections.getByRole('button', { name: /^Все/ }).click()
-    const search = menu.getByRole('searchbox', { name: 'Найти услугу' })
+    await sections.getByRole('button', { name: /^All/ }).click()
+    const search = menu.getByRole('searchbox', { name: 'Find a service' })
     await search.fill('тонир')
-    await expect(menu.getByText('Нашли 1 услугу')).toBeVisible()
+    await expect(menu.getByText('Found 1 service')).toBeVisible()
     await expect(menu.getByRole('article')).toHaveCount(1)
     const card = menu.getByRole('article', { name: /^Тонирование/ })
     // The card books that very service.
@@ -58,42 +58,42 @@ test.describe('Business page', () => {
     )
 
     await search.fill('шиномонтаж')
-    await expect(menu.getByText(/Ничего не нашли/)).toBeVisible()
-    await menu.getByRole('button', { name: 'Очистить поиск' }).click()
+    await expect(menu.getByText(/Nothing found/)).toBeVisible()
+    await menu.getByRole('button', { name: 'Clear search' }).click()
     await expect(search).toHaveValue('')
-    await expect(menu.getByText('Часто выбирают')).toBeVisible()
+    await expect(menu.getByText('Popular')).toBeVisible()
   })
 
   test('work photos open full screen and turn', async ({ page, isMobile }) => {
     await page.goto(`/${SLUG}`)
-    await openTab(page, 'Работы')
+    await openTab(page, 'Work')
     const work = page.locator('#work')
     // The tab's one action at the tabs' row end; phones keep the row for the tabs.
     const prices = page.locator(`a[href="/feed?business=${SLUG}"]`)
     if (isMobile) await expect(prices).toBeHidden()
-    else await expect(prices).toHaveText('Смотреть с ценами')
-    await work.getByRole('button', { name: 'Открыть фото 2 из 6' }).click()
-    const viewer = page.getByRole('dialog', { name: /: фото 2 из 6$/ })
+    else await expect(prices).toHaveText('See with prices')
+    await work.getByRole('button', { name: 'Open photo 2 of 6' }).click()
+    const viewer = page.getByRole('dialog', { name: /: photo 2 of 6$/ })
     await expect(viewer).toBeVisible()
 
     await page.keyboard.press('ArrowRight')
-    await expect(page.getByRole('dialog', { name: /: фото 3 из 6$/ })).toBeVisible()
+    await expect(page.getByRole('dialog', { name: /: photo 3 of 6$/ })).toBeVisible()
     await page.keyboard.press('ArrowLeft')
-    await expect(page.getByRole('dialog', { name: /: фото 2 из 6$/ })).toBeVisible()
+    await expect(page.getByRole('dialog', { name: /: photo 2 of 6$/ })).toBeVisible()
     await page.keyboard.press('ArrowLeft')
-    await expect(page.getByRole('dialog', { name: /: фото 1 из 6$/ })).toBeVisible()
+    await expect(page.getByRole('dialog', { name: /: photo 1 of 6$/ })).toBeVisible()
     if (!isMobile) {
-      // The viewer's own arrow: the cards of «Похожие места» leaf their pictures too.
-      await page.getByRole('dialog').getByRole('button', { name: 'Следующее фото' }).click()
-      await expect(page.getByRole('dialog', { name: /: фото 2 из 6$/ })).toBeVisible()
+      // The viewer's own arrow: the cards of “Similar places” leaf their pictures too.
+      await page.getByRole('dialog').getByRole('button', { name: 'Next photo' }).click()
+      await expect(page.getByRole('dialog', { name: /: photo 2 of 6$/ })).toBeVisible()
     }
 
     await page.keyboard.press('Escape')
-    await expect(page.getByRole('dialog', { name: /: фото \d из 6$/ })).toHaveCount(0)
+    await expect(page.getByRole('dialog', { name: /: photo \d of 6$/ })).toHaveCount(0)
 
-    await work.getByRole('button', { name: 'Открыть фото 1 из 6' }).click()
-    await page.getByRole('button', { name: 'Закрыть' }).click()
-    await expect(page.getByRole('dialog', { name: /: фото \d из 6$/ })).toHaveCount(0)
+    await work.getByRole('button', { name: 'Open photo 1 of 6' }).click()
+    await page.getByRole('button', { name: 'Close' }).click()
+    await expect(page.getByRole('dialog', { name: /: photo \d of 6$/ })).toHaveCount(0)
   })
 
   test('the head reaches the place: call, route, share', async ({ page }) => {
@@ -109,15 +109,15 @@ test.describe('Business page', () => {
     const { business } = await (await page.request.get(`/api/businesses/${SLUG}`)).json()
     await page.goto(`/${SLUG}`)
 
-    await expect(page.getByRole('link', { name: 'Позвонить' }).first()).toHaveAttribute(
+    await expect(page.getByRole('link', { name: 'Call' }).first()).toHaveAttribute(
       'href',
       `tel:${business.phone}`,
     )
-    const route = page.getByRole('link', { name: 'Маршрут' }).first()
+    const route = page.getByRole('link', { name: 'Directions' }).first()
     await expect(route).toHaveAttribute('href', /^https:\/\//)
     await expect(route).toHaveAttribute('target', '_blank')
 
-    await page.getByRole('button', { name: 'Поделиться' }).first().click()
+    await page.getByRole('button', { name: 'Share' }).first().click()
     await expect
       .poll(() => page.evaluate(() => (window as unknown as { shared?: ShareData }).shared?.url))
       .toMatch(new RegExp(`/${SLUG}$`))
@@ -126,7 +126,9 @@ test.describe('Business page', () => {
     await expect(page.locator('a[href="#reviews"]').first()).toBeVisible()
     await page.goto(`/${SLUG}#masters`)
     await expect(
-      page.getByRole('tablist', { name: 'Разделы места' }).getByRole('tab', { name: /^Мастера/ }),
+      page
+        .getByRole('tablist', { name: 'Place sections' })
+        .getByRole('tab', { name: /^Specialists/ }),
     ).toHaveAttribute('aria-selected', 'true')
     await expect(page.locator('#masters')).toBeVisible()
   })
@@ -136,18 +138,18 @@ test.describe('Business page', () => {
     const reviews = page.locator('#reviews')
     await reviews.scrollIntoViewIfNeeded()
     // The score card: the average with one decimal.
-    await expect(reviews.getByRole('img', { name: /^\d\.\d из 5$/ })).toBeVisible()
+    await expect(reviews.getByRole('img', { name: /^\d\.\d out of 5$/ })).toBeVisible()
     await expect.poll(() => countReviews(page)).toBe(3)
 
-    const more = reviews.getByRole('button', { name: /^Ещё \d+ отзыв/ })
+    const more = reviews.getByRole('button', { name: /^\d+ more review/ })
     await more.click()
     await expect.poll(() => countReviews(page)).toBeGreaterThan(3)
-    await reviews.getByRole('button', { name: 'Скрыть' }).click()
+    await reviews.getByRole('button', { name: 'Hide' }).click()
     await expect.poll(() => countReviews(page)).toBe(3)
 
     const { catalog } = await (await page.request.get(`/api/businesses/${SLUG}`)).json()
     const master = catalog.specialists[0]
-    await openTab(page, 'Мастера')
+    await openTab(page, 'Specialists')
     await expect(
       page.locator('#masters').locator(`a[href="/${SLUG}/book?specialist=${master.id}"]`),
     ).toBeVisible()

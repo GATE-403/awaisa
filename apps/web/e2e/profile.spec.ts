@@ -57,13 +57,13 @@ test.describe('Own profile', () => {
     await expect(page.getByText('E2E статус')).toBeVisible()
     await expect(page.getByText('💅').first()).toBeVisible()
     await expect(page.getByText('E2E о себе')).toBeVisible()
-    await expect(page.getByText(/Уровень 1/).first()).toBeVisible()
+    await expect(page.getByText(/Level 1/).first()).toBeVisible()
     // Laid out like Telegram: the tiles, then the sections as tabs, medals first; with nothing
     // earned yet the goals are shown open with their progress.
-    await expect(page.getByRole('button', { name: 'Пригласить' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Изменить' })).toBeVisible()
-    await expect(page.getByRole('tab', { name: /Медали/ })).toHaveAttribute('aria-selected', 'true')
-    await expect(page.getByRole('list', { name: 'Цели' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Invite' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Change' })).toBeVisible()
+    await expect(page.getByRole('tab', { name: /Medals/ })).toHaveAttribute('aria-selected', 'true')
+    await expect(page.getByRole('list', { name: 'Goals' })).toBeVisible()
 
     // Bad presets and a status «emoji» that is not one are refused.
     expect(
@@ -90,17 +90,17 @@ test.describe('Own profile', () => {
     ).toBe(404)
     await guest.close()
     await page.reload()
-    await expect(page.getByText('Профиль скрыт - его видите только вы')).toBeVisible()
+    await expect(page.getByText('Profile hidden: only you can see it')).toBeVisible()
 
-    // «Изменить» on one's own page opens the editor with the live preview.
-    await page.getByRole('button', { name: 'Изменить' }).click()
-    const sheet = page.getByRole('dialog', { name: 'Профиль' })
-    await expect(sheet.getByRole('combobox', { name: 'Цвет профиля' })).toContainText('Розовый')
+    // “Change” on one's own page opens the editor with the live preview.
+    await page.getByRole('button', { name: 'Change' }).click()
+    const sheet = page.getByRole('dialog', { name: 'Profile' })
+    await expect(sheet.getByRole('combobox', { name: 'Profile colour' })).toContainText('Pink')
     // The status emoji is a plain Select row now; it shows the saved one.
-    await expect(sheet.getByRole('combobox', { name: 'Эмодзи статуса' })).toContainText('💅')
-    await sheet.getByText('Открытый профиль', { exact: true }).click()
-    await sheet.getByRole('button', { name: 'Готово' }).click()
-    await expect(page.getByText('Профиль обновлён')).toBeVisible()
+    await expect(sheet.getByRole('combobox', { name: 'Status emoji' })).toContainText('💅')
+    await sheet.getByText('Public profile', { exact: true }).click()
+    await sheet.getByRole('button', { name: 'Done' }).click()
+    await expect(page.getByText('Profile updated')).toBeVisible()
     const after = await (await page.request.get('/api/me/profile')).json()
     expect(after.isPublic).toBe(true)
   })
@@ -121,16 +121,16 @@ test.describe('Own profile', () => {
 
     // The short address opens the profile; on one's own it invites.
     await page.goto(`/u/${handle}`)
-    await expect(page.getByRole('button', { name: 'Пригласить' })).toBeVisible()
-    // «В сторис» shows the picture first, with a download for a mouse.
-    await page.getByRole('button', { name: 'В сторис' }).click()
-    const storySheet = page.getByRole('dialog', { name: 'Для сторис' })
-    await expect(storySheet.getByRole('img', { name: 'Картинка профиля для сторис' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Invite' })).toBeVisible()
+    // “To stories” shows the picture first, with a download for a mouse.
+    await page.getByRole('button', { name: 'To stories' }).click()
+    const storySheet = page.getByRole('dialog', { name: 'For stories' })
+    await expect(storySheet.getByRole('img', { name: 'Profile picture for stories' })).toBeVisible()
     // Saving it is one glyph in the sheet's bar (a download with a mouse).
-    await expect(storySheet.getByRole('button', { name: 'Скачать картинку' })).toBeVisible()
-    await storySheet.getByRole('button', { name: 'Закрыть' }).click()
+    await expect(storySheet.getByRole('button', { name: 'Download picture' })).toBeVisible()
+    await storySheet.getByRole('button', { name: 'Close' }).click()
 
-    // A friend books by the link: once they have come, they count - points and «Привёл друга».
+    // A friend books by the link: once they have come, they count - points and “Brought a friend”.
     const friendPhone = randomClientPhone()
     await createPastVisit('E2E Друг', friendPhone, 0, undefined, handle)
     await expect
@@ -179,10 +179,10 @@ test.describe('Profile story', () => {
 
     // On the page: the earned medal on the shelf, the goals folded into one line that opens.
     await page.goto(`/u/${settings.id}`)
-    await expect(page.getByRole('list', { name: 'Получено' })).toContainText('Первый визит')
-    const goals = page.getByRole('button', { name: /целей.*ближе всего/ })
+    await expect(page.getByRole('list', { name: 'Earned' })).toContainText('First visit')
+    const goals = page.getByRole('button', { name: /goals.*closest/ })
     await goals.click()
-    await expect(page.getByRole('list', { name: 'Цели' })).toBeVisible()
+    await expect(page.getByRole('list', { name: 'Goals' })).toBeVisible()
   })
 })
 
@@ -225,23 +225,23 @@ test.describe('Client profiles', () => {
     }
 
     // The author's name on the business page opens that profile as a sheet over the page, like a
-    // booking; «Закрыть» goes back to the place.
+    // booking; “Close” goes back to the place.
     await page.goto(`/${found.slug}`)
     await page
-      .getByRole('link', { name: `${found.review.authorName}: профиль` })
+      .getByRole('link', { name: `${found.review.authorName}: profile` })
       .first()
       .click()
     await page.waitForURL(new RegExp(`/u/${found.review.authorId}$`))
-    const sheet = page.getByRole('dialog', { name: 'Профиль' })
+    const sheet = page.getByRole('dialog', { name: 'Profile' })
     await expect(sheet.getByRole('heading', { level: 1 })).toBeVisible()
-    await expect(sheet.getByText(/Уровень \d+/).first()).toBeVisible()
-    await sheet.getByRole('button', { name: 'Закрыть' }).click()
+    await expect(sheet.getByText(/Level \d+/).first()).toBeVisible()
+    await sheet.getByRole('button', { name: 'Close' }).click()
     await page.waitForURL(new RegExp(`/${found.slug}$`))
-    await expect(page.getByRole('dialog', { name: 'Профиль' })).toHaveCount(0)
+    await expect(page.getByRole('dialog', { name: 'Profile' })).toHaveCount(0)
 
     // The address itself (a shared link, a reload) is the full page, no sheet.
     await page.goto(`/u/${found.review.authorId}`)
     await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toBeVisible()
-    await expect(page.getByRole('dialog', { name: 'Профиль' })).toHaveCount(0)
+    await expect(page.getByRole('dialog', { name: 'Profile' })).toHaveCount(0)
   })
 })

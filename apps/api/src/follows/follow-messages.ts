@@ -30,9 +30,9 @@ const freedText = (master: string, place: string, day: string, time: string, lin
   `${firstName(master)}, ${place}: a slot opened up ${day} at ${time}. Book: ${link}`
 
 const movedText = (master: string, place: string, link: string) =>
-  `${firstName(master)} now works at «${place}». Book: ${link}`
+  `${firstName(master)} now works at “${place}”. Book: ${link}`
 
 const worksText = (master: string, count: number, link: string) =>
-  `${firstName(master)}: ${count} new ${count === 1 ? 'look' : 'looks'} in «Looks». See them: ${link}`
+  `${firstName(master)}: ${count} new ${count === 1 ? 'look' : 'looks'} in “Looks”. See them: ${link}`
 
 export { dayWords, freedText, movedText, worksText }

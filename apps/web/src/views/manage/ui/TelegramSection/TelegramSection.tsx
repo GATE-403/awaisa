@@ -123,7 +123,7 @@ export const TelegramSection = ({ slug, fallback = null }: TelegramSectionProps)
         {isWaiting || !link ? (
           <span className={styles.connect} data-waiting=''>
             {isWaiting
-              ? t('Waiting for you to tap "Start" in Telegram…')
+              ? t('Waiting for you to tap “Start” in Telegram…')
               : t('Preparing the link…')}
           </span>
         ) : (

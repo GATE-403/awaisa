@@ -312,7 +312,7 @@ export const MasterStatsSheet = ({
                 <Input
                   variant='plain'
                   aria-label={t('Payout comment')}
-                  placeholder={t('Comment, e.g. "advance"')}
+                  placeholder={t('Comment, e.g. “advance”')}
                   value={payout.note}
                   maxLength={200}
                   onValueChange={(note) => setPayout({ ...payout, note })}

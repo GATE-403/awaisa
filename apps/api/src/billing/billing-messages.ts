@@ -21,7 +21,7 @@ const orderTitle = (order: {
 }) =>
   order.kind === 'sms'
     ? `${order.smsCount ?? 0} SMS pack`
-    : `«${order.planTitle ?? ''}» plan for ${monthsText(order.months ?? 1)}`
+    : `“${order.planTitle ?? ''}” plan for ${monthsText(order.months ?? 1)}`
 
 /**
  * The owner's reminder about the plan's end (SMS and Telegram): what happens and where to pay.
@@ -31,11 +31,11 @@ const reminderText = (
   stage: ReminderStage,
   input: { businessName: string; planTitle: string; isTrial: boolean; endsAt: Date; link: string },
 ) => {
-  const what = input.isTrial ? 'Your free trial' : `Your «${input.planTitle}» plan`
+  const what = input.isTrial ? 'Your free trial' : `Your “${input.planTitle}” plan`
   if (stage === 'soon') {
     return `${input.businessName}: ${what} ends on ${formatDay(input.endsAt)}. Renew: ${input.link}`
   }
-  const ended = input.isTrial ? 'your free trial' : `your «${input.planTitle}» plan`
+  const ended = input.isTrial ? 'your free trial' : `your “${input.planTitle}” plan`
   return `${input.businessName}: ${ended} has ended, so the till, analytics and mailings are closed. Renew: ${input.link}`
 }
 

@@ -133,7 +133,7 @@ const upgradeFor = (plans: PlanRow[], fits: (plan: PlanRow) => boolean) =>
 
 const featureLockedMessage = (plans: PlanRow[], feature: PlanFeature) => {
   const upgrade = upgradeFor(plans, (plan) => hasFeature(plan, feature))
-  return upgrade ? `Available on the «${upgrade.title}» plan` : 'Not available on your plan'
+  return upgrade ? `Available on the “${upgrade.title}” plan` : 'Not available on your plan'
 }
 
 const limitOf = (plan: PlanRow, limit: PlanLimit) =>
@@ -148,9 +148,9 @@ const limitProblem = (plans: PlanRow[], plan: PlanRow, limit: PlanLimit, current
     const otherMax = limitOf(other, limit)
     return otherMax === null || otherMax > max
   })
-  const head = `The «${plan.title}» plan allows up to ${max} ${plural(max, words)}`
+  const head = `The “${plan.title}” plan allows up to ${max} ${plural(max, words)}`
 
-  return upgrade ? `${head}. More on the «${upgrade.title}» plan` : head
+  return upgrade ? `${head}. More on the “${upgrade.title}” plan` : head
 }
 
 /** Paying N months: from the later of now, the paid end and the trial's end. */

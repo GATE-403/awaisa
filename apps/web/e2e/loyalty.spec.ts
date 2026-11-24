@@ -26,22 +26,22 @@ test.describe('Loyalty', () => {
       const bonuses = page.getByRole('switch').first()
       if (before.bonusPercent === null) {
         await bonuses.click()
-        await expect(page.getByText('Бонусы включены')).toBeVisible()
+        await expect(page.getByText('Bonuses on')).toBeVisible()
       }
-      await page.getByRole('button', { name: 'Новый' }).click()
-      const planSheet = page.getByRole('dialog', { name: 'Новый абонемент' })
-      await planSheet.getByLabel('Название абонемента').fill('E2E Абонемент')
-      await planSheet.getByLabel('Визитов').fill('3')
-      await planSheet.getByLabel('Цена абонемента, сом').fill('2000')
-      await planSheet.getByRole('button', { name: 'Сохранить' }).click()
+      await page.getByRole('button', { name: 'New' }).click()
+      const planSheet = page.getByRole('dialog', { name: 'New pass' })
+      await planSheet.getByLabel('Pass name').fill('E2E Абонемент')
+      await planSheet.getByLabel('Visits').fill('3')
+      await planSheet.getByLabel('Pass price, som').fill('2000')
+      await planSheet.getByRole('button', { name: 'Save' }).click()
       await expect(page.getByRole('button', { name: /E2E Абонемент/ })).toBeVisible()
 
-      await page.getByRole('button', { name: 'Выпустить' }).click()
-      const certSheet = page.getByRole('dialog', { name: 'Сертификат' })
-      await certSheet.getByLabel('Сумма сертификата, сом').fill('1000')
-      await certSheet.getByLabel('Кому').fill('E2E Подарок')
-      await certSheet.getByRole('button', { name: 'Выпустить' }).click()
-      await expect(page.getByText(/^Сертификат [A-Z0-9]{8}$/)).toBeVisible()
+      await page.getByRole('button', { name: 'Issue' }).click()
+      const certSheet = page.getByRole('dialog', { name: 'Certificate' })
+      await certSheet.getByLabel('Certificate amount, som').fill('1000')
+      await certSheet.getByLabel('To', { exact: true }).fill('E2E Подарок')
+      await certSheet.getByRole('button', { name: 'Issue' }).click()
+      await expect(page.getByText(/^Certificate [A-Z0-9]{8}$/)).toBeVisible()
       const overview = await (await page.request.get(`${manage}/loyalty`)).json()
       const plan = overview.plans.find((item: { title: string }) => item.title === 'E2E Абонемент')
       const certificate = overview.certificates.find(
@@ -62,7 +62,7 @@ test.describe('Loyalty', () => {
       ).toBe(true)
       expect((await loyaltyOf()).bonusBalance).toBe(Math.round((1000 * percent) / 100))
 
-      // A sold subscription is revenue the day it is sold, in «Прибыль» and «Акции и лояльность».
+      // A sold subscription is revenue the day it is sold, in “Profit” and “Promotions and loyalty”.
       const money = async () =>
         (await (await page.request.get(`${manage}/money?days=7`)).json()) as {
           subscriptionsRevenue: number
@@ -104,7 +104,7 @@ test.describe('Loyalty', () => {
         loyaltyBefore.subscriptionsRevenue + 2000,
       )
       await page.goto(`/manage/${SLUG}?tab=analytics`)
-      await expect(page.getByText('Абонементы', { exact: true })).toBeVisible()
+      await expect(page.getByText('Passes', { exact: true })).toBeVisible()
       const second = await createPastVisit('E2E Лояльность', phone, 1, 40)
       const paid = await (
         await outcome(second.booking.id, { outcome: 'arrived', subscriptionId: subscription.id })

@@ -143,7 +143,7 @@ export const SaleSheet = ({
         <EmptyState
           variant='inline'
           title={t('No products for sale')}
-          text={t('Mark a stock item "Sold to clients" and set its price.')}
+          text={t('Mark a stock item “Sold to clients” and set its price.')}
           action={
             isOwner ? (
               <ButtonLink href={`/manage/${slug}?tab=stock`} size='sm' variant='secondary'>

@@ -63,17 +63,17 @@ test.describe('Prepayment', () => {
       //    paying confirms the visit and the profile says so.
       await guestPage.goto(`/${SLUG}/book?service=${service.id}&specialist=${master.id}`)
       const steps = bookingSteps(guestPage)
-      await expect(steps.datetime.getByRole('group', { name: 'День' })).toBeVisible()
+      await expect(steps.datetime.getByRole('group', { name: 'Day' })).toBeVisible()
       await pickFirstFreeSlot(guestPage)
-      await steps.contacts.getByLabel('Имя').fill('E2E Предоплата')
-      await steps.contacts.getByLabel('Телефон').fill(randomClientPhone().replace('+996', ''))
+      await steps.contacts.getByLabel('Name').fill('E2E Предоплата')
+      await steps.contacts.getByLabel('Phone').fill(randomClientPhone().replace('+996', ''))
       await submitBooking(guestPage)
       await expect(guestPage).toHaveURL(/\/pay\/[0-9a-f-]+\?s=/)
       // The first visit compiles the route in dev: give the checkout a moment.
-      await expect(guestPage.getByText('Тестовый режим')).toBeVisible({ timeout: 20_000 })
-      await guestPage.getByRole('button', { name: `Оплатить ${DEPOSIT} сом` }).click()
+      await expect(guestPage.getByText('Test mode')).toBeVisible({ timeout: 20_000 })
+      await guestPage.getByRole('button', { name: `Pay ${DEPOSIT} som` }).click()
       await expect(guestPage).toHaveURL(/\/bookings/)
-      await expect(guestPage.getByText('Предоплата внесена')).toBeVisible()
+      await expect(guestPage.getByText('Deposit paid')).toBeVisible()
       const [stored] = await guestPage.evaluate(
         () =>
           JSON.parse(localStorage.getItem('awaisa:bookings:v2') ?? '[]') as {

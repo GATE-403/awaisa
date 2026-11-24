@@ -17,9 +17,9 @@ test.describe('Staff roles', () => {
 
     // The owner adds an administrator by phone.
     await page.goto(`/manage/${SLUG}?tab=team`)
-    await page.getByLabel('Телефон администратора').fill(phone.replace('+996', ''))
-    await page.getByRole('button', { name: 'Добавить' }).click()
-    await expect(page.getByText('Администратор добавлен')).toBeVisible()
+    await page.getByLabel("Administrator's phone").fill(phone.replace('+996', ''))
+    await page.getByRole('button', { name: 'Add' }).click()
+    await expect(page.getByText('Administrator added')).toBeVisible()
 
     const staffContext = await browser.newContext()
     const staff = await staffContext.newPage()
@@ -69,19 +69,19 @@ test.describe('Staff roles', () => {
       expect(ownerClients.items[0].spent).toBeGreaterThan(0)
 
       await staff.goto(`/manage/${SLUG}?tab=analytics`)
-      const tabs = staff.getByRole('navigation', { name: 'Разделы кабинета' })
-      await expect(tabs.getByRole('link', { name: 'Расписание' })).toBeVisible()
-      await expect(tabs.getByRole('link', { name: 'Касса' })).toBeVisible()
-      await expect(tabs.getByRole('link', { name: 'Аналитика' })).toHaveCount(0)
-      await expect(tabs.getByRole('link', { name: 'Настройки' })).toHaveCount(0)
+      const tabs = staff.getByRole('navigation', { name: 'Dashboard sections' })
+      await expect(tabs.getByRole('link', { name: 'Schedule' })).toBeVisible()
+      await expect(tabs.getByRole('link', { name: 'Till' })).toBeVisible()
+      await expect(tabs.getByRole('link', { name: 'Analytics' })).toHaveCount(0)
+      await expect(tabs.getByRole('link', { name: 'Settings' })).toHaveCount(0)
 
       // The owner closes the door.
       await page.reload()
       await page
-        .getByRole('button', { name: /^Закрыть доступ:/ })
+        .getByRole('button', { name: /^Remove access:/ })
         .last()
         .click()
-      await expect(page.getByText('Доступ закрыт')).toBeVisible()
+      await expect(page.getByText('Access removed')).toBeVisible()
       expect((await staff.request.get(`/api/manage/${SLUG}/schedule?date=${today}`)).status()).toBe(
         403,
       )

@@ -123,7 +123,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
                     </dd>
                   </div>
                   <div className={styles.stat}>
-                    <dt className={styles.statLabel}>{t('Started in "Looks"')}</dt>
+                    <dt className={styles.statLabel}>{t('Started in “Looks”')}</dt>
                     <dd className={styles.statValue}>{fromFeed.toLocaleString('en-GB')}</dd>
                     <dd className={styles.statMeta}>
                       {online

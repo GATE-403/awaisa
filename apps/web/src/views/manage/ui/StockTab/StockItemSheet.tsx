@@ -119,7 +119,7 @@ export const StockItemSheet = ({
             <Input
               variant='plain'
               aria-label={t('Name')}
-              placeholder={t('For example, "Hair dye"')}
+              placeholder={t('For example, “Hair dye”')}
               value={name}
               onValueChange={setName}
               autoFocus={!item}
@@ -192,7 +192,7 @@ export const StockItemSheet = ({
           </div>
           <p className={sheet.groupFooter}>
             {isForSale
-              ? t('Sold in "Till" and in the visit outcome; the stock goes down by itself.')
+              ? t('Sold in “Till” and in the visit outcome; the stock goes down by itself.')
               : t('Shampoo, wax, oil: sell with a visit or on their own.')}
           </p>
         </section>
@@ -291,7 +291,7 @@ export const StockItemSheet = ({
                     name: example.name,
                     amount: maskAmountInput(String(exampleCost)),
                   })
-                : t('How much one visit uses: written off when the visit is marked "Arrived".')}
+                : t('How much one visit uses: written off when the visit is marked “Arrived”.')}
             </p>
           </section>
         )}

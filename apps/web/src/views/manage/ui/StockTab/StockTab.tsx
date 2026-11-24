@@ -67,7 +67,7 @@ export const StockTab = ({ slug, catalog }: StockTabProps) => {
       <SectionHeader
         title={t('Stock')}
         description={t(
-          'Consumables are written off when a visit is marked "Arrived", products when sold.',
+          'Consumables are written off when a visit is marked “Arrived”, products when sold.',
         )}
         isFloatingOnPhone
         actions={
@@ -156,7 +156,7 @@ export const StockTab = ({ slug, catalog }: StockTabProps) => {
                         expense: asExpense ? { branchId: null } : null,
                       }),
                     t('Delivery recorded'),
-                    asExpense ? t('The purchase cost is in "Expenses".') : undefined,
+                    asExpense ? t('The purchase cost is in “Expenses”.') : undefined,
                   )
           }
           onAdjust={

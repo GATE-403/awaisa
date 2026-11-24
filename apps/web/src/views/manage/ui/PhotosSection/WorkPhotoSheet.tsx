@@ -133,8 +133,8 @@ export const WorkPhotoSheet = ({
                   count: photo.reports,
                 })
               : serviceId === NONE
-                ? t('Set the service: in the "Work" feed the photo gets "Book" for it.')
-                : t('In the "Work" feed the photo shows the price, the next free time and "Book".')}
+                ? t('Set the service: in the “Work” feed the photo gets “Book” for it.')
+                : t('In the “Work” feed the photo shows the price, the next free time and “Book”.')}
           </p>
         </section>
         <HoldButton

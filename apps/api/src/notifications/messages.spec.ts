@@ -40,7 +40,7 @@ describe('SMS messages', () => {
 
   it('return-visit SMS names the service and the master by first name', () => {
     expect(returnVisitMessage('Kings', "Men's haircut", 'Erlan Sydykov', 'https://a.kg/b')).toBe(
-      "Kings: time for another «Men's haircut»? Erlan is ready for you - book: https://a.kg/b",
+      "Kings: time for another “Men's haircut”? Erlan is ready for you - book: https://a.kg/b",
     )
   })
 })

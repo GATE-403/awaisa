@@ -158,7 +158,7 @@ export class SubscriptionOrdersService implements OnModuleInit {
     }
     const checkout = await this.payments
       .createOrderCheckout(KIND, placed.id, placed.amount, {
-        description: `Pass ‘${placed.title}’, ${placed.businessName}`,
+        description: `Pass “${placed.title}”, ${placed.businessName}`,
         phone: buyer.phone,
       })
       .catch(async (error: unknown) => {
@@ -186,7 +186,7 @@ export class SubscriptionOrdersService implements OnModuleInit {
 
     return {
       kind: KIND,
-      title: `Pass ‘${String(row.title)}’`,
+      title: `Pass “${String(row.title)}”`,
       details: `${visitsWord(toNumber(row.visits))} for ${toNumber(row.validDays)} days${isBooked ? ' · this visit is the first' : ''}`,
       business: { name: String(row.name), slug: String(row.slug) },
       dueAt: status === 'pending' ? (row.dueAt as Date).toISOString() : null,

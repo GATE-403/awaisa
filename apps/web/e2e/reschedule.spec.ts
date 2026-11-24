@@ -18,19 +18,19 @@ test.describe('Client reschedules a visit', () => {
     )
 
     await page.goto('/bookings')
-    const ticket = page.getByRole('article', { name: /^Запись / }).first()
+    const ticket = page.getByRole('article', { name: /^Booking / }).first()
     await expect(ticket).toBeVisible()
-    // «Перенести» sits in plain sight under the ticket.
-    await page.getByRole('button', { name: 'Перенести', exact: true }).first().click()
+    // “Reschedule” sits in plain sight under the ticket.
+    await page.getByRole('button', { name: 'Reschedule', exact: true }).first().click()
 
-    const sheet = page.getByRole('dialog', { name: 'Перенести запись' })
-    await expect(sheet).toContainText('Сейчас')
-    const time = sheet.getByRole('group', { name: 'Время' }).getByRole('button').first()
+    const sheet = page.getByRole('dialog', { name: 'Reschedule' })
+    await expect(sheet).toContainText('Now')
+    const time = sheet.getByRole('group', { name: 'Time' }).getByRole('button').first()
     await time.click()
     const newTime = (await time.textContent())?.trim() ?? ''
-    await sheet.getByRole('button', { name: `Перенести на ${newTime}` }).click()
+    await sheet.getByRole('button', { name: `Move to ${newTime}` }).click()
 
-    await expect(page.getByText(/Перенесено:/)).toBeVisible()
+    await expect(page.getByText(/Moved:/)).toBeVisible()
     await expect(ticket).toContainText(newTime)
   })
 

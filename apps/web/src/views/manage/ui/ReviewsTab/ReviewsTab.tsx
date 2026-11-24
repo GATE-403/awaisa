@@ -306,7 +306,7 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
         <EmptyState
           title={t('No reviews yet')}
           text={t(
-            'They appear after the first visits: clients rate the specialist by the SMS link or in "My bookings".',
+            'They appear after the first visits: clients rate the specialist by the SMS link or in “My bookings”.',
           )}
         />
       )}

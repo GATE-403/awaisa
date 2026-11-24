@@ -22,15 +22,15 @@ test.describe('User flow: booking', () => {
   }) => {
     await page.goto('/')
     // Services lead the catalog; places are the second tab.
-    await page.getByRole('tab', { name: /Места/ }).click()
+    await page.getByRole('tab', { name: /Places/ }).click()
     // The business card (not an offer inside the banner) leads to the business page.
     await page.locator('a[href="/awaisa-studio"]').first().click()
     await expect(page).toHaveURL(/\/awaisa-studio$/)
     await revealNextSlot(page)
-    const nextSlot = page.getByRole('complementary', { name: 'Ближайшее окно' })
-    await expect(nextSlot.getByText(/^(Сегодня|Завтра), \d{2}:\d{2}$/)).toBeVisible()
+    const nextSlot = page.getByRole('complementary', { name: 'Next free time' })
+    await expect(nextSlot.getByText(/^(Today|Tomorrow), \d{2}:\d{2}$/)).toBeVisible()
     // The card links to its time once the first free slot is known.
-    const card = nextSlot.getByRole('link', { name: /^Записаться на/ })
+    const card = nextSlot.getByRole('link', { name: /^Book for/ })
     await expect(card).toHaveAttribute('href', /time=\d{2}:\d{2}/)
     const href = (await card.getAttribute('href')) ?? ''
     const time = new URL(href, 'http://local').searchParams.get('time') ?? ''
@@ -41,8 +41,8 @@ test.describe('User flow: booking', () => {
     // Service and time already lie in the stack of done cards: only the contacts are asked.
     await expect(steps.service).toBeVisible()
     await expect(steps.datetime).toContainText(time)
-    await expect(steps.contacts.getByLabel('Имя')).toBeVisible()
-    await expect(primaryAction(page)).toHaveText(/^(Ввести контакты|Записаться)$/)
+    await expect(steps.contacts.getByLabel('Name')).toBeVisible()
+    await expect(primaryAction(page)).toHaveText(/^(Enter contacts|Book)$/)
   })
 
   test('full booking: service → master → time → contacts → ticket → cancel', async ({ page }) => {
@@ -53,20 +53,20 @@ test.describe('User flow: booking', () => {
     await expect(steps.service).toContainText('Мужская стрижка')
 
     // A service with a single master skips the choice; otherwise take anyone free.
-    const anyMaster = steps.specialist.getByRole('radio', { name: /Любой мастер/ })
+    const anyMaster = steps.specialist.getByRole('radio', { name: /Any specialist/ })
     if (await anyMaster.isVisible()) await anyMaster.click()
     const time = await pickFirstFreeSlot(page)
 
     await expect(steps.datetime).toContainText(time)
-    await steps.contacts.getByLabel('Имя').fill('E2E Тест')
-    await steps.contacts.getByLabel('Телефон').fill('+996 555 000 111')
-    await expect(primaryAction(page)).toHaveText('Записаться')
+    await steps.contacts.getByLabel('Name').fill('E2E Тест')
+    await steps.contacts.getByLabel('Phone').fill('+996 555 000 111')
+    await expect(primaryAction(page)).toHaveText('Book')
     const booked = page.waitForResponse(
       (response) =>
         response.request().method() === 'POST' &&
         new URL(response.url()).pathname === '/api/bookings',
     )
-    // «Вам может понравиться» stays near what was just booked: the shelf asks with `like=`.
+    // “You may also like” stays near what was just booked: the shelf asks with `like=`.
     const shelf = page.waitForRequest(
       (request) =>
         new URL(request.url()).pathname === '/api/recommendations' &&
@@ -74,30 +74,30 @@ test.describe('User flow: booking', () => {
     )
     await submitBooking(page)
 
-    await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'You are booked' })).toBeVisible()
     const { serviceId } = (await (await booked).json()) as { serviceId: string }
     expect(new URL((await shelf).url()).searchParams.get('like')).toBe(serviceId)
     // No toast over the success screen: it says in plain words what to do next.
-    await expect(page.getByText(new RegExp(`Приходите к ${time}`))).toBeVisible()
-    await expect(page.getByRole('article', { name: /^Запись / })).toContainText(time)
+    await expect(page.getByText(new RegExp(`Come at ${time}`))).toBeVisible()
+    await expect(page.getByRole('article', { name: /^Booking / })).toContainText(time)
     // The sum is said in the sentence and leads the ticket's stub - nobody hunts for it.
-    await expect(page.getByText(/Оплата в салоне - \d[\d\s]*\sсом/)).toBeVisible()
-    await expect(page.getByRole('article', { name: /^Запись / })).toContainText(/К оплате\s*\d/)
+    await expect(page.getByText(/Pay at the salon: \d[\d,]*\ssom/)).toBeVisible()
+    await expect(page.getByRole('article', { name: /^Booking / })).toContainText(/To pay\s*\d/)
 
-    await page.getByRole('main').getByRole('link', { name: 'Мои записи' }).click()
+    await page.getByRole('main').getByRole('link', { name: 'My bookings' }).click()
     await expect(page).toHaveURL(/\/bookings$/)
-    const ticket = page.getByRole('article', { name: /^Запись / }).first()
+    const ticket = page.getByRole('article', { name: /^Booking / }).first()
     await expect(ticket).toContainText('Мужская стрижка')
 
     // The ticket alone, large, with a way to save it - like showing it at the door.
-    await ticket.getByRole('button', { name: 'Показать талон' }).click()
-    const ticketSheet = page.getByRole('dialog', { name: 'Талон' })
-    await expect(ticketSheet.getByRole('article', { name: /^Запись / })).toBeVisible()
-    await expect(ticketSheet.getByRole('button', { name: 'Скачать', exact: true })).toBeEnabled()
-    await ticketSheet.getByRole('button', { name: 'Закрыть' }).click()
+    await ticket.getByRole('button', { name: 'Show the ticket' }).click()
+    const ticketSheet = page.getByRole('dialog', { name: 'Ticket' })
+    await expect(ticketSheet.getByRole('article', { name: /^Booking / })).toBeVisible()
+    await expect(ticketSheet.getByRole('button', { name: 'Download', exact: true })).toBeEnabled()
+    await ticketSheet.getByRole('button', { name: 'Close' }).click()
     // Sheets also close by pulling the top bar down.
-    await ticket.getByRole('button', { name: 'Показать талон' }).click()
-    const title = ticketSheet.getByRole('heading', { name: 'Талон' })
+    await ticket.getByRole('button', { name: 'Show the ticket' }).click()
+    const title = ticketSheet.getByRole('heading', { name: 'Ticket' })
     // A pull begun while a slow runner still settles the sheet can be read as a tap: the pull is
     // tried again from where the bar now is, until the sheet has gone.
     await expect(async () => {
@@ -111,22 +111,22 @@ test.describe('User flow: booking', () => {
       await expect(ticketSheet).toHaveCount(0, { timeout: 2_000 })
     }).toPass({ timeout: 15_000 })
 
-    // Cancelling is immediate (from the pass's «⋯» menu); «Вернуть» in the toast undoes it.
+    // Cancelling is immediate (from the pass's “⋯” menu); “Undo” in the toast undoes it.
     const cancelFromMenu = async () => {
-      await ticket.getByRole('button', { name: 'Ещё' }).click()
-      await page.getByRole('menuitem', { name: 'Отменить запись' }).click()
+      await ticket.getByRole('button', { name: 'More' }).click()
+      await page.getByRole('menuitem', { name: 'Cancel booking' }).click()
     }
     await cancelFromMenu()
-    await expect(ticket.getByText('Отменена')).toBeVisible()
-    await page.getByRole('button', { name: 'Вернуть' }).click()
-    await expect(ticket.getByText('Отменена')).toHaveCount(0)
+    await expect(ticket.getByText('Cancelled')).toBeVisible()
+    await page.getByRole('button', { name: 'Undo' }).click()
+    await expect(ticket.getByText('Cancelled')).toHaveCount(0)
     await expect(page.getByRole('region', { name: /Notifications/ })).toContainText(
-      'Запись возвращена',
+      'Booking restored',
     )
 
     await cancelFromMenu()
-    await expect(ticket.getByText('Отменена')).toBeVisible()
-    await expect(ticket.getByRole('button', { name: 'Убрать из списка' })).toBeVisible()
+    await expect(ticket.getByText('Cancelled')).toBeVisible()
+    await expect(ticket.getByRole('button', { name: 'Remove from the list' })).toBeVisible()
   })
 
   test('master page link preselects the master and narrows services', async ({ page }) => {
@@ -144,8 +144,8 @@ test.describe('User flow: booking', () => {
     await expect(steps.specialist).toContainText('Тимур Абдыкадыров')
     await expect(
       steps.datetime
-        .getByRole('group', { name: 'Время' })
-        .or(steps.datetime.getByText('На этот день всё занято')),
+        .getByRole('group', { name: 'Time' })
+        .or(steps.datetime.getByText('This day is fully booked')),
     ).toBeVisible()
   })
 
@@ -164,9 +164,9 @@ test.describe('User flow: booking', () => {
       .click()
     await page.goto('/')
 
-    const resume = page.getByRole('complementary', { name: 'Незаконченная запись' })
+    const resume = page.getByRole('complementary', { name: 'Unfinished booking' })
     await expect(resume).toContainText('Укладка')
-    await resume.getByRole('link', { name: /Продолжить запись/ }).click()
+    await resume.getByRole('link', { name: /Continue booking/ }).click()
     await expect(page).toHaveURL(/\/awaisa-studio\/book\?service=styling/)
     await expect(bookingSteps(page).service).toContainText('Укладка')
   })
@@ -182,38 +182,38 @@ test.describe('Booking: helpful defaults', () => {
     await context.setGeolocation({ latitude: 42.848, longitude: 74.6015 })
     await page.goto('/lumiere-salon/book')
 
-    // The branch is the first card of the ticket; «Изменить» opens the list.
+    // The branch is the first card of the ticket; “Change” opens the list.
     await expect(bookingSteps(page).branch).toContainText('Ала-Арча')
     await editStep(page, 'branch')
-    const branches = page.getByRole('group', { name: 'Филиал' })
+    const branches = page.getByRole('group', { name: 'Branch' })
     await expect(branches.getByRole('radio', { name: /Ала-Арча/ })).toBeChecked()
     // Each branch says its address and how far it is; the route leads to the chosen one.
-    await expect(branches.getByText(/ · \d+ м$/).first()).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Маршрут до «Ала-Арча» ›' })).toBeVisible()
+    await expect(branches.getByText(/ · \d+ m$/).first()).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Directions to “Ала-Арча” ›' })).toBeVisible()
     await branches.getByRole('radio', { name: /Ала-Арча/ }).click()
 
     // At least one service row names its first free time today or tomorrow.
     await expect(
       bookingSteps(page)
-        .service.getByText(/^(Сегодня|Завтра) с \d{2}:\d{2}/)
+        .service.getByText(/^(Today|Tomorrow) from \d{2}:\d{2}/)
         .first(),
     ).toBeVisible()
   })
 
-  test('another branch keeps the service and the «any master» choice', async ({ page }) => {
+  test('another branch keeps the service and the “any specialist” choice', async ({ page }) => {
     await page.goto('/lumiere-salon/book')
     const steps = bookingSteps(page)
     await steps.service.getByRole('radio').first().click()
-    const anyMaster = steps.specialist.getByRole('radio', { name: /Любой мастер/ })
+    const anyMaster = steps.specialist.getByRole('radio', { name: /Any specialist/ })
     await anyMaster.click()
     const chosenService = (await steps.service.textContent()) ?? ''
 
     await editStep(page, 'branch')
-    const branches = page.getByRole('group', { name: 'Филиал' })
+    const branches = page.getByRole('group', { name: 'Branch' })
     await branches.getByRole('radio', { checked: false }).first().click()
 
     // Nothing to choose again: the service card stays, the form waits on the time.
     await expect(steps.service).toContainText(chosenService.trim().split(' ')[0] ?? '')
-    await expect(primaryAction(page)).toHaveText(/^Выбрать (время|\d{2}:\d{2})$/)
+    await expect(primaryAction(page)).toHaveText(/^Choose (a time|\d{2}:\d{2})$/)
   })
 })

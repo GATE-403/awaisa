@@ -105,7 +105,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
     <section className={styles.section} aria-label={t('Loyalty')}>
       <SectionHeader
         title={t('Loyalty')}
-        description={t('Bonuses, passes and certificates are redeemed in "Visit outcome".')}
+        description={t('Bonuses, passes and certificates are redeemed in “Visit outcome”.')}
       />
 
       <section className={sheet.group} aria-label={t('Bonuses')}>
@@ -162,7 +162,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
         {data.plans.length === 0 ? (
           <RowNote>
             {t(
-              'For example, "5 haircuts for 4": the client pays up front, visits are redeemed in "Visit outcome".',
+              'For example, “5 haircuts for 4”: the client pays up front, visits are redeemed in “Visit outcome”.',
             )}
           </RowNote>
         ) : (

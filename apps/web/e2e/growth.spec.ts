@@ -9,7 +9,7 @@ import {
 } from './helpers'
 import { withDb } from './visits'
 
-test.describe('Booking for someone else, Kyrgyz, Telegram and telemetry', () => {
+test.describe('Booking for someone else, Telegram and telemetry', () => {
   test('a signed-in client books mum with her own name and number; it stays in the account', async ({
     page,
   }) => {
@@ -22,13 +22,13 @@ test.describe('Booking for someone else, Kyrgyz, Telegram and telemetry', () => 
     await steps.service.getByRole('radio', { name: /Мужская стрижка/ }).click()
     await pickFirstFreeSlot(page)
 
-    // Signed in: no phone field until «Записываю другого человека» is switched on.
-    await expect(steps.contacts.getByLabel('Телефон')).toHaveCount(0)
-    await steps.contacts.getByRole('switch', { name: 'Записываю другого человека' }).click()
-    await steps.contacts.getByLabel('Имя').fill('E2E Мама')
-    await steps.contacts.getByLabel('Телефон').fill(mumPhone)
+    // Signed in: no phone field until “Booking for someone else” is switched on.
+    await expect(steps.contacts.getByLabel('Phone')).toHaveCount(0)
+    await steps.contacts.getByRole('switch', { name: 'Booking for someone else' }).click()
+    await steps.contacts.getByLabel('Name').fill('E2E Мама')
+    await steps.contacts.getByLabel('Phone').fill(mumPhone)
     await submitBooking(page)
-    await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'You are booked' })).toBeVisible()
 
     const [stored] = await readStoredBookings(page)
     if (!stored) throw new Error('booking not saved')
@@ -37,18 +37,11 @@ test.describe('Booking for someone else, Kyrgyz, Telegram and telemetry', () => 
     const items = (await mine.json()) as { id: string; customerName: string }[]
     expect(items.find((item) => item.id === stored.id)?.customerName).toBe('E2E Мама')
 
-    // «Напоминать в Telegram» answers for the booking (no link without a bot in tests).
+    // “Remind in Telegram” answers for the booking (no link without a bot in tests).
     const telegram = await page.request.get(`/api/bookings/${stored.id}/telegram`)
     expect(telegram.ok()).toBe(true)
     expect(await telegram.json()).toMatchObject({ isLinked: false })
     await cancelViaApi(stored)
-  })
-
-  test('the booking form speaks Kyrgyz when chosen', async ({ page }) => {
-    await page.addInitScript(() => window.localStorage.setItem('awaisa:lang:v1', 'ky'))
-    await page.goto('/lumiere-salon/book')
-    await expect(page.getByRole('heading', { name: 'Эмне кылабыз?' })).toBeVisible()
-    await expect(page.getByRole('radiogroup', { name: 'Кызмат' })).toBeVisible()
   })
 
   test('funnel steps and errors are kept; only platform admins read them', async ({
@@ -163,7 +156,7 @@ test.describe('Booking for someone else, Kyrgyz, Telegram and telemetry', () => 
     const session = `e2e-${Math.random().toString(36).slice(2, 12)}`
     await page.addInitScript((id) => window.localStorage.setItem('awaisa:device:v1', id), session)
     await page.goto('/login')
-    await expect(page.getByLabel('Номер телефона')).toBeVisible()
+    await expect(page.getByLabel('Phone number')).toBeVisible()
 
     const stored = () =>
       withDb(async (client) => {

@@ -73,7 +73,7 @@ const reviewText = (
   [
     `${stars(review.rating)} <b>New review</b> · ${escapeHtml(business)}`,
     `${escapeHtml(review.authorName)} about ${escapeHtml(review.specialistName)}`,
-    review.comment ? `«${escapeHtml(review.comment)}»` : '',
+    review.comment ? `“${escapeHtml(review.comment)}”` : '',
     answerUrl && review.rating <= ANSWER_IN_PERSON_UP_TO
       ? `<b>Reply to the client today:</b> <a href="${escapeHtml(answerUrl)}">open reviews</a>`
       : '',
@@ -84,7 +84,7 @@ const reviewText = (
 const questionText = (business: string, authorName: string, text: string) =>
   [
     `❓ <b>New question</b> · ${escapeHtml(business)}`,
-    `${escapeHtml(authorName)}: «${escapeHtml(text)}»`,
+    `${escapeHtml(authorName)}: “${escapeHtml(text)}”`,
     'Answer in the dashboard: Reviews → Questions.',
   ].join('\n')
 
@@ -122,7 +122,7 @@ const dayText = (business: string, date: string, bookings: BookingLine[], title 
 }
 
 const linkedText = (business: string) =>
-  `✅ Done! New bookings, cancellations and reviews for «${escapeHtml(business)}» will come here, and every morning the day's schedule.\n\n/today - today's bookings\n/stop - turn notifications off`
+  `✅ Done! New bookings, cancellations and reviews for “${escapeHtml(business)}” will come here, and every morning the day's schedule.\n\n/today - today's bookings\n/stop - turn notifications off`
 
 const unclosedText = (count: number) =>
   `📋 Visits not marked today: <b>${count}</b>. Open the schedule and mark who came, so your revenue is accurate.`
@@ -132,11 +132,11 @@ const HELP_TEXT =
 
 // «Sign in with Telegram»: the bot asks for the person's own number with one button.
 const LOGIN_ASK_CONTACT =
-  'Signing in to <b>Awaisa</b>. Tap «Share my number» below, so we know your number and can open your profile with your bookings.'
+  'Signing in to <b>Awaisa</b>. Tap “Share my number” below, so we know your number and can open your profile with your bookings.'
 const LOGIN_SHARE_BUTTON = '📱 Share my number'
 const LOGIN_DONE =
   'Done, you are signed in. Go back to the site or the app. Visit reminders will now come here.'
-const LOGIN_EXPIRED = 'The sign-in link has expired. Tap «Sign in with Telegram» on the site again.'
+const LOGIN_EXPIRED = 'The sign-in link has expired. Tap “Sign in with Telegram” on the site again.'
 // A chat that already shared its number signs in at once, with a way to use another one.
 const loginKnownText = (phone: string) => {
   const digits = phone.replace(/\D/g, '')
@@ -145,7 +145,7 @@ const loginKnownText = (phone: string) => {
     : phone
   return `Done, you are signed in with <b>${escapeHtml(shown)}</b>. Go back to the site or the app.\n\nAnother number? Send /stop and sign in again.`
 }
-const LOGIN_NOT_OWN = 'We need your own number: tap «Share my number» below.'
+const LOGIN_NOT_OWN = 'We need your own number: tap “Share my number” below.'
 const LOGIN_REFUSED = 'For now we only accept Kyrgyzstan numbers (+996).'
 
 export type { BookingLine }

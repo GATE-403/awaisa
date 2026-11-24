@@ -28,7 +28,7 @@ describe('catalogMetadata', () => {
     expect(metadata.alternates?.canonical).toBe('/?kind=barber')
   })
 
-  it('does not index «Other» or an unknown kind as landings', () => {
+  it('does not index “Other” or an unknown kind as landings', () => {
     expect(catalogMetadata({ kind: 'other' }).robots).toEqual({ index: false, follow: true })
     expect(catalogMetadata({ kind: 'other' }).alternates?.canonical).toBe('/')
     expect(catalogMetadata({ kind: 'nope' }).alternates?.canonical).toBe('/')

@@ -13,7 +13,7 @@ type WorkPhoto = { id: string; url: string; isHidden: boolean }
 
 // Reports are records a platform admin works through at /moderation.
 test.describe('Moderation', () => {
-  test('three reports hide a work photo, the admin keeps it and it stays; others get «not found»', async ({
+  test('three reports hide a work photo, the admin keeps it and it stays; others get “not found”', async ({
     page,
     browser,
     isMobile,
@@ -24,7 +24,7 @@ test.describe('Moderation', () => {
     // The page streams (PPR): the refusal is the «not found» page, not a status code.
     await signInViaApi(page, randomClientPhone())
     await page.goto('/moderation')
-    await expect(page.getByRole('heading', { name: /Не нашли/ })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Not found/ })).toBeVisible()
     expect((await page.request.get('/api/moderation/queue')).status()).toBe(403)
     await page.context().clearCookies()
 
@@ -77,13 +77,13 @@ test.describe('Moderation', () => {
       expect(await isInFeed()).toBe(false)
 
       await page.goto('/moderation')
-      const queue = page.getByRole('list', { name: 'Жалобы' })
+      const queue = page.getByRole('list', { name: 'Reports' })
       const row = queue
         .getByRole('listitem')
         .filter({ has: page.locator(`img[src="${photo.url}"]`) })
-      await expect(row).toContainText('3 жалобы')
-      await expect(row).toContainText('Спам или реклама 3')
-      await expect(row).toContainText('Скрыто, пока вы не решите')
+      await expect(row).toContainText('3 reports')
+      await expect(row).toContainText('Spam or advertising 3')
+      await expect(row).toContainText('Hidden until you decide')
       await test.step('design and accessibility of the queue', async () => {
         await expectGoodDesign(page, 'main')
         const { violations } = await new AxeBuilder({ page })
@@ -96,13 +96,13 @@ test.describe('Moderation', () => {
             .map((item) => item.id),
         ).toEqual([])
       })
-      await row.getByRole('button', { name: 'Оставить' }).click()
+      await row.getByRole('button', { name: 'Keep' }).click()
       await expect(row).toHaveCount(0)
 
-      await page.getByRole('tab', { name: 'Журнал' }).click()
+      await page.getByRole('tab', { name: 'Log' }).click()
       await expect(
-        page.getByRole('list', { name: 'Журнал решений' }).getByRole('listitem').first(),
-      ).toContainText('Оставлено')
+        page.getByRole('list', { name: 'Decision log' }).getByRole('listitem').first(),
+      ).toContainText('Kept')
 
       expect(await isInFeed()).toBe(true)
       const shown: WorkPhoto[] = await (await page.request.get(`${manage}/work-photos`)).json()

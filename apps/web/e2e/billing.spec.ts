@@ -39,42 +39,42 @@ test.describe('Business plans', () => {
     // One check on the API refuses paid sections and limits, with words the cabinet shows.
     const cash = await page.request.get(`${manage}/cash`)
     expect(cash.status()).toBe(402)
-    expect((await cash.json()).message).toBe('Доступно на тарифе «Бизнес»')
+    expect((await cash.json()).message).toBe('Available on the “Business” plan')
     expect((await page.request.get(`${manage}/analytics?days=7`)).status()).toBe(402)
-    // Fiscal receipts too: back on «Старт» nothing new is issued.
+    // Fiscal receipts too: back on “Start” nothing new is issued.
     expect((await page.request.get(`${manage}/fiscal`)).status()).toBe(402)
     const third = await page.request.post(`${manage}/specialists`, {
-      data: { name: 'Третий', role: 'Мастер', serviceIds: [business.service.id] },
+      data: { name: 'Третий', role: 'Specialist', serviceIds: [business.service.id] },
     })
     expect(third.status()).toBe(402)
     expect((await third.json()).message).toBe(
-      'На тарифе «Старт» до 2 мастеров. Больше на тарифе «Бизнес»',
+      'The “Start” plan allows up to 2 specialists. More on the “Business” plan',
     )
     // The day's work stays open on the free plan.
     expect((await page.request.get(`${manage}/clients`)).status()).toBe(200)
 
     // The cabinet says what the section would give and leads to the plan.
     await page.goto(`/manage/${business.slug}?tab=cash`)
-    await expect(page.getByText('Доступно на тарифе «Бизнес»', { exact: true })).toBeVisible()
+    await expect(page.getByText('Available on the “Business” plan', { exact: true })).toBeVisible()
     await expectGoodDesign(page, 'main')
-    await page.getByRole('link', { name: 'Открыть тариф' }).click()
+    await page.getByRole('link', { name: 'Open the plan' }).click()
     await expect(page).toHaveURL(/tab=billing/)
-    const plan = page.getByRole('region', { name: 'Тариф' })
-    await expect(plan.getByText('закончился', { exact: false }).first()).toBeVisible()
-    await expect(plan.getByText('2 из 2')).toBeVisible()
+    const plan = page.getByRole('region', { name: 'Plan' })
+    await expect(plan.getByText('ended', { exact: false }).first()).toBeVisible()
+    await expect(plan.getByText('2 of 2')).toBeVisible()
     await expectGoodDesign(page, 'main')
 
-    // A month through the built-in test acquirer: 990 сом for two masters.
-    await plan.getByRole('button', { name: 'Оплатить 990 сом' }).click()
+    // A month through the built-in test acquirer: 990 som for two masters.
+    await plan.getByRole('button', { name: 'Pay 990 som' }).click()
     await expect(page).toHaveURL(/\/pay\//)
-    await expect(page.getByText('Тариф «Бизнес» на 1 месяц')).toBeVisible()
-    await page.getByRole('button', { name: /Оплатить 990/ }).click()
-    await expect(page.getByText('Оплачено', { exact: true })).toBeVisible()
-    await expect(page.getByText(/^Тариф «Бизнес» оплачен до /)).toBeVisible()
-    await page.getByRole('link', { name: 'Вернуться в кабинет' }).click()
+    await expect(page.getByText('“Business” plan for 1 month')).toBeVisible()
+    await page.getByRole('button', { name: /Pay 990/ }).click()
+    await expect(page.getByText('Paid', { exact: true })).toBeVisible()
+    await expect(page.getByText(/^The “Business” plan is paid until /)).toBeVisible()
+    await page.getByRole('link', { name: 'Back to the dashboard' }).click()
     await expect(page).toHaveURL(/tab=billing/)
-    await expect(page.getByText(/^Бизнес · оплачен до /)).toBeVisible()
-    await expect(page.getByRole('region', { name: 'Оплаты' })).toContainText('990')
+    await expect(page.getByText(/^Business · paid until /)).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Payments' })).toContainText('990')
 
     expect(await access()).toMatchObject({ planKey: 'business', status: 'active' })
     expect((await page.request.get(`${manage}/cash`)).status()).toBe(200)

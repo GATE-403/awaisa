@@ -164,7 +164,7 @@ export const MasterDialog = ({
             <Input
               variant='plain'
               aria-label={t('Role')}
-              placeholder={t('Role, for example "Stylist"')}
+              placeholder={t('Role, for example “Stylist”')}
               value={role}
               onValueChange={setRole}
             />

@@ -190,7 +190,7 @@ export class BusinessesService {
           WHERE sp."business_id" = b."id" AND sp."is_active" AND sp."rating" IS NOT NULL) AS "rating",
         (SELECT br."address" FROM "branches" br
           WHERE br."business_id" = b."id" AND br."is_active" ORDER BY br."position" LIMIT 1) AS "address",
-        -- The biggest open promotion on this service (not codes): «−20%» on the catalog card.
+        -- The biggest open promotion on this service (not codes): “−20%” on the catalog card.
         (SELECT MAX(p."percent")::int FROM "promotions" p
           WHERE p."business_id" = b."id" AND p."is_active" AND p."kind" <> 'promo_code'
             AND (p."service_ids" IS NULL OR s."id" = ANY(p."service_ids"))

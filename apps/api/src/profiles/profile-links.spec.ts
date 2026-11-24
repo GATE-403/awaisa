@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { linksView, normalizeLinks } from './profile-links.js'
 
 describe('normalizeLinks', () => {
-  it('keeps the handle from «@name», a bare name or a pasted link', () => {
+  it('keeps the handle from “@name”, a bare name or a pasted link', () => {
     expect(
       normalizeLinks({
         instagram: 'https://www.instagram.com/aigerim.nails/?hl=ru',

@@ -45,7 +45,7 @@ const reviewRequestMessage = (businessName: string, link: string) =>
 
 // The owner gave a master their number: tell the master where their day lives.
 const masterInviteMessage = (businessName: string, link: string) =>
-  `${businessName}: «My day» is open to you - your bookings and clients. Sign in with this number: ${link}`
+  `${businessName}: “My day” is open to you - your bookings and clients. Sign in with this number: ${link}`
 
 // The waitlist: a time opened up on the day the client wanted; the link opens it in the form.
 const waitlistFreedMessage = (
@@ -64,7 +64,7 @@ const returnVisitMessage = (
   masterName: string,
   link: string,
 ) =>
-  `${businessName}: time for another «${serviceName}»? ${masterName.split(' ')[0]} is ready for you - book: ${link}`
+  `${businessName}: time for another “${serviceName}”? ${masterName.split(' ')[0]} is ready for you - book: ${link}`
 
 // The owner added this number as an administrator: where the cabinet is.
 const adminInviteMessage = (businessName: string, link: string) =>

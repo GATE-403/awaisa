@@ -36,21 +36,21 @@ test.describe('Subscriptions online', () => {
 
     // The owner sells a plan online from the cabinet (which also refreshes the public page).
     await page.goto(`/manage/${SLUG}?tab=loyalty`)
-    await page.getByRole('button', { name: 'Новый' }).click()
-    const planSheet = page.getByRole('dialog', { name: 'Новый абонемент' })
-    await planSheet.getByLabel('Название абонемента').fill(title)
-    await planSheet.getByLabel('Услуга абонемента').click()
+    await page.getByRole('button', { name: 'New' }).click()
+    const planSheet = page.getByRole('dialog', { name: 'New pass' })
+    await planSheet.getByLabel('Pass name').fill(title)
+    await planSheet.getByLabel('Pass service').click()
     await page
       .getByRole('option', {
         name: business.catalog.services.find((item: { id: string }) => item.id === serviceId).name,
         exact: true,
       })
       .click()
-    await planSheet.getByLabel('Визитов').fill('3')
-    await planSheet.getByLabel('Цена абонемента, сом').fill(String(PRICE))
-    await planSheet.getByRole('switch', { name: 'Продавать онлайн' }).click()
-    await planSheet.getByRole('button', { name: 'Сохранить' }).click()
-    await expect(page.getByRole('button', { name: new RegExp(title) })).toContainText('Онлайн')
+    await planSheet.getByLabel('Visits').fill('3')
+    await planSheet.getByLabel('Pass price, som').fill(String(PRICE))
+    await planSheet.getByRole('switch', { name: 'Sell online' }).click()
+    await planSheet.getByRole('button', { name: 'Save' }).click()
+    await expect(page.getByRole('button', { name: new RegExp(title) })).toContainText('Online')
     const overview = await (await page.request.get(`${manage}/loyalty`)).json()
     const plan = overview.plans.find((item: { title: string }) => item.title === title)
     expect(plan.isOnline).toBe(true)
@@ -67,30 +67,30 @@ test.describe('Subscriptions online', () => {
       await client.goto(`/${SLUG}#subscriptions`)
       const section = client.locator('#subscriptions')
       await section.getByRole('button', { name: new RegExp(title) }).click()
-      const sheet = client.getByRole('dialog', { name: 'Абонемент' })
+      const sheet = client.getByRole('dialog', { name: 'Membership' })
       await sheet
-        .getByRole('button', { name: `Купить ${PRICE.toLocaleString('ru-RU')} сом` })
+        .getByRole('button', { name: `Buy for ${PRICE.toLocaleString('en-GB')} som` })
         .click()
       await expect(client).toHaveURL(/\/pay\/[0-9a-f-]+\?s=/)
-      await expect(client.getByText('Тестовый режим')).toBeVisible({ timeout: 20_000 })
+      await expect(client.getByText('Test mode')).toBeVisible({ timeout: 20_000 })
       // Nothing is issued before the money comes.
       expect((await mine()).some((item) => item.title === title)).toBe(false)
-      await client.getByRole('button', { name: /^Оплатить/ }).click()
-      await expect(client.getByText('Оплачено. Абонемент ваш')).toBeVisible()
+      await client.getByRole('button', { name: /^Pay/ }).click()
+      await expect(client.getByText('Paid. The pass is yours')).toBeVisible()
       const [bought] = (await mine()).filter((item) => item.title === title)
       expect(bought).toMatchObject({ visitsLeft: 3 })
 
-      // 2. The booking form offers it under «Оплата»; the visit is booked by the subscription.
+      // 2. The booking form offers it under “Payment”; the visit is booked by the subscription.
       await client.goto(`/${SLUG}/book?service=${serviceId}&specialist=${master.id}`)
-      await expect(bookingSteps(client).datetime.getByRole('group', { name: 'День' })).toBeVisible()
+      await expect(bookingSteps(client).datetime.getByRole('group', { name: 'Day' })).toBeVisible()
       await pickFirstFreeSlot(client)
-      await client.getByRole('combobox', { name: 'Оплата' }).click()
-      await client.getByRole('option', { name: 'Абонементом · осталось 3' }).click()
+      await client.getByRole('combobox', { name: 'Payment' }).click()
+      await client.getByRole('option', { name: 'By subscription · 3 left' }).click()
       await expect(
-        client.getByText('По абонементу').filter({ visible: true }).first(),
+        client.getByText('By subscription', { exact: true }).filter({ visible: true }).first(),
       ).toBeVisible()
       await submitBooking(client)
-      await expect(client.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
+      await expect(client.getByRole('heading', { name: 'You are booked' })).toBeVisible()
       const booked = (await (await client.request.get('/api/me/bookings')).json()) as {
         id: string
         isBySubscription?: boolean
@@ -99,7 +99,7 @@ test.describe('Subscriptions online', () => {
       const visit = booked.find((item) => item.isBySubscription && item.status === 'confirmed')
       expect(visit).toBeTruthy()
 
-      // «Пришёл» alone draws the visit from the subscription (moved into the past first).
+      // “Arrived” alone draws the visit from the subscription (moved into the past first).
       await withDb((db) =>
         db.query(
           `UPDATE "bookings" SET "starts_at" = "starts_at" - make_interval(days => $2),
@@ -116,7 +116,7 @@ test.describe('Subscriptions online', () => {
       expect(marked).toMatchObject({ paymentMethod: 'subscription', paidAmount: 0 })
       expect((await mine()).find((item) => item.id === bought?.id)?.visitsLeft).toBe(2)
 
-      // 3. «Купить абонемент и записаться»: the booking waits for the payment, then is paid by it.
+      // 3. Buying the pass with the booking: the booking waits for the payment, then is paid by it.
       let date = ''
       let time = ''
       for (let offset = 10; offset < 16 && !date; offset += 1) {

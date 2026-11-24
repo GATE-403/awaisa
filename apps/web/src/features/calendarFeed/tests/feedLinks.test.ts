@@ -22,7 +22,7 @@ describe('feed links', () => {
     )
   })
 
-  it('fills Google Calendar’s «Add by URL»', () => {
+  it('fills Google Calendar’s “Add by URL”', () => {
     expect(toGoogleCalendar(URL)).toBe(
       'https://calendar.google.com/calendar/render?cid=webcal%3A%2F%2Fawaisa.kg%2Fapi%2Fcalendar%2Fabc.ics',
     )

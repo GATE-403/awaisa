@@ -28,28 +28,28 @@ test.describe('Inventory', () => {
       // The cabinet: a new item with a unit cost, a warning level and what the service uses.
       await page.goto(`/manage/${SLUG}?tab=stock`)
       await page
-        .getByRole('button', { name: /Позиция|Добавить позицию/ })
+        .getByRole('button', { name: /^(Item|Add item)$/ })
         .first()
         .click()
-      const sheet = page.getByRole('dialog', { name: 'Новый расходник' })
-      await sheet.getByLabel('Название').fill('E2E Краска')
-      await sheet.getByLabel('Цена за единицу, сом').fill('4')
-      await sheet.getByLabel('Минимальный остаток').fill('60')
-      await sheet.getByLabel(`Расход: ${service.name}`).fill('50')
+      const sheet = page.getByRole('dialog', { name: 'New consumable' })
+      await sheet.getByLabel('Name').fill('E2E Краска')
+      await sheet.getByLabel('Price per unit, som').fill('4')
+      await sheet.getByLabel('Minimum stock').fill('60')
+      await sheet.getByLabel(`Use: ${service.name}`).fill('50')
       await expect(
-        sheet.getByText(`«${service.name}» - 200 сом материалов за визит.`),
+        sheet.getByText(`"${service.name}": 200 som of materials per visit.`),
       ).toBeVisible()
-      await sheet.getByRole('button', { name: 'Сохранить' }).click()
+      await sheet.getByRole('button', { name: 'Save' }).click()
       await expect(page.getByRole('button', { name: /E2E Краска/ })).toBeVisible()
 
       // A delivery of 100 ml from the item's sheet.
       await page.getByRole('button', { name: /E2E Краска/ }).click()
-      const itemSheet = page.getByRole('dialog', { name: 'Расходник' })
-      await itemSheet.getByLabel('Приход').fill('100')
-      await itemSheet.getByRole('button', { name: 'Принять' }).click()
-      await expect(page.getByText('Приход записан')).toBeVisible()
-      await expect(itemSheet.getByText('Остаток · 100 мл')).toBeVisible()
-      await itemSheet.getByRole('button', { name: 'Отмена' }).click()
+      const itemSheet = page.getByRole('dialog', { name: 'Consumable' })
+      await itemSheet.getByLabel('Delivery').fill('100')
+      await itemSheet.getByRole('button', { name: 'Receive' }).click()
+      await expect(page.getByText('Delivery recorded')).toBeVisible()
+      await expect(itemSheet.getByText('Stock · 100 ml')).toBeVisible()
+      await itemSheet.getByRole('button', { name: 'Cancel' }).click()
       expect(await stock()).toMatchObject({ quantity: 100, isLow: false })
 
       // The visit arrives: 50 ml written off, the item is now low; saving again does not
@@ -76,7 +76,7 @@ test.describe('Inventory', () => {
       const item = await stock()
       await page.request.post(`${manage}/stock/${item?.id}/adjust`, { data: { quantity: 20 } })
       await page.reload()
-      await expect(page.getByText(/Заканчивается: .*E2E Краска/)).toBeVisible()
+      await expect(page.getByText(/Running low: .*E2E Краска/)).toBeVisible()
     } finally {
       const item = await stock()
       if (item) await page.request.delete(`${manage}/stock/${item.id}`)

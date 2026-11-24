@@ -13,12 +13,12 @@ describe('follow messages', () => {
       'Azamat, Old School: a slot opened up tomorrow at 11:00. Book: https://a.kg/x',
     )
     expect(movedText('Azamat Bekov', 'Boroda', 'https://a.kg/b')).toBe(
-      'Azamat now works at «Boroda». Book: https://a.kg/b',
+      'Azamat now works at “Boroda”. Book: https://a.kg/b',
     )
   })
 
   it('counts new works in English', () => {
-    expect(worksText('Azamat', 1, 'L')).toBe('Azamat: 1 new look in «Looks». See them: L')
-    expect(worksText('Azamat', 3, 'L')).toBe('Azamat: 3 new looks in «Looks». See them: L')
+    expect(worksText('Azamat', 1, 'L')).toBe('Azamat: 1 new look in “Looks”. See them: L')
+    expect(worksText('Azamat', 3, 'L')).toBe('Azamat: 3 new looks in “Looks”. See them: L')
   })
 })

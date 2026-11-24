@@ -4,7 +4,7 @@ import { orderTitle, reminderText } from './billing-messages.js'
 describe('billing messages', () => {
   it('names an order', () => {
     expect(orderTitle({ kind: 'plan', planTitle: 'Business', months: 12, smsCount: null })).toBe(
-      '«Business» plan for 1 year',
+      '“Business” plan for 1 year',
     )
     expect(orderTitle({ kind: 'sms', planTitle: null, months: null, smsCount: 500 })).toBe(
       '500 SMS pack',
@@ -23,7 +23,7 @@ describe('billing messages', () => {
       'Barber: Your free trial ends on 24 November. Renew: https://awaisa.kg/manage/barber?tab=billing',
     )
     expect(reminderText('ended', { ...input, isTrial: false })).toContain(
-      'your «Business» plan has ended, so the till, analytics and mailings are closed',
+      'your “Business” plan has ended, so the till, analytics and mailings are closed',
     )
   })
 })

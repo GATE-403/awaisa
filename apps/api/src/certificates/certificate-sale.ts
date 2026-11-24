@@ -47,7 +47,7 @@ const buyerMessage = (order: PaidOrder) => {
 /** To the recipient: who it is from, the words, the code and where to book. */
 const recipientMessage = (order: PaidOrder) => {
   const greeting = order.recipientName ? `${order.recipientName}, ` : ''
-  const words = order.message ? ` «${order.message}»` : ''
+  const words = order.message ? ` “${order.message}”` : ''
   const gift = order.buyerName
     ? `${order.buyerName} has given you`
     : `${greeting ? 'you have' : 'You have'} been given`
