@@ -10,8 +10,6 @@ interface ReviewsSectionProps {
   reviews: ReviewSummary
 }
 
-const _dateFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' })
-
 // Real reviews after real visits: the score and how it splits, then what people wrote.
 export const ReviewsSection = ({ business, reviews }: ReviewsSectionProps) => {
   if (reviews.count === 0) return null

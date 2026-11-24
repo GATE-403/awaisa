@@ -26,15 +26,6 @@ const formatAmount = (price: number) => priceFormatter.format(price)
 
 const formatPrice = (price: number) => `${formatAmount(price)}\u00a0${CURRENCY}`
 
-const formatDuration = (minutes: number) => {
-  const hours = Math.floor(minutes / 60)
-  const rest = minutes % 60
-  if (hours === 0) return `${rest} мин`
-  if (rest === 0) return `${hours} ч`
-
-  return `${hours} ч ${rest} мин`
-}
-
 const toDayKey = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 
@@ -61,15 +52,6 @@ const getDateParts = (key: string) => {
 }
 
 const formatDayLong = (key: string) => capitalize(longDateFormatter.format(fromDayKey(key)))
-
-const shortDateFormatter = new Intl.DateTimeFormat('ru-RU', {
-  weekday: 'short',
-  day: 'numeric',
-  month: 'short',
-})
-
-// «чт, 19 нояб.»: where a whole «Четверг, 19 ноября» does not fit (two dates side by side).
-const formatDayShort = (key: string) => shortDateFormatter.format(fromDayKey(key))
 
 // Days from `before` days ago to `after - 1` days ahead; the schedule needs the past to close visits.
 const getDaysAround = (todayKey: string, before: number, after: number): BookingDay[] => {
@@ -115,8 +97,6 @@ export {
   findSpecialist,
   formatAmount,
   formatDayLong,
-  formatDayShort,
-  formatDuration,
   formatPrice,
   getDateParts,
   getSpecialistLabel,

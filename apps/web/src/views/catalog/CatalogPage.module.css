@@ -33,38 +33,11 @@
   }
 }
 
-.title {
-  max-width: 16ch;
-  font-family: var(--font-display);
-  font-size: var(--text-3xl);
-  line-height: 1.1;
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--tracking-title);
-  text-wrap: balance;
-}
-
-.titleMuted {
-  color: var(--color-muted-foreground);
-}
-
-.filters {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
 .results {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
   margin-top: var(--space-4);
-}
-
-.resultsTitle {
-  font-size: var(--text-xl);
-  line-height: var(--text-xl-line-height);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--tracking-title);
 }
 
 .grid {
@@ -77,97 +50,16 @@
   font-weight: var(--font-weight-semibold);
 }
 
-.muted {
-  color: var(--color-muted-foreground);
-}
-
-.empty {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-  padding: var(--space-6);
-  border-radius: var(--radius-2xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-}
-
-.emptyTitle {
-  font-size: var(--text-lg);
-  font-weight: var(--font-weight-semibold);
-}
-
-.emptyText {
-  color: var(--color-muted-foreground);
-}
-
-.emptyLink {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--control-height-md);
-  color: var(--color-link);
-}
-
-.promo {
-  margin-top: var(--space-6);
-}
-
 @media (min-width: 640px) {
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (min-width: 768px) {
-  .title {
-    font-size: var(--text-4xl);
-  }
-
-  .resultsTitle {
-    font-size: var(--text-2xl);
-    line-height: var(--text-2xl-line-height);
-  }
-}
-
 @media (min-width: 1024px) {
-  .title {
-    max-width: 22ch;
-    font-size: var(--text-display);
-    line-height: var(--text-display-line-height);
-    font-weight: var(--font-weight-bold);
-    letter-spacing: var(--tracking-display);
-  }
-
   .grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-}
-
-.resultsLinks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-5);
-}
-
-.resultsHeader {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.count {
-  margin-left: var(--space-2);
-  color: var(--color-muted-foreground);
-  font-weight: var(--font-weight-regular);
-}
-
-.reset {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--control-height-md);
-  color: var(--color-link);
-  font-size: var(--text-sm);
 }
 
 /* The leaderboards as one quiet row with a gold trophy, like a shortcut in Settings. */

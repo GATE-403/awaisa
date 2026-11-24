@@ -15,49 +15,10 @@
   padding: var(--space-4);
 }
 
-.head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.stars {
-  display: inline-flex;
-  gap: 1px;
-  color: var(--color-rating);
-}
-
-.stars svg {
-  width: 15px;
-  height: 15px;
-}
-
-.date,
 .meta,
 .hint {
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
-}
-
-.author {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 var(--space-2);
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-semibold);
-}
-
-.phone {
-  color: var(--color-link);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-regular);
-}
-
-.comment {
-  font-size: var(--text-sm);
-  line-height: 1.45;
-  white-space: pre-line;
 }
 
 .reply {
@@ -69,13 +30,6 @@
   border: none;
   border-radius: var(--radius-md);
   background: var(--color-fill);
-}
-
-.replyHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
 }
 
 .replyEdit {
@@ -107,12 +61,6 @@
 .replyEdit svg {
   width: 14px;
   height: 14px;
-}
-
-.replyTitle {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
 }
 
 .replyButton {
