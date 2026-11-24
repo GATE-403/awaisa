@@ -6,6 +6,7 @@ x-api-env: &api-env
   DATABASE_POOL_SIZE: ${DATABASE_POOL_SIZE:-10}
   DATABASE_STATEMENT_TIMEOUT_MS: ${DATABASE_STATEMENT_TIMEOUT_MS:-30000}
   WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
+  TRUST_PROXY: ${TRUST_PROXY:-}
   PUBLIC_WEB_URL: ${PUBLIC_WEB_URL:-}
   AUTH_SECRET: ${AUTH_SECRET:-}
   ADMIN_PHONES: ${ADMIN_PHONES:-}
@@ -159,12 +160,38 @@ services:
       redis:
         condition: service_healthy
 
+  # Database copies: one at start, then every BACKUP_EVERY_HOURS, the last BACKUP_KEEP_DAYS kept
+  # in the `backups` volume (scripts/db-backup.sh). Sync that volume off this server as well.
+  backup:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    profiles: [app]
+    entrypoint: ["sh", "/scripts/db-backup.sh"]
+    environment:
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER:-awaisa}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-awaisa}
+      PGDATABASE: ${POSTGRES_DB:-awaisa}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+      BACKUP_EVERY_HOURS: ${BACKUP_EVERY_HOURS:-24}
+    volumes:
+      - backups:/backups
+      - ./scripts:/scripts:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
       args:
         API_URL: http://api:4000
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://awaisa.kg}
+        NEXT_PUBLIC_MAP_TILES_URL: ${NEXT_PUBLIC_MAP_TILES_URL:-}
+        NEXT_PUBLIC_MAP_TILES_URL_DARK: ${NEXT_PUBLIC_MAP_TILES_URL_DARK:-}
+        NEXT_PUBLIC_MAP_ATTRIBUTION: ${NEXT_PUBLIC_MAP_ATTRIBUTION:-}
+        NEXT_PUBLIC_MAP_ATTRIBUTION_DARK: ${NEXT_PUBLIC_MAP_ATTRIBUTION_DARK:-}
     restart: unless-stopped
     profiles: [app]
     environment:
@@ -178,3 +205,4 @@ services:
 volumes:
   postgres-data:
   uploads:
+  backups:

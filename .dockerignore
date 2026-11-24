@@ -6,3 +6,10 @@
 **/.env
 **/.env*.local
 .git
+**/.next-*
+**/dist-e2e
+**/test-results
+**/e2e-results
+apps/api/uploads
+reports
+.claude
