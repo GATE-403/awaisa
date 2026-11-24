@@ -16,6 +16,8 @@ test.describe('Waitlist', () => {
     // One master's day is made full; running it once keeps the two projects from colliding.
     test.skip(isMobile, 'Runs once: it changes a master’s days')
     test.setTimeout(150_000)
+    // Its own name: a repeated run finds earlier guests waiting for the same day.
+    const guestName = `E2E Ожидание ${randomClientPhone().slice(-4)}`
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     const business = await (await fetch(`${API_URL}/businesses/${SLUG}`)).json()
     const master = business.catalog.specialists.at(-1)
@@ -64,7 +66,7 @@ test.describe('Waitlist', () => {
       )
       await guestPage.getByRole('button', { name: 'Сообщить, когда освободится' }).click()
       const sheet = guestPage.getByRole('dialog', { name: 'Лист ожидания' })
-      await sheet.getByLabel('Имя').fill('E2E Ожидание')
+      await sheet.getByLabel('Имя').fill(guestName)
       await sheet.getByLabel('Телефон').fill(randomClientPhone().replace('+996', ''))
       await sheet.getByRole('button', { name: 'Готово' }).click()
       await expect(guestPage.getByText('Сообщим, если освободится')).toBeVisible()
@@ -86,14 +88,15 @@ test.describe('Waitlist', () => {
       await page.goto(`/manage/${SLUG}?tab=schedule&date=${date}`)
       await page.getByRole('button', { name: /^Ждут окна: \d+/ }).click()
       const waiting = page.getByRole('dialog', { name: 'Ждут окна' })
-      await expect(waiting.getByText('E2E Ожидание')).toBeVisible()
-      await waiting.getByRole('button', { name: 'Записать' }).first().click()
+      const waiter = waiting.getByRole('listitem').filter({ hasText: guestName })
+      await expect(waiter).toBeVisible()
+      await waiter.getByRole('button', { name: 'Записать' }).click()
       await expect(
         page
           .getByRole('dialog', { name: 'Новая запись' })
           .and(page.locator(':not([data-type])'))
           .getByLabel('Имя'),
-      ).toHaveValue('E2E Ожидание')
+      ).toHaveValue(guestName)
       await page.keyboard.press('Escape')
 
       // The salon frees the day: the minute cron texts the client and marks the entry.
