@@ -5,6 +5,7 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource, type EntityManager } from 'typeorm'
 import { BillingService } from '../billing/billing.service.js'
+import { returnedRows, toNumber } from '../common/sql.js'
 import type { Env } from '../config/env.js'
 import type { FiscalSettingsBody } from './fiscal.schemas.js'
 import {
@@ -48,7 +49,6 @@ const BATCH = 50
 const SENDING_TIMEOUT_MINUTES = 5
 const LIVE = `('pending', 'sending', 'issued', 'failed')`
 
-const toNumber = (value: unknown) => Number(value ?? 0)
 const toIso = (value: unknown) =>
   (value instanceof Date ? value : new Date(String(value))).toISOString()
 
@@ -139,7 +139,7 @@ export class FiscalService {
   async syncSale(businessId: string, saleId: string) {
     await this.safely(`sale ${saleId}`, async () => {
       const ids = await this.dataSource.transaction(async (manager) => {
-        const [sale] = this.rows(
+        const [sale] = returnedRows(
           await manager.query(
             `SELECT "branch_id", "payment_method", "cancelled_at" FROM "sales"
              WHERE "id" = $1 AND "business_id" = $2`,
@@ -147,7 +147,7 @@ export class FiscalService {
           ),
         )
         if (!sale) return []
-        const items = this.rows(
+        const items = returnedRows(
           await manager.query(
             'SELECT "name", "quantity", "price" FROM "sale_items" WHERE "sale_id" = $1 ORDER BY "name"',
             [saleId],
@@ -183,7 +183,7 @@ export class FiscalService {
     for (const bookingId of bookingIds) {
       await this.safely(`visit ${bookingId}`, async () => {
         const ids = await this.dataSource.transaction(async (manager) => {
-          const [visit] = this.rows(
+          const [visit] = returnedRows(
             await manager.query(
               `SELECT b."branch_id", b."outcome", b."paid_amount", b."payment_method",
                  b."status", s."name" AS "service_name"
@@ -256,7 +256,7 @@ export class FiscalService {
 
   /** The owner sends a receipt the provider kept refusing once more. */
   async retry(businessId: string, receiptId: string) {
-    const [row] = this.rows(
+    const [row] = returnedRows(
       await this.dataSource.query(
         `UPDATE "fiscal_receipts" SET "status" = 'pending', "attempts" = 0, "next_attempt_at" = now()
          WHERE "id" = $1 AND "business_id" = $2 AND "status" = 'failed' RETURNING "id"`,
@@ -291,7 +291,7 @@ export class FiscalService {
   /** One receipt to the provider; the queue keeps it until the provider says yes. */
   async send(receiptId: string) {
     if (!this.driver) return
-    const [receipt] = this.rows(
+    const [receipt] = returnedRows(
       await this.dataSource.query(
         `UPDATE "fiscal_receipts" SET "status" = 'sending', "attempts" = "attempts" + 1,
            "next_attempt_at" = now() + interval '${SENDING_TIMEOUT_MINUTES} minutes'
@@ -356,7 +356,7 @@ export class FiscalService {
     const owner = source.saleId
       ? { column: 'sale_id', id: source.saleId, extra: '' }
       : { column: 'booking_id', id: source.bookingId, extra: 'AND "sale_id" IS NULL' }
-    const [active] = this.rows(
+    const [active] = returnedRows(
       await manager.query(
         `SELECT "id", "status", "total", "payment" FROM "fiscal_receipts"
          WHERE "${owner.column}" = $1 ${owner.extra} AND "kind" = 'sale' AND NOT "is_refunded"
@@ -388,7 +388,7 @@ export class FiscalService {
     const toSend: string[] = []
     const refund = [...plan.refund]
     if (plan.cancel.length > 0) {
-      const dropped = this.rows(
+      const dropped = returnedRows(
         await manager.query(
           `UPDATE "fiscal_receipts" SET "status" = 'cancelled'
            WHERE "id" = ANY($1::uuid[]) AND "status" IN ('pending', 'failed') RETURNING "id"`,
@@ -399,7 +399,7 @@ export class FiscalService {
       refund.push(...plan.cancel.filter((id) => !dropped.includes(id)))
     }
     for (const id of refund) {
-      const [row] = this.rows(
+      const [row] = returnedRows(
         await manager.query(
           `WITH original AS (
              UPDATE "fiscal_receipts" SET "is_refunded" = true WHERE "id" = $1 RETURNING *
@@ -416,7 +416,7 @@ export class FiscalService {
       if (row) toSend.push(String(row.id))
     }
     if (plan.issue && isIssuing && document) {
-      const [row] = this.rows(
+      const [row] = returnedRows(
         await manager.query(
           `INSERT INTO "fiscal_receipts" ("business_id", "branch_id", "kind", "sale_id", "booking_id",
              "driver", "inn", "tax_regime", "payment", "lines", "total", "vat_amount",
@@ -500,7 +500,7 @@ export class FiscalService {
   }
 
   private async loadSettings(manager: EntityManager, businessId: string): Promise<Settings> {
-    const [row] = this.rows(
+    const [row] = returnedRows(
       await manager.query('SELECT * FROM "fiscal_settings" WHERE "business_id" = $1', [businessId]),
     )
     return {
@@ -564,11 +564,6 @@ export class FiscalService {
 
   private get authSecret() {
     return this.config.get('AUTH_SECRET', { infer: true })
-  }
-
-  // DELETE/UPDATE … RETURNING come back as [rows, affected] from TypeORM on Postgres.
-  private rows(result: unknown) {
-    return (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as Row[]
   }
 
   private query(sql: string, params: unknown[]) {

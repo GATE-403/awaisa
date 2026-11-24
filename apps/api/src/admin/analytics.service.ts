@@ -10,6 +10,7 @@ import {
   toBusinessParts,
   weekdayOf,
 } from '../common/business-time.js'
+import { toNumber } from '../common/sql.js'
 import { MailingsService } from '../mailings/mailings.service.js'
 import { PayrollService } from '../payroll/payroll.service.js'
 
@@ -36,8 +37,6 @@ const MATERIALS = `(SELECT COALESCE(SUM(m."cost"), 0) FROM "stock_movements" m
 
 // Local business time (fixed UTC+6, see business-time.ts) for grouping by day and hour.
 const LOCAL = `("b"."starts_at" AT TIME ZONE 'UTC' + interval '6 hours')`
-
-const toNumber = (value: unknown) => Number(value ?? 0)
 
 // «Давно не были»: the same segment and days as the mailing sheet opens with, so the count here
 // is the count the mailing will reach.

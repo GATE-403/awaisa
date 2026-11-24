@@ -13,6 +13,7 @@ import { DataSource } from 'typeorm'
 import { BillingService } from '../billing/billing.service.js'
 import { PaymentsService } from '../bookings/payments.service.js'
 import { normalizePhone } from '../common/phone.js'
+import { returnedRows } from '../common/sql.js'
 import type { Env } from '../config/env.js'
 import type { Customer } from '../customers/customer.entity.js'
 import { LoyaltyService } from '../loyalty/loyalty.service.js'
@@ -30,10 +31,6 @@ import {
 import type { CertificateOrderBody } from './certificates.schemas.js'
 
 type Row = Record<string, unknown>
-
-// TypeORM returns [rows, affected] for UPDATE … RETURNING on Postgres.
-const rowsOf = (result: unknown) =>
-  (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as Row[]
 
 /** The payment kind of a certificate order (`payments.kind`). */
 const KIND = 'certificate'
@@ -149,7 +146,7 @@ export class CertificateSalesService implements OnModuleInit {
     // One transaction: a failure leaves the order unpaid, and the next notification (or the
     // client's return to /pay) tries again instead of finding it paid without a certificate.
     const issued = await this.dataSource.transaction(async (manager) => {
-      const [order] = rowsOf(
+      const [order] = returnedRows(
         await manager.query(
           `UPDATE "certificate_orders" SET "status" = 'paid', "paid_at" = now()
            WHERE "id" = $1 AND "status" <> 'paid' RETURNING *`,
@@ -213,7 +210,7 @@ export class CertificateSalesService implements OnModuleInit {
        WHERE "status" = 'pending' AND "due_at" < now() RETURNING "id"`,
       [],
     )
-    const expired = rowsOf(rows)
+    const expired = returnedRows(rows)
     await this.payments.failPendingOrders(
       KIND,
       expired.map((row) => String(row.id)),

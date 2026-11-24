@@ -1,4 +1,4 @@
-import { createHash, createHmac, randomBytes, randomInt, timingSafeEqual } from 'node:crypto'
+import { createHmac, randomBytes, randomInt, timingSafeEqual } from 'node:crypto'
 import {
   BadRequestException,
   ForbiddenException,
@@ -10,6 +10,7 @@ import {
 import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 import { IsNull, MoreThan, Repository } from 'typeorm'
+import { hashToken } from '../common/hash.js'
 import { normalizePhone } from '../common/phone.js'
 import type { Env } from '../config/env.js'
 import { Customer } from '../customers/customer.entity.js'
@@ -22,8 +23,6 @@ import { Session } from './session.entity.js'
 
 const MINUTE_MS = 60_000
 const DAY_MS = 24 * 60 * MINUTE_MS
-
-const sha256 = (value: string) => createHash('sha256').update(value).digest('hex')
 
 const parsePhone = (value: string) => {
   const phone = normalizePhone(value)
@@ -155,7 +154,7 @@ export class AuthService {
     await this.sessions.save(
       this.sessions.create({
         customerId: customer.id,
-        tokenHash: sha256(token),
+        tokenHash: hashToken(token),
         expiresAt: new Date(Date.now() + SESSION_TTL_DAYS * DAY_MS),
       }),
     )
@@ -166,7 +165,7 @@ export class AuthService {
   async findCustomerBySession(token: string | undefined) {
     if (!token) return null
     const session = await this.sessions.findOne({
-      where: { tokenHash: sha256(token), expiresAt: MoreThan(new Date()) },
+      where: { tokenHash: hashToken(token), expiresAt: MoreThan(new Date()) },
       relations: { customer: true },
     })
 
@@ -174,7 +173,7 @@ export class AuthService {
   }
 
   async logout(token: string | undefined) {
-    if (token) await this.sessions.delete({ tokenHash: sha256(token) })
+    if (token) await this.sessions.delete({ tokenHash: hashToken(token) })
   }
 
   private hashCode(phone: string, code: string) {

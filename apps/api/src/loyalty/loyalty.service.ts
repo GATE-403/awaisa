@@ -6,6 +6,7 @@ import { normalizeAmounts } from '../certificates/certificate-sale.js'
 import type { CertificateSaleInput } from '../certificates/certificates.schemas.js'
 import { toBusinessParts } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
+import { toNumber } from '../common/sql.js'
 import type { CertificateInput, PlanInput } from './loyalty.schemas.js'
 import { type SettledVisit, subscriptionCovers } from './visit-cover.js'
 
@@ -29,8 +30,6 @@ type VisitToSettle = SettledVisit & {
 // Codes people read aloud at the desk: no 0/O, 1/I/L.
 const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
 const CODE_LENGTH = 8
-
-const toNumber = (value: unknown) => Number(value ?? 0)
 
 const today = () => toBusinessParts(new Date()).dateKey
 
